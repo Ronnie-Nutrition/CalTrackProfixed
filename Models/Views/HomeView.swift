@@ -130,7 +130,7 @@ struct DailySummaryCard: View {
             // Macros
             HStack(spacing: 20) {
                 MacroView(value: totalProtein, target: appState.currentUser?.dailyProteinTarget ?? 150, 
-                         unit: "g", label: "Protein", color: .red)
+                         unit: "g", label: "Protein 💪", color: .red)
                 MacroView(value: totalCarbs, target: appState.currentUser?.dailyCarbTarget ?? 250, 
                          unit: "g", label: "Carbs", color: .orange)
                 MacroView(value: totalFat, target: appState.currentUser?.dailyFatTarget ?? 65, 
