@@ -1,0 +1,97 @@
+name: iOS CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    name: Build and Test
+    runs-on: macos-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Xcode
+      uses: maxim-lobanov/setup-xcode@v1
+      with:
+        xcode-version: latest-stable
+        
+    - name: Cache derived data
+      uses: actions/cache@v3
+      with:
+        path: ~/Library/Developer/Xcode/DerivedData
+        key: ${{ runner.os }}-derived-data-${{ hashFiles('**/*.pbxproj') }}
+        restore-keys: |
+          ${{ runner.os }}-derived-data-
+          
+    - name: Build project
+      run: |
+        xcodebuild clean build \
+          -project CalTrackProFixed.xcodeproj \
+          -scheme CalTrackProFixed \
+          -destination 'platform=iOS Simulator,name=iPhone 15,OS=latest' \
+          CODE_SIGNING_ALLOWED=NO
+          
+    - name: Run tests
+      run: |
+        xcodebuild test \
+          -project CalTrackProFixed.xcodeproj \
+          -scheme CalTrackProFixed \
+          -destination 'platform=iOS Simulator,name=iPhone 15,OS=latest' \
+          CODE_SIGNING_ALLOWED=NO
+          
+    - name: Upload build artifacts
+      if: success()
+      uses: actions/upload-artifact@v3
+      with:
+        name: build-artifacts-${{ github.sha }}
+        path: ~/Library/Developer/Xcode/DerivedData
+        retention-days: 7
+
+  code-quality:
+    name: Code Quality Checks
+    runs-on: macos-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Xcode
+      uses: maxim-lobanov/setup-xcode@v1
+      with:
+        xcode-version: latest-stable
+        
+    - name: SwiftLint
+      run: |
+        if which swiftlint >/dev/null; then
+          swiftlint
+        else
+          echo "SwiftLint not installed, skipping..."
+        fi
+        
+    - name: SwiftFormat check
+      run: |
+        if which swiftformat >/dev/null; then
+          swiftformat --lint .
+        else
+          echo "SwiftFormat not installed, skipping..."
+        fi
+
+  notify-status:
+    name: Notify Build Status
+    runs-on: macos-latest
+    needs: [build-and-test, code-quality]
+    if: always()
+    
+    steps:
+    - name: Build Success
+      if: needs.build-and-test.result == 'success' && needs.code-quality.result == 'success'
+      run: echo "✅ Build and tests passed successfully!"
+      
+    - name: Build Failed
+      if: needs.build-and-test.result == 'failure' || needs.code-quality.result == 'failure'
+      run: echo "❌ Build or tests failed. Check the logs above."
