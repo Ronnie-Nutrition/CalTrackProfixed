@@ -2,6 +2,7 @@ import SwiftUI
 import AVFoundation
 import Vision
 import CoreML
+import Combine
 
 struct CameraView: View {
     @Binding var selectedMealType: FoodEntry.MealType
@@ -109,9 +110,9 @@ struct CameraView: View {
                 servingUnit: "g",
                 alternatives: [
                     DetectedFood(name: "Caesar Salad", confidence: 0.78, calories: 450, 
-                               protein: 20, carbs: 20, fat: 35, servingSize: 300, servingUnit: "g"),
+                               protein: 20, carbs: 20, fat: 35, servingSize: 300, servingUnit: "g", alternatives: [], image: image),
                     DetectedFood(name: "Greek Salad", confidence: 0.65, calories: 280, 
-                               protein: 15, carbs: 18, fat: 20, servingSize: 280, servingUnit: "g")
+                               protein: 15, carbs: 18, fat: 20, servingSize: 280, servingUnit: "g", alternatives: [], image: image)
                 ],
                 image: image
             )

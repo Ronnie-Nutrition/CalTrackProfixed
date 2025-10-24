@@ -1,5 +1,7 @@
 import SwiftUI
 import AVFoundation
+import Combine
+import SwiftData
 
 struct BarcodeScannerView: View {
     @StateObject private var scanner = BarcodeScanner()
@@ -64,7 +66,7 @@ struct BarcodeScannerView: View {
 
 class BarcodeScanner: NSObject, ObservableObject {
     @Published var scannedCode: String?
-    private let captureSession = AVCaptureSession()
+    let captureSession = AVCaptureSession()
     
     override init() {
         super.init()
@@ -134,7 +136,7 @@ struct BarcodeScannerRepresentable: UIViewRepresentable {
         
         let previewLayer = AVCaptureVideoPreviewLayer(session: scanner.captureSession)
         previewLayer.frame = view.bounds
-        previewLayer.videoGravity = .resizeAspectFill
+        previewLayer.videoGravity = AVLayerVideoGravity.resizeAspectFill
         view.layer.addSublayer(previewLayer)
         
         scanner.startScanning()

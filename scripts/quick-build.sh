@@ -6,7 +6,7 @@ set -e
 
 PROJECT_NAME="CalTrackProFixed"
 SCHEME="CalTrackProFixed"
-DESTINATION="platform=iOS Simulator,name=iPhone 15,OS=latest"
+DESTINATION="platform=iOS Simulator,name=iPhone 17,OS=latest"
 
 # Colors for output
 RED='\033[0;31m'
