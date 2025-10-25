@@ -72,7 +72,13 @@ final class UserProfile {
         self.createdAt = Date()
         self.updatedAt = Date()
         
-        // Calculate initial targets
+        // Initialize macro targets with default values
+        self.dailyCalorieTarget = 2000
+        self.dailyProteinTarget = 150
+        self.dailyCarbTarget = 250
+        self.dailyFatTarget = 65
+        
+        // Calculate actual targets
         let bmr = calculateBMR()
         self.dailyCalorieTarget = (bmr * activityLevel.multiplier) + goal.calorieAdjustment
         
