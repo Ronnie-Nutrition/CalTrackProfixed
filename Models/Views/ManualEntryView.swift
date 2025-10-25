@@ -13,12 +13,29 @@ struct ManualEntryView: View {
     @State private var servingSize = ""
     @State private var servingUnit = "g"
     @State private var quantity = "1"
+    @State private var showingFoodSearch = false
+    @State private var selectedFood: FoodItem?
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
     
     var body: some View {
         NavigationStack {
             Form {
+                Section {
+                    Button(action: { showingFoodSearch = true }) {
+                        HStack {
+                            Image(systemName: "magnifyingglass")
+                            Text("Search Food Database")
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    .foregroundColor(.primary)
+                } header: {
+                    Text("Quick Search")
+                }
+                
                 Section("Food Details") {
                     TextField("Food Name", text: $name)
                     TextField("Brand (Optional)", text: $brand)
@@ -85,6 +102,21 @@ struct ManualEntryView: View {
                         saveEntry()
                     }
                     .disabled(!isValid)
+                }
+            }
+            .sheet(isPresented: $showingFoodSearch) {
+                FoodSearchView(selectedFood: $selectedFood)
+            }
+            .onChange(of: selectedFood) { _, food in
+                if let food = food {
+                    // Populate fields with selected food data
+                    name = food.label
+                    calories = String(format: "%.0f", food.nutrients.calories)
+                    protein = String(format: "%.1f", food.nutrients.protein)
+                    carbs = String(format: "%.1f", food.nutrients.carbs)
+                    fat = String(format: "%.1f", food.nutrients.fat)
+                    servingSize = "100"
+                    servingUnit = "g"
                 }
             }
         }

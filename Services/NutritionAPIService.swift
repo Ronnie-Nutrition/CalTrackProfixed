@@ -66,29 +66,29 @@ class NutritionAPIService {
 }
 
 // MARK: - API Models
-struct FoodSearchResponse: Codable {
-    let parsed: [ParsedFood]
-    let hints: [FoodHint]?
+public struct FoodSearchResponse: Codable {
+    public let parsed: [ParsedFood]
+    public let hints: [FoodHint]?
 }
 
-struct ParsedFood: Codable {
-    let food: FoodItem
+public struct ParsedFood: Codable {
+    public let food: FoodItem
 }
 
-struct FoodHint: Codable {
-    let food: FoodItem
+public struct FoodHint: Codable {
+    public let food: FoodItem
 }
 
-struct FoodItem: Codable {
-    let foodId: String
-    let label: String
-    let nutrients: Nutrients
-    let category: String?
-    let categoryLabel: String?
-    let image: String?
+public struct FoodItem: Codable {
+    public let foodId: String
+    public let label: String
+    public let nutrients: Nutrients
+    public let category: String?
+    public let categoryLabel: String?
+    public let image: String?
 }
 
-struct Nutrients: Codable {
+public struct Nutrients: Codable {
     let ENERC_KCAL: Double?  // Calories
     let PROCNT: Double?      // Protein
     let FAT: Double?         // Fat
@@ -97,12 +97,12 @@ struct Nutrients: Codable {
     let SUGAR: Double?       // Sugar
     
     // Computed properties for easier access
-    var calories: Double { ENERC_KCAL ?? 0 }
-    var protein: Double { PROCNT ?? 0 }
-    var fat: Double { FAT ?? 0 }
-    var carbs: Double { CHOCDF ?? 0 }
-    var fiber: Double { FIBTG ?? 0 }
-    var sugar: Double { SUGAR ?? 0 }
+    public var calories: Double { ENERC_KCAL ?? 0 }
+    public var protein: Double { PROCNT ?? 0 }
+    public var fat: Double { FAT ?? 0 }
+    public var carbs: Double { CHOCDF ?? 0 }
+    public var fiber: Double { FIBTG ?? 0 }
+    public var sugar: Double { SUGAR ?? 0 }
 }
 
 // MARK: - API Errors
