@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import Foundation
 
 struct ManualEntryView: View {
     let mealType: FoodEntry.MealType

@@ -1,5 +1,5 @@
 import SwiftUI
-
+import Foundation
 struct FoodSearchView: View {
     @State private var searchText = ""
     @State private var searchResults: [FoodItem] = []

@@ -1,8 +1,41 @@
 import Foundation
 
-// This file re-exports the FoodItem from NutritionAPIService
-// so it can be used throughout the app without importing the service
+// MARK: - Food Models
+public struct FoodItem: Codable, Equatable {
+    public let foodId: String
+    public let label: String
+    public let nutrients: Nutrients
+    public let category: String?
+    public let categoryLabel: String?
+    public let image: String?
+}
 
-typealias FoodItem = NutritionAPIService.FoodItem
-typealias Nutrients = NutritionAPIService.Nutrients
-typealias FoodSearchResponse = NutritionAPIService.FoodSearchResponse
+public struct Nutrients: Codable, Equatable {
+    let ENERC_KCAL: Double?  // Calories
+    let PROCNT: Double?      // Protein
+    let FAT: Double?         // Fat
+    let CHOCDF: Double?      // Carbs
+    let FIBTG: Double?       // Fiber
+    let SUGAR: Double?       // Sugar
+    
+    // Computed properties for easier access
+    public var calories: Double { ENERC_KCAL ?? 0 }
+    public var protein: Double { PROCNT ?? 0 }
+    public var fat: Double { FAT ?? 0 }
+    public var carbs: Double { CHOCDF ?? 0 }
+    public var fiber: Double { FIBTG ?? 0 }
+    public var sugar: Double { SUGAR ?? 0 }
+}
+
+public struct FoodSearchResponse: Codable {
+    public let parsed: [ParsedFood]
+    public let hints: [FoodHint]?
+}
+
+public struct ParsedFood: Codable {
+    public let food: FoodItem
+}
+
+public struct FoodHint: Codable {
+    public let food: FoodItem
+}
