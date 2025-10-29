@@ -1,4 +1,5 @@
 import Foundation
+// Note: API models are defined in Models/NutritionAPIModels.swift
 
 // MARK: - Nutrition API Service
 class NutritionAPIService {

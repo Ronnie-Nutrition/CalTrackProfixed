@@ -48,7 +48,7 @@ struct BarcodeScannerView: View {
                     Spacer()
                 }
             }
-            .onChange(of: scanner.scannedCode) { code in
+            .onChange(of: scanner.scannedCode) { _, code in
                 if let code = code {
                     scannedCode = code
                     showingProductDetails = true

@@ -84,7 +84,7 @@ struct CameraView: View {
             .onAppear {
                 camera.checkPermissions()
             }
-            .onChange(of: camera.capturedImage) { image in
+            .onChange(of: camera.capturedImage) { _, image in
                 if let image = image {
                     analyzeFood(image: image)
                 }

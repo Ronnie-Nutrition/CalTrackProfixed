@@ -27,9 +27,10 @@
 		FB0B70DC2EABA83F004E511A /* ManualEntryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB0B70DB2EABA83F004E511A /* ManualEntryView.swift */; };
 		FB0B70DE2EABA84F004E511A /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB0B70DD2EABA84F004E511A /* SettingsView.swift */; };
 		FB0B70E02EABA877004E511A /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB0B70DF2EABA877004E511A /* Extensions.swift */; };
-		FB0B71182EAEECB4004E511A /* FoodItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB0B71172EAEECB4004E511A /* FoodItem.swift */; };
 		FB0B711A2EAEF8A1004E511A /* FoodSearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB0B71192EAEF8A1004E511A /* FoodSearchView.swift */; };
 		FB0B71292EAFB84E004E511A /* NutritionAPIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB0B71282EAFB84E004E511A /* NutritionAPIService.swift */; };
+		FB0B71302EAFB85F004E511A /* NutritionAPIModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB0B712F2EAFB85F004E511A /* NutritionAPIModels.swift */; };
+		FB0B71312EAFB870004E511A /* APIConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB0B71322EAFB870004E511A /* APIConfig.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -73,9 +74,10 @@
 		FB0B70DB2EABA83F004E511A /* ManualEntryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ManualEntryView.swift; sourceTree = "<group>"; };
 		FB0B70DD2EABA84F004E511A /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		FB0B70DF2EABA877004E511A /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
-		FB0B71172EAEECB4004E511A /* FoodItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodItem.swift; sourceTree = "<group>"; };
 		FB0B71192EAEF8A1004E511A /* FoodSearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodSearchView.swift; sourceTree = "<group>"; };
 		FB0B71282EAFB84E004E511A /* NutritionAPIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NutritionAPIService.swift; sourceTree = "<group>"; };
+		FB0B712F2EAFB85F004E511A /* NutritionAPIModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NutritionAPIModels.swift; sourceTree = "<group>"; };
+		FB0B71322EAFB870004E511A /* APIConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Utilities/APIConfig.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -155,7 +157,8 @@
 			isa = PBXGroup;
 			children = (
 				FB0B71282EAFB84E004E511A /* NutritionAPIService.swift */,
-				FB0B71172EAEECB4004E511A /* FoodItem.swift */,
+				FB0B712F2EAFB85F004E511A /* NutritionAPIModels.swift */,
+				FB0B71322EAFB870004E511A /* APIConfig.swift */,
 				FB0B70B92EABA414004E511A /* Views */,
 				FB0B70BA2EABA432004E511A /* Utilities */,
 				FB0B70BB2EABA62A004E511A /* AppState.swift */,
@@ -351,7 +354,6 @@
 				FB0B70DC2EABA83F004E511A /* ManualEntryView.swift in Sources */,
 				FB0B70E02EABA877004E511A /* Extensions.swift in Sources */,
 				FB0B70DA2EABA832004E511A /* ImagePicker.swift in Sources */,
-				FB0B71182EAEECB4004E511A /* FoodItem.swift in Sources */,
 				FB0B70D82EABA820004E511A /* FoodDetailsView.swift in Sources */,
 				FB0B70CA2EABA7B4004E511A /* InsightsView.swift in Sources */,
 				FB0B70C42EABA6D4004E511A /* ContentView.swift in Sources */,
@@ -359,6 +361,8 @@
 				FB0B70C02EABA660004E511A /* Recipe.swift in Sources */,
 				FB0B70D02EABA7E7004E511A /* BarcodeScannerView.swift in Sources */,
 				FB0B71292EAFB84E004E511A /* NutritionAPIService.swift in Sources */,
+				FB0B71302EAFB85F004E511A /* NutritionAPIModels.swift in Sources */,
+				FB0B71312EAFB870004E511A /* APIConfig.swift in Sources */,
 				FB0B70D42EABA802004E511A /* EditFoodEntryView.swift in Sources */,
 				FB0B711A2EAEF8A1004E511A /* FoodSearchView.swift in Sources */,
 				FB0B70CE2EABA7DB004E511A /* OnboardingView.swift in Sources */,

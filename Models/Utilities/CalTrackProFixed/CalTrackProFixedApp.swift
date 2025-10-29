@@ -31,12 +31,12 @@ struct CalTrackProFixedApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .onAppear {
+                    // Ensure we have at least one user profile
+                    createDefaultUserProfileIfNeeded()
+                }
         }
         .modelContainer(modelContainer)
-        .onAppear {
-            // Ensure we have at least one user profile
-            createDefaultUserProfileIfNeeded()
-        }
     }
     
     private func createDefaultUserProfileIfNeeded() {

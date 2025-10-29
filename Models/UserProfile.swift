@@ -59,6 +59,11 @@ final class UserProfile {
         }
     }
     
+    convenience init() {
+        self.init(name: "Default User", email: "", age: 30, gender: .other, 
+                 height: 170, weight: 70, activityLevel: .moderatelyActive, goal: .maintainWeight)
+    }
+    
     init(name: String, email: String, age: Int, gender: Gender,
          height: Double, weight: Double, activityLevel: ActivityLevel, goal: Goal) {
         self.name = name
