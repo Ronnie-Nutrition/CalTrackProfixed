@@ -57,7 +57,7 @@ struct BarcodeScannerView: View {
             }
             .sheet(isPresented: $showingProductDetails) {
                 if let code = scannedCode {
-                    ProductDetailsView(barcode: code)
+                    EnhancedProductDetailsView(barcode: code)
                 }
             }
         }
@@ -66,27 +66,67 @@ struct BarcodeScannerView: View {
 
 class BarcodeScanner: NSObject, ObservableObject {
     @Published var scannedCode: String?
+    @Published var torchIsOn = false
+    @Published var hasError = false
+    @Published var errorMessage = ""
+    
     let captureSession = AVCaptureSession()
+    private var videoDevice: AVCaptureDevice?
     
     override init() {
         super.init()
-        setupScanner()
+        checkCameraPermissions()
+    }
+    
+    private func checkCameraPermissions() {
+        switch AVCaptureDevice.authorizationStatus(for: .video) {
+        case .authorized:
+            setupScanner()
+        case .notDetermined:
+            AVCaptureDevice.requestAccess(for: .video) { granted in
+                if granted {
+                    DispatchQueue.main.async {
+                        self.setupScanner()
+                    }
+                } else {
+                    DispatchQueue.main.async {
+                        self.hasError = true
+                        self.errorMessage = "Camera access is required to scan barcodes."
+                    }
+                }
+            }
+        case .denied, .restricted:
+            hasError = true
+            errorMessage = "Camera access is required. Please enable it in Settings."
+        @unknown default:
+            break
+        }
     }
     
     private func setupScanner() {
-        guard let videoCaptureDevice = AVCaptureDevice.default(for: .video) else { return }
+        guard let videoCaptureDevice = AVCaptureDevice.default(for: .video) else {
+            hasError = true
+            errorMessage = "Unable to access camera."
+            return
+        }
+        
+        self.videoDevice = videoCaptureDevice
         
         let videoInput: AVCaptureDeviceInput
         
         do {
             videoInput = try AVCaptureDeviceInput(device: videoCaptureDevice)
         } catch {
+            hasError = true
+            errorMessage = "Unable to initialize camera: \(error.localizedDescription)"
             return
         }
         
         if captureSession.canAddInput(videoInput) {
             captureSession.addInput(videoInput)
         } else {
+            hasError = true
+            errorMessage = "Unable to add camera input."
             return
         }
         
@@ -96,21 +136,46 @@ class BarcodeScanner: NSObject, ObservableObject {
             captureSession.addOutput(metadataOutput)
             
             metadataOutput.setMetadataObjectsDelegate(self, queue: DispatchQueue.main)
-            metadataOutput.metadataObjectTypes = [.ean8, .ean13, .pdf417, .qr, .upce]
+            metadataOutput.metadataObjectTypes = [.ean8, .ean13, .pdf417, .qr, .upce, .code128, .code39, .code93, .itf14]
         } else {
+            hasError = true
+            errorMessage = "Unable to add metadata output."
             return
+        }
+    }
+    
+    func toggleTorch() {
+        guard let device = videoDevice, device.hasTorch else { return }
+        
+        do {
+            try device.lockForConfiguration()
+            
+            if torchIsOn {
+                device.torchMode = .off
+            } else {
+                try device.setTorchModeOn(level: 0.5)
+            }
+            torchIsOn.toggle()
+            
+            device.unlockForConfiguration()
+        } catch {
+            print("Torch could not be toggled: \(error)")
         }
     }
     
     func startScanning() {
         if !captureSession.isRunning {
-            captureSession.startRunning()
+            DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+                self?.captureSession.startRunning()
+            }
         }
     }
     
     func stopScanning() {
         if captureSession.isRunning {
-            captureSession.stopRunning()
+            DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+                self?.captureSession.stopRunning()
+            }
         }
     }
 }

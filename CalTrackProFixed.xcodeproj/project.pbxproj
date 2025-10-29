@@ -31,6 +31,8 @@
 		FB0B71292EAFB84E004E511A /* NutritionAPIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB0B71282EAFB84E004E511A /* NutritionAPIService.swift */; };
 		FB0B71302EAFB85F004E511A /* NutritionAPIModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB0B712F2EAFB85F004E511A /* NutritionAPIModels.swift */; };
 		FB0B71312EAFB870004E511A /* APIConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB0B71322EAFB870004E511A /* APIConfig.swift */; };
+		FB0B71332EAFB880004E511A /* EnhancedProductDetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB0B71342EAFB880004E511A /* EnhancedProductDetailsView.swift */; };
+		FB0B71352EAFB890004E511A /* EnhancedBarcodeScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB0B71362EAFB890004E511A /* EnhancedBarcodeScannerView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -78,6 +80,8 @@
 		FB0B71282EAFB84E004E511A /* NutritionAPIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NutritionAPIService.swift; sourceTree = "<group>"; };
 		FB0B712F2EAFB85F004E511A /* NutritionAPIModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NutritionAPIModels.swift; sourceTree = "<group>"; };
 		FB0B71322EAFB870004E511A /* APIConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Utilities/APIConfig.swift"; sourceTree = "<group>"; };
+		FB0B71342EAFB880004E511A /* EnhancedProductDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnhancedProductDetailsView.swift; sourceTree = "<group>"; };
+		FB0B71362EAFB890004E511A /* EnhancedBarcodeScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnhancedBarcodeScannerView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -180,6 +184,8 @@
 				FB0B70CB2EABA7C8004E511A /* ProfileView.swift */,
 				FB0B70CD2EABA7DB004E511A /* OnboardingView.swift */,
 				FB0B70CF2EABA7E7004E511A /* BarcodeScannerView.swift */,
+				FB0B71362EAFB890004E511A /* EnhancedBarcodeScannerView.swift */,
+				FB0B71342EAFB880004E511A /* EnhancedProductDetailsView.swift */,
 				FB0B70D12EABA7F3004E511A /* CameraView.swift */,
 				FB0B70D32EABA802004E511A /* EditFoodEntryView.swift */,
 				FB0B70D52EABA811004E511A /* EditProfileView.swift */,
@@ -363,6 +369,8 @@
 				FB0B71292EAFB84E004E511A /* NutritionAPIService.swift in Sources */,
 				FB0B71302EAFB85F004E511A /* NutritionAPIModels.swift in Sources */,
 				FB0B71312EAFB870004E511A /* APIConfig.swift in Sources */,
+				FB0B71332EAFB880004E511A /* EnhancedProductDetailsView.swift in Sources */,
+				FB0B71352EAFB890004E511A /* EnhancedBarcodeScannerView.swift in Sources */,
 				FB0B70D42EABA802004E511A /* EditFoodEntryView.swift in Sources */,
 				FB0B711A2EAEF8A1004E511A /* FoodSearchView.swift in Sources */,
 				FB0B70CE2EABA7DB004E511A /* OnboardingView.swift in Sources */,

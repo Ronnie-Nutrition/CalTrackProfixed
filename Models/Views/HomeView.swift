@@ -61,7 +61,7 @@ struct HomeView: View {
                 ImagePicker(selectedImage: $selectedImage)
             }
             .sheet(isPresented: $showingBarcodeScanner) {
-                BarcodeScannerView()
+                EnhancedBarcodeScannerView()
             }
             .sheet(isPresented: $showingManualEntry) {
                 ManualEntryView(mealType: selectedMealType)
