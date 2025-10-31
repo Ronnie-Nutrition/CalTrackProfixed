@@ -3,9 +3,16 @@ import SwiftData
 
 struct ContentView: View {
     @State private var selectedFood: FoodItem? = nil
+    @StateObject private var appState = AppState()
     
     var body: some View {
         TabView {
+            HomeView()
+                .tabItem {
+                    Label("Home", systemImage: "house.fill")
+                }
+                .environmentObject(appState)
+            
             DiaryView()
                 .tabItem {
                     Label("Diary", systemImage: "book.fill")
@@ -26,6 +33,7 @@ struct ContentView: View {
                     Label("Profile", systemImage: "person.fill")
                 }
         }
+        .environmentObject(appState)
     }
 }
 

@@ -1,0 +1,26 @@
+GitHub Setup Instructions for CalTrackPro
+========================================
+
+1. Go to https://github.com/new
+2. Create a new repository with these settings:
+   - Repository name: CalTrackPro
+   - Description: AI-powered calorie tracking app for iOS
+   - Private or Public (your choice)
+   - DO NOT initialize with README, .gitignore, or license
+
+3. After creating the repository, run these commands:
+
+git remote add origin https://github.com/YOUR_USERNAME/CalTrackPro.git
+git branch -M main
+git push -u origin main
+
+Replace YOUR_USERNAME with your GitHub username.
+
+4. To test on your iPhone:
+   - Open Xcode
+   - Create new iOS App project named "CalTrackPro"
+   - Enable SwiftUI and SwiftData
+   - Drag the CalTrackPro folder contents into Xcode
+   - Connect your iPhone to your Mac
+   - Select your iPhone as the run destination
+   - Build and run the app

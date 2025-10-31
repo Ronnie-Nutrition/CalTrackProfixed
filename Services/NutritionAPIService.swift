@@ -21,8 +21,9 @@ class NutritionAPIService {
             return
         }
         
+        // Use Open Food Facts API as fallback (free, no API key required)
         let encodedQuery = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
-        let urlString = "\(baseURL)/parser?app_id=\(appId)&app_key=\(appKey)&ingr=\(encodedQuery)"
+        let urlString = "https://world.openfoodfacts.org/cgi/search.pl?search_terms=\(encodedQuery)&search_simple=1&action=process&json=1&page_size=20"
         
         guard let url = URL(string: urlString) else {
             DispatchQueue.main.async {
@@ -62,8 +63,16 @@ class NutritionAPIService {
                     }
                     
                     do {
-                        let searchResponse = try JSONDecoder().decode(FoodSearchResponse.self, from: data)
-                        completion(.success(searchResponse))
+                        // Try to parse as Open Food Facts response first
+                        if let jsonObject = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+                           let products = jsonObject["products"] as? [[String: Any]] {
+                            let searchResponse = self.convertOpenFoodFactsToEdamam(products: products)
+                            completion(.success(searchResponse))
+                        } else {
+                            // Fallback to original Edamam format
+                            let searchResponse = try JSONDecoder().decode(FoodSearchResponse.self, from: data)
+                            completion(.success(searchResponse))
+                        }
                     } catch {
                         print("JSON Decoding error: \(error)")
                         completion(.failure(APIError.decodingError))
@@ -82,6 +91,44 @@ class NutritionAPIService {
                 }
             }
         }.resume()
+    }
+    
+    // MARK: - Open Food Facts Converter
+    private func convertOpenFoodFactsToEdamam(products: [[String: Any]]) -> FoodSearchResponse {
+        let foods = products.compactMap { product -> FoodItem? in
+            guard let name = product["product_name_en"] as? String ?? product["product_name"] as? String,
+                  !name.isEmpty else { return nil }
+            
+            let nutrients = product["nutriments"] as? [String: Any] ?? [:]
+            let calories = nutrients["energy-kcal_100g"] as? Double ?? 0
+            let protein = nutrients["proteins_100g"] as? Double ?? 0
+            let carbs = nutrients["carbohydrates_100g"] as? Double ?? 0
+            let fat = nutrients["fat_100g"] as? Double ?? 0
+            
+            let foodNutrients = FoodNutrients(
+                calories: calories,
+                protein: protein,
+                carbs: carbs,
+                fat: fat
+            )
+            
+            return FoodItem(
+                foodId: product["id"] as? String ?? UUID().uuidString,
+                label: name,
+                categoryLabel: product["categories"] as? String,
+                nutrients: foodNutrients
+            )
+        }
+        
+        let parsedItems = foods.map { food in
+            ParsedFoodItem(food: food)
+        }
+        
+        return FoodSearchResponse(
+            text: "",
+            parsed: parsedItems,
+            hints: nil
+        )
     }
     
     // MARK: - Barcode Lookup
