@@ -1,0 +1,56 @@
+# SwiftLint Configuration for CalTrackPro
+# This file configures SwiftLint rules for consistent code style
+
+# Paths to include during linting
+included:
+  - Models
+  - CalTrackProFixed
+  - CalTrackProFixedTests
+
+# Paths to exclude from linting
+excluded:
+  - Carthage
+  - Pods
+  - .build
+  - DerivedData
+
+# Rules to disable
+disabled_rules:
+  - trailing_whitespace # We'll handle this with SwiftFormat
+  - line_length # Allow longer lines for readability
+
+# Rules to enable that are opt-in
+opt_in_rules:
+  - empty_count
+  - closure_spacing
+  - fatal_error_message
+  - first_where
+  - force_unwrapping
+  - implicitly_unwrapped_optional
+  - overridden_super_call
+  - redundant_nil_coalescing
+  - sorted_first_last
+  - vertical_parameter_alignment_on_call
+
+# Rule configurations
+line_length:
+  warning: 120
+  error: 150
+
+function_body_length:
+  warning: 50
+  error: 80
+
+type_body_length:
+  warning: 200
+  error: 300
+
+file_length:
+  warning: 400
+  error: 500
+
+identifier_name:
+  min_length: 1
+  max_length: 40
+
+reporter: "xcode" # Output format compatible with Xcode
