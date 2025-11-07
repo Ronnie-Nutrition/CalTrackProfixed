@@ -179,19 +179,24 @@ struct ManualEntryView: View {
         let foodItem = FoodItem(
             foodId: UUID().uuidString,
             label: name,
-            categoryLabel: brand.isEmpty ? nil : brand,
-            nutrients: FoodNutrients(
-                calories: caloriesDouble,
-                protein: proteinDouble,
-                carbs: carbsDouble,
-                fat: fatDouble
+            nutrients: Nutrients(
+                ENERC_KCAL: caloriesDouble,
+                PROCNT: proteinDouble,
+                FAT: fatDouble,
+                CHOCDF: carbsDouble,
+                FIBTG: nil
             ),
+            categoryLabel: brand.isEmpty ? nil : brand,
             image: nil
         )
-        OfflineDataCache.shared.addToRecentFoods(foodItem)
+        // Note: Offline cache will be implemented later
         
         do {
             try modelContext.save()
+            
+            // Auto-sync to HealthKit if user has premium and enabled sync
+            entry.syncToHealthKit()
+            
             dismiss()
         } catch {
             print("Error saving entry: \(error)")

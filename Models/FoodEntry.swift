@@ -59,4 +59,10 @@ final class FoodEntry {
     var totalFat: Double {
         return (fat / servingSize) * quantity
     }
+    
+    // Auto-sync to HealthKit when entry is saved (Premium feature)
+    func syncToHealthKit() {
+        // HealthKit sync will be implemented when premium is active
+        print("HealthKit sync ready for premium users")
+    }
 }

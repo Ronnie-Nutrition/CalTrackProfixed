@@ -5,7 +5,7 @@ struct DiaryView: View {
     @Query(sort: \FoodEntry.timestamp, order: .reverse) private var allEntries: [FoodEntry]
     @State private var selectedDate = Date()
     @State private var editingEntry: FoodEntry?
-    @ObservedObject private var networkMonitor = NetworkMonitor.shared
+    @State private var isOffline = false
     
     private var entriesForSelectedDate: [FoodEntry] {
         let calendar = Calendar.current
@@ -31,7 +31,15 @@ struct DiaryView: View {
         NavigationStack {
             VStack(spacing: 0) {
                 // Offline Banner
-                OfflineBanner()
+                if isOffline {
+                    HStack {
+                        Image(systemName: "wifi.slash")
+                        Text("Offline - data may be limited")
+                    }
+                    .padding()
+                    .background(Color.orange)
+                    .foregroundColor(.white)
+                }
                 
                 // Date Picker
                 DatePicker("", selection: $selectedDate, displayedComponents: .date)

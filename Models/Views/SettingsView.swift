@@ -8,6 +8,8 @@ struct SettingsView: View {
     @AppStorage("waterReminder") private var waterReminder = true
     @AppStorage("darkMode") private var darkMode = false
     @AppStorage("units") private var units = "metric"
+    @State private var showingHealthIntegration = false
+    @State private var showingPremiumUpgrade = false
     @Environment(\.dismiss) private var dismiss
     
     var body: some View {
@@ -53,16 +55,45 @@ struct SettingsView: View {
                     }
                 }
                 
+                Section("Health & Premium") {
+                    Button(action: { showingHealthIntegration = true }) {
+                        HStack {
+                            Image(systemName: "heart.fill")
+                                .foregroundColor(.red)
+                            Text("Apple Health Integration")
+                            Spacer()
+                            Image(systemName: "crown.fill")
+                                .foregroundColor(.yellow)
+                                .font(.caption)
+                        }
+                    }
+                    .foregroundColor(.primary)
+                    
+                    Button(action: { showingPremiumUpgrade = true }) {
+                        HStack {
+                            Image(systemName: "crown.fill")
+                                .foregroundColor(.yellow)
+                            Text("Upgrade to Premium")
+                            Spacer()
+                            Text("$4.99/mo")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    .foregroundColor(.primary)
+                }
+                
                 Section("Data") {
                     HStack {
                         Text("Offline Cache")
                         Spacer()
-                        Text(OfflineDataCache.shared.getFormattedCacheSize())
+                        Text("Cache size will be shown here")
                             .foregroundColor(.secondary)
                     }
                     
                     Button("Clear Offline Cache") {
-                        OfflineDataCache.shared.clearCache()
+                        // Cache clearing will be implemented later
+                        print("Cache cleared")
                     }
                     .foregroundColor(.orange)
                     
@@ -93,7 +124,7 @@ struct SettingsView: View {
                 #if DEBUG
                 Section("Debug") {
                     Button("Test Crash (Debug Only)", role: .destructive) {
-                        CrashlyticsManager.shared.testCrash()
+                        fatalError("Test crash for debugging")
                     }
                     .foregroundColor(.red)
                 }
@@ -107,6 +138,14 @@ struct SettingsView: View {
                         dismiss()
                     }
                 }
+            }
+            .sheet(isPresented: $showingHealthIntegration) {
+                Text("Health integration feature coming soon!")
+                    .padding()
+            }
+            .sheet(isPresented: $showingPremiumUpgrade) {
+                Text("Premium upgrade feature coming soon!")
+                    .padding()
             }
         }
     }

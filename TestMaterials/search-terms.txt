@@ -1,0 +1,37 @@
+# Search Terms for Testing Food Database
+
+## Basic Foods
+chicken
+apple
+banana
+rice
+bread
+milk
+
+## Complex Terms
+chicken breast
+protein shake
+greek yogurt
+brown rice
+olive oil
+
+## Edge Cases
+"" (empty search)
+a (single character)
+supercalifragilisticexpialidocious (very long)
+123!@# (invalid characters)
+CHICKEN (uppercase)
+ChIcKeN (mixed case)
+
+## International Foods
+quinoa
+avocado
+hummus
+tofu
+salmon
+
+## Brand Names
+coca cola
+pepsi
+cheerios
+doritos

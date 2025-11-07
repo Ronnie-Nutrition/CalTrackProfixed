@@ -1,0 +1,33 @@
+# Network Testing Guide
+
+## Test Network Conditions
+
+### 1. WiFi Testing
+- Connect to stable WiFi
+- Test search and barcode features
+- Note response times
+
+### 2. Cellular Testing  
+- Disable WiFi, use cellular only
+- Test in different locations
+- Monitor data usage
+
+### 3. Slow Connection Simulation
+In iPhone Settings:
+- Developer → Network Link Conditioner
+- Enable and select "3G" profile
+- Test app behavior with slow network
+
+### 4. Offline Testing
+- Enable Airplane Mode
+- Test offline features:
+  • Manual food entry
+  • Viewing cached search results
+  • Food diary functionality
+  • Settings and help screens
+
+### 5. Network Recovery Testing
+- Start in Airplane Mode
+- Use app with offline features
+- Disable Airplane Mode
+- Verify smooth transition back online

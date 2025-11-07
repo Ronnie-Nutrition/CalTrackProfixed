@@ -28,6 +28,10 @@
 	<string>CalTrackPro can read your health data to provide better insights and sync with other fitness apps.</string>
 	<key>NSHealthUpdateUsageDescription</key>
 	<string>CalTrackPro can save your nutrition data to Apple Health to keep all your health information in one place.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>CalTrackPro uses speech recognition to log food entries when you say things like "I ate a turkey sandwich".</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>CalTrackPro needs microphone access to recognize your voice when logging food entries.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

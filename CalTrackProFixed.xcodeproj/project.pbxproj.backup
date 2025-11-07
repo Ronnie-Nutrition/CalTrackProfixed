@@ -30,10 +30,9 @@
 		FB0B711A2EAEF8A1004E511A /* FoodSearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB0B71192EAEF8A1004E511A /* FoodSearchView.swift */; };
 		FB0B71292EAFB84E004E511A /* NutritionAPIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB0B71282EAFB84E004E511A /* NutritionAPIService.swift */; };
 		FB0B71302EAFB85F004E511A /* NutritionAPIModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB0B712F2EAFB85F004E511A /* NutritionAPIModels.swift */; };
-		FB0B71312EAFB870004E511A /* Utilities/APIConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB0B71322EAFB870004E511A /* Utilities/APIConfig.swift */; };
+		FB0B71312EAFB870004E511A /* APIConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB0B71322EAFB870004E511A /* APIConfig.swift */; };
 		FB0B71332EAFB880004E511A /* EnhancedProductDetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB0B71342EAFB880004E511A /* EnhancedProductDetailsView.swift */; };
 		FB0B71352EAFB890004E511A /* EnhancedBarcodeScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB0B71362EAFB890004E511A /* EnhancedBarcodeScannerView.swift */; };
-		FBDAA1332EBE635300EB31F2 /* VoiceInputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBDAA1322EBE635300EB31F2 /* VoiceInputView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -80,10 +79,9 @@
 		FB0B71192EAEF8A1004E511A /* FoodSearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodSearchView.swift; sourceTree = "<group>"; };
 		FB0B71282EAFB84E004E511A /* NutritionAPIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NutritionAPIService.swift; sourceTree = "<group>"; };
 		FB0B712F2EAFB85F004E511A /* NutritionAPIModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NutritionAPIModels.swift; sourceTree = "<group>"; };
-		FB0B71322EAFB870004E511A /* Utilities/APIConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utilities/APIConfig.swift; sourceTree = "<group>"; };
+		FB0B71322EAFB870004E511A /* APIConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Utilities/APIConfig.swift"; sourceTree = "<group>"; };
 		FB0B71342EAFB880004E511A /* EnhancedProductDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnhancedProductDetailsView.swift; sourceTree = "<group>"; };
 		FB0B71362EAFB890004E511A /* EnhancedBarcodeScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnhancedBarcodeScannerView.swift; sourceTree = "<group>"; };
-		FBDAA1322EBE635300EB31F2 /* VoiceInputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceInputView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -164,7 +162,7 @@
 			children = (
 				FB0B71282EAFB84E004E511A /* NutritionAPIService.swift */,
 				FB0B712F2EAFB85F004E511A /* NutritionAPIModels.swift */,
-				FB0B71322EAFB870004E511A /* Utilities/APIConfig.swift */,
+				FB0B71322EAFB870004E511A /* APIConfig.swift */,
 				FB0B70B92EABA414004E511A /* Views */,
 				FB0B70BA2EABA432004E511A /* Utilities */,
 				FB0B70BB2EABA62A004E511A /* AppState.swift */,
@@ -178,7 +176,6 @@
 		FB0B70B92EABA414004E511A /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				FBDAA1322EBE635300EB31F2 /* VoiceInputView.swift */,
 				FB0B71192EAEF8A1004E511A /* FoodSearchView.swift */,
 				FB0B70C32EABA6D4004E511A /* ContentView.swift */,
 				FB0B70C52EABA6F5004E511A /* HomeView.swift */,
@@ -371,8 +368,7 @@
 				FB0B70D02EABA7E7004E511A /* BarcodeScannerView.swift in Sources */,
 				FB0B71292EAFB84E004E511A /* NutritionAPIService.swift in Sources */,
 				FB0B71302EAFB85F004E511A /* NutritionAPIModels.swift in Sources */,
-				FB0B71312EAFB870004E511A /* Utilities/APIConfig.swift in Sources */,
-				FBDAA1332EBE635300EB31F2 /* VoiceInputView.swift in Sources */,
+				FB0B71312EAFB870004E511A /* APIConfig.swift in Sources */,
 				FB0B71332EAFB880004E511A /* EnhancedProductDetailsView.swift in Sources */,
 				FB0B71352EAFB890004E511A /* EnhancedBarcodeScannerView.swift in Sources */,
 				FB0B70D42EABA802004E511A /* EditFoodEntryView.swift in Sources */,
@@ -543,19 +539,19 @@
 				DEVELOPMENT_TEAM = D66KWXXM88;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = CalTrackPro;
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.health-fitness";
-				INFOPLIST_KEY_NSCameraUsageDescription = "CalTrackPro needs camera access to scan barcodes and take photos of your meals for nutrition tracking.";
-				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "CalTrackPro needs photo library access to let you select photos of your meals for nutrition tracking.";
-				INFOPLIST_KEY_NSPrivacyAccessedAPICategoryFileTimestamp = YES;
-				INFOPLIST_KEY_NSPrivacyAccessedAPICategoryUserDefaults = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UIRequiresFullScreen = NO;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_NSCameraUsageDescription = "CalTrackPro needs camera access to scan barcodes and take photos of your meals for nutrition tracking.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "CalTrackPro needs photo library access to let you select photos of your meals for nutrition tracking.";
+				INFOPLIST_KEY_CFBundleDisplayName = CalTrackPro;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.health-fitness";
+				INFOPLIST_KEY_UIRequiresFullScreen = NO;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_NSPrivacyAccessedAPICategoryUserDefaults = YES;
+				INFOPLIST_KEY_NSPrivacyAccessedAPICategoryFileTimestamp = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -583,19 +579,19 @@
 				DEVELOPMENT_TEAM = D66KWXXM88;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = CalTrackPro;
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.health-fitness";
-				INFOPLIST_KEY_NSCameraUsageDescription = "CalTrackPro needs camera access to scan barcodes and take photos of your meals for nutrition tracking.";
-				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "CalTrackPro needs photo library access to let you select photos of your meals for nutrition tracking.";
-				INFOPLIST_KEY_NSPrivacyAccessedAPICategoryFileTimestamp = YES;
-				INFOPLIST_KEY_NSPrivacyAccessedAPICategoryUserDefaults = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UIRequiresFullScreen = NO;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_NSCameraUsageDescription = "CalTrackPro needs camera access to scan barcodes and take photos of your meals for nutrition tracking.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "CalTrackPro needs photo library access to let you select photos of your meals for nutrition tracking.";
+				INFOPLIST_KEY_CFBundleDisplayName = CalTrackPro;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.health-fitness";
+				INFOPLIST_KEY_UIRequiresFullScreen = NO;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_NSPrivacyAccessedAPICategoryUserDefaults = YES;
+				INFOPLIST_KEY_NSPrivacyAccessedAPICategoryFileTimestamp = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

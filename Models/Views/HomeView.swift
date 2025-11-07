@@ -8,6 +8,7 @@ struct HomeView: View {
     @State private var showingImagePicker = false
     @State private var showingBarcodeScanner = false
     @State private var showingManualEntry = false
+    @State private var showingVoiceInput = false
     @State private var selectedImage: UIImage?
     @State private var selectedMealType: FoodEntry.MealType = .breakfast
     @EnvironmentObject var appState: AppState
@@ -42,6 +43,10 @@ struct HomeView: View {
                             QuickAddButton(icon: "photo", title: "Gallery", color: .purple) {
                                 showingImagePicker = true
                             }
+                            
+                            QuickAddButton(icon: "mic.fill", title: "Voice", color: .red) {
+                                showingVoiceInput = true
+                            }
                         }
                         .padding(.horizontal)
                     }
@@ -65,6 +70,9 @@ struct HomeView: View {
             }
             .sheet(isPresented: $showingManualEntry) {
                 ManualEntryView(mealType: selectedMealType)
+            }
+            .sheet(isPresented: $showingVoiceInput) {
+                VoiceInputView()
             }
         }
     }

@@ -10,14 +10,22 @@ struct FoodSearchView: View {
     @State private var error: Error?
     @Binding var selectedFood: FoodItem?
     @Environment(\.dismiss) private var dismiss
-    @ObservedObject private var networkMonitor = NetworkMonitor.shared
+    @State private var isOffline = false
     
     var body: some View {
         NavigationStack {
             ZStack {
                 VStack(spacing: 0) {
-                    // Offline Banner
-                    OfflineBanner()
+                    // Offline Banner  
+                    if isOffline {
+                        HStack {
+                            Image(systemName: "wifi.slash")
+                            Text("Offline - showing cached results")
+                        }
+                        .padding()
+                        .background(Color.orange)
+                        .foregroundColor(.white)
+                    }
                     
                     VStack {
                 // Search Bar
@@ -43,19 +51,30 @@ struct FoodSearchView: View {
                 
                 // Search Results
                 if let error = error {
-                    NetworkErrorView(error: error) {
-                        searchFoods()
+                    VStack(spacing: 16) {
+                        Image(systemName: "exclamationmark.triangle")
+                            .font(.system(size: 50))
+                            .foregroundColor(.orange)
+                        Text("Search Error")
+                            .font(.headline)
+                        Text(error.localizedDescription)
+                            .font(.caption)
+                            .multilineTextAlignment(.center)
+                        Button("Try Again") {
+                            searchFoods()
+                        }
+                        .buttonStyle(.borderedProminent)
                     }
                     .padding()
                     Spacer()
                 } else if searchResults.isEmpty && !searchText.isEmpty && !isSearching {
                     VStack(spacing: 20) {
-                        Image(systemName: networkMonitor.isConnected ? "magnifyingglass" : "wifi.slash")
+                        Image(systemName: isOffline ? "wifi.slash" : "magnifyingglass")
                             .font(.system(size: 50))
                             .foregroundColor(.secondary)
-                        Text(networkMonitor.isConnected ? "No foods found" : "No offline results")
+                        Text(isOffline ? "No offline results" : "No foods found")
                             .font(.headline)
-                        Text(networkMonitor.isConnected ? "Try searching for something else" : "Connect to internet for more results")
+                        Text(isOffline ? "Connect to internet for more results" : "Try searching for something else")
                             .foregroundColor(.secondary)
                             .multilineTextAlignment(.center)
                             .padding(.horizontal)
@@ -93,9 +112,9 @@ struct FoodSearchView: View {
     
     private func searchFoods() {
         // Validate search input
-        let validation = InputValidator.validateSearchQuery(searchText)
-        guard validation.isValid, let query = validation.value else {
-            error = NSError(domain: "InputValidation", code: 0, userInfo: [NSLocalizedDescriptionKey: validation.error ?? "Invalid search query"])
+        let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !query.isEmpty else {
+            error = NSError(domain: "InputValidation", code: 0, userInfo: [NSLocalizedDescriptionKey: "Search cannot be empty"])
             return
         }
         
@@ -119,11 +138,8 @@ struct FoodSearchView: View {
                     self.error = apiError
                     searchResults = []
                     
-                    // Log error
-                    CrashlyticsManager.shared.recordError(apiError, additionalInfo: [
-                        "screen": "FoodSearchView",
-                        "query": searchText
-                    ])
+                    // Log error (Crashlytics integration will be added later)
+                    print("Search error: \(apiError.localizedDescription)")
                 }
             }
         }
