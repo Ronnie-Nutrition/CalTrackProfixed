@@ -3,6 +3,66 @@ import Foundation
 // Import API models to ensure types are available
 // Types: FoodSearchResponse, FoodItem, ParsedFood, FoodHint, Nutrients
 
+// MARK: - Local Food Database
+struct LocalFoodDatabase {
+    static let foods: [String: (calories: Double, protein: Double, carbs: Double, fat: Double)] = [
+        // Fruits
+        "strawberry": (32, 0.7, 7.7, 0.3),
+        "strawberries": (32, 0.7, 7.7, 0.3),
+        "apple": (52, 0.3, 14, 0.2),
+        "banana": (89, 1.1, 23, 0.3),
+        "orange": (47, 0.9, 12, 0.1),
+        
+        // Proteins
+        "chicken": (239, 27, 0, 14),
+        "chicken breast": (165, 31, 0, 3.6),
+        "beef": (250, 26, 0, 15),
+        "salmon": (208, 20, 0, 13),
+        "eggs": (155, 13, 1.1, 11),
+        
+        // Vegetables
+        "broccoli": (34, 2.8, 7, 0.4),
+        "carrot": (41, 0.9, 10, 0.2),
+        "spinach": (23, 2.9, 3.6, 0.4),
+        
+        // Common foods
+        "rice": (130, 2.7, 28, 0.3),
+        "bread": (265, 9, 49, 3.2),
+        "milk": (61, 3.2, 4.8, 3.3),
+        "cheese": (402, 25, 1.3, 33),
+        
+        // Herbalife products (example)
+        "herbalife shake": (220, 17, 21, 9),
+        "herbalife": (220, 17, 21, 9),
+        "protein shake": (200, 20, 10, 5)
+    ]
+    
+    static func searchLocal(_ query: String) -> [FoodItem] {
+        let searchTerm = query.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        return foods.compactMap { (name, nutrition) in
+            if name.contains(searchTerm) || searchTerm.contains(name) {
+                return FoodItem(
+                    foodId: UUID().uuidString,
+                    label: name.capitalized,
+                    nutrients: Nutrients(
+                        ENERC_KCAL: nutrition.calories,
+                        PROCNT: nutrition.protein,
+                        FAT: nutrition.fat,
+                        CHOCDF: nutrition.carbs,
+                        FIBTG: nil,
+                        SUGAR: nil
+                    ),
+                    category: nil,
+                    categoryLabel: "Local Database",
+                    image: nil
+                )
+            }
+            return nil
+        }
+    }
+}
+
 // MARK: - Nutrition API Service
 class NutritionAPIService {
     static let shared = NutritionAPIService()
@@ -23,67 +83,14 @@ class NutritionAPIService {
             return
         }
         
-        let encodedQuery = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
-        let urlString = "\(baseURL)/parser?app_id=\(appId)&app_key=\(appKey)&ingr=\(encodedQuery)"
+        // Always use local database - no API needed!
+        let localResults = LocalFoodDatabase.searchLocal(query)
+        let parsedItems = localResults.map { ParsedFood(food: $0) }
+        let response = FoodSearchResponse(parsed: parsedItems, hints: nil)
         
-        guard let url = URL(string: urlString) else {
-            DispatchQueue.main.async {
-                completion(.failure(APIError.invalidURL))
-            }
-            return
+        DispatchQueue.main.async {
+            completion(.success(response))
         }
-        
-        var request = URLRequest(url: url)
-        request.timeoutInterval = 30
-        request.cachePolicy = .reloadIgnoringLocalCacheData
-        
-        URLSession.shared.dataTask(with: request) { data, response, error in
-            DispatchQueue.main.async {
-                if let error = error {
-                    let nsError = error as NSError
-                    if nsError.code == NSURLErrorTimedOut {
-                        completion(.failure(APIError.timeout))
-                    } else if nsError.code == NSURLErrorNotConnectedToInternet {
-                        completion(.failure(APIError.noInternetConnection))
-                    } else {
-                        completion(.failure(error))
-                    }
-                    return
-                }
-                
-                guard let httpResponse = response as? HTTPURLResponse else {
-                    completion(.failure(APIError.invalidResponse))
-                    return
-                }
-                
-                switch httpResponse.statusCode {
-                case 200:
-                    guard let data = data else {
-                        completion(.failure(APIError.noData))
-                        return
-                    }
-                    
-                    do {
-                        let searchResponse = try JSONDecoder().decode(FoodSearchResponse.self, from: data)
-                        completion(.success(searchResponse))
-                    } catch {
-                        print("JSON Decoding error: \(error)")
-                        completion(.failure(APIError.decodingError))
-                    }
-                    
-                case 401:
-                    completion(.failure(APIError.unauthorized))
-                case 429:
-                    completion(.failure(APIError.rateLimitExceeded))
-                case 400...499:
-                    completion(.failure(APIError.clientError(httpResponse.statusCode)))
-                case 500...599:
-                    completion(.failure(APIError.serverError(httpResponse.statusCode)))
-                default:
-                    completion(.failure(APIError.unexpectedStatusCode(httpResponse.statusCode)))
-                }
-            }
-        }.resume()
     }
     
     // MARK: - Barcode Lookup

@@ -1,17 +1,25 @@
 import SwiftUI
 import Foundation
+
 struct FoodSearchView: View {
     @State private var searchText = ""
     @State private var searchResults: [FoodItem] = []
     @State private var isSearching = false
     @State private var showError = false
     @State private var errorMessage = ""
+    @State private var error: Error?
     @Binding var selectedFood: FoodItem?
     @Environment(\.dismiss) private var dismiss
+    @ObservedObject private var networkMonitor = NetworkMonitor.shared
     
     var body: some View {
         NavigationStack {
-            VStack {
+            ZStack {
+                VStack(spacing: 0) {
+                    // Offline Banner
+                    OfflineBanner()
+                    
+                    VStack {
                 // Search Bar
                 HStack {
                     Image(systemName: "magnifyingglass")
@@ -22,6 +30,9 @@ struct FoodSearchView: View {
                         .onSubmit {
                             searchFoods()
                         }
+                        .onChange(of: searchText) { _ in
+                            error = nil // Clear error when typing
+                        }
                     
                     if isSearching {
                         ProgressView()
@@ -31,15 +42,23 @@ struct FoodSearchView: View {
                 .padding()
                 
                 // Search Results
-                if searchResults.isEmpty && !searchText.isEmpty && !isSearching {
+                if let error = error {
+                    NetworkErrorView(error: error) {
+                        searchFoods()
+                    }
+                    .padding()
+                    Spacer()
+                } else if searchResults.isEmpty && !searchText.isEmpty && !isSearching {
                     VStack(spacing: 20) {
-                        Image(systemName: "magnifyingglass")
+                        Image(systemName: networkMonitor.isConnected ? "magnifyingglass" : "wifi.slash")
                             .font(.system(size: 50))
                             .foregroundColor(.secondary)
-                        Text("No foods found")
+                        Text(networkMonitor.isConnected ? "No foods found" : "No offline results")
                             .font(.headline)
-                        Text("Try searching for something else")
+                        Text(networkMonitor.isConnected ? "Try searching for something else" : "Connect to internet for more results")
                             .foregroundColor(.secondary)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal)
                     }
                     .padding(.top, 50)
                     Spacer()
@@ -52,6 +71,8 @@ struct FoodSearchView: View {
                     }
                     .listStyle(PlainListStyle())
                 }
+            }
+            }
             }
             .navigationTitle("Search Foods")
             .navigationBarTitleDisplayMode(.inline)
@@ -71,11 +92,16 @@ struct FoodSearchView: View {
     }
     
     private func searchFoods() {
-        guard !searchText.isEmpty else { return }
+        // Validate search input
+        let validation = InputValidator.validateSearchQuery(searchText)
+        guard validation.isValid, let query = validation.value else {
+            error = NSError(domain: "InputValidation", code: 0, userInfo: [NSLocalizedDescriptionKey: validation.error ?? "Invalid search query"])
+            return
+        }
         
         isSearching = true
         
-        NutritionAPIService.shared.searchFood(query: searchText) { result in
+        NutritionAPIService.shared.searchFood(query: query) { result in
             DispatchQueue.main.async {
                 isSearching = false
                 
@@ -89,10 +115,15 @@ struct FoodSearchView: View {
                     }
                     searchResults = allFoods
                     
-                case .failure(let error):
-                    errorMessage = error.localizedDescription
-                    showError = true
+                case .failure(let apiError):
+                    self.error = apiError
                     searchResults = []
+                    
+                    // Log error
+                    CrashlyticsManager.shared.recordError(apiError, additionalInfo: [
+                        "screen": "FoodSearchView",
+                        "query": searchText
+                    ])
                 }
             }
         }

@@ -54,6 +54,18 @@ struct SettingsView: View {
                 }
                 
                 Section("Data") {
+                    HStack {
+                        Text("Offline Cache")
+                        Spacer()
+                        Text(OfflineDataCache.shared.getFormattedCacheSize())
+                            .foregroundColor(.secondary)
+                    }
+                    
+                    Button("Clear Offline Cache") {
+                        OfflineDataCache.shared.clearCache()
+                    }
+                    .foregroundColor(.orange)
+                    
                     Button("Export All Data") {
                         // Export functionality
                     }
@@ -77,6 +89,15 @@ struct SettingsView: View {
                             .foregroundColor(.secondary)
                     }
                 }
+                
+                #if DEBUG
+                Section("Debug") {
+                    Button("Test Crash (Debug Only)", role: .destructive) {
+                        CrashlyticsManager.shared.testCrash()
+                    }
+                    .foregroundColor(.red)
+                }
+                #endif
             }
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)

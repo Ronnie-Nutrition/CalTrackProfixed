@@ -5,6 +5,7 @@ struct DiaryView: View {
     @Query(sort: \FoodEntry.timestamp, order: .reverse) private var allEntries: [FoodEntry]
     @State private var selectedDate = Date()
     @State private var editingEntry: FoodEntry?
+    @ObservedObject private var networkMonitor = NetworkMonitor.shared
     
     private var entriesForSelectedDate: [FoodEntry] {
         let calendar = Calendar.current
@@ -29,6 +30,9 @@ struct DiaryView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
+                // Offline Banner
+                OfflineBanner()
+                
                 // Date Picker
                 DatePicker("", selection: $selectedDate, displayedComponents: .date)
                     .datePickerStyle(.graphical)

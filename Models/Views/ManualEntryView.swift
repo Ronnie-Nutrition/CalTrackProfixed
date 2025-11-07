@@ -16,6 +16,7 @@ struct ManualEntryView: View {
     @State private var quantity = "1"
     @State private var showingFoodSearch = false
     @State private var selectedFood: FoodItem?
+    @State private var validationErrors: [String: String] = [:]
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
     
@@ -38,8 +39,23 @@ struct ManualEntryView: View {
                 }
                 
                 Section("Food Details") {
-                    TextField("Food Name", text: $name)
-                    TextField("Brand (Optional)", text: $brand)
+                    VStack(alignment: .leading) {
+                        TextField("Food Name", text: $name)
+                        if let error = validationErrors["name"] {
+                            Text(error)
+                                .font(.caption)
+                                .foregroundColor(.red)
+                        }
+                    }
+                    
+                    VStack(alignment: .leading) {
+                        TextField("Brand (Optional)", text: $brand)
+                        if let error = validationErrors["brand"] {
+                            Text(error)
+                                .font(.caption)
+                                .foregroundColor(.red)
+                        }
+                    }
                 }
                 
                 Section("Nutrition per Serving") {
@@ -158,6 +174,21 @@ struct ManualEntryView: View {
         }
         
         modelContext.insert(entry)
+        
+        // Cache the food for offline access
+        let foodItem = FoodItem(
+            foodId: UUID().uuidString,
+            label: name,
+            categoryLabel: brand.isEmpty ? nil : brand,
+            nutrients: FoodNutrients(
+                calories: caloriesDouble,
+                protein: proteinDouble,
+                carbs: carbsDouble,
+                fat: fatDouble
+            ),
+            image: nil
+        )
+        OfflineDataCache.shared.addToRecentFoods(foodItem)
         
         do {
             try modelContext.save()
