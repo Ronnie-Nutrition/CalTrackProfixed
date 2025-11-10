@@ -16,6 +16,7 @@ struct VoiceInputView: View {
     @State private var recognitionRequest: SFSpeechAudioBufferRecognitionRequest?
     @State private var recognitionTask: SFSpeechRecognitionTask?
     @State private var isAuthorized = false
+    @State private var recordingTimer: Timer?
     
     struct DetectedFood {
         let name: String
@@ -160,6 +161,11 @@ struct VoiceInputView: View {
             .onAppear {
                 requestSpeechAuthorization()
             }
+            .onDisappear {
+                if isRecording {
+                    stopRecording()
+                }
+            }
             .sheet(isPresented: $showingResults) {
                 FoodResultsView(detectedFoods: detectedFoods, speechText: speechText)
             }
@@ -198,19 +204,31 @@ struct VoiceInputView: View {
         speechText = ""
         errorMessage = nil
         
+        // Clean up any previous recording state
+        if audioEngine.isRunning {
+            audioEngine.stop()
+            audioEngine.inputNode.removeTap(onBus: 0)
+        }
+        
+        // Check if speech recognizer is available
+        guard let speechRecognizer = speechRecognizer, speechRecognizer.isAvailable else {
+            errorMessage = "Speech recognition not available"
+            return
+        }
+        
         // Configure audio session
         let audioSession = AVAudioSession.sharedInstance()
         do {
             try audioSession.setCategory(.record, mode: .measurement, options: .duckOthers)
             try audioSession.setActive(true, options: .notifyOthersOnDeactivation)
         } catch {
-            errorMessage = "Failed to set up audio session"
+            errorMessage = "Failed to set up audio session: \(error.localizedDescription)"
             return
         }
         
+        // Create fresh recognition request
         recognitionRequest = SFSpeechAudioBufferRecognitionRequest()
         
-        let inputNode = audioEngine.inputNode
         guard let recognitionRequest = recognitionRequest else {
             errorMessage = "Unable to create recognition request"
             return
@@ -218,46 +236,95 @@ struct VoiceInputView: View {
         
         recognitionRequest.shouldReportPartialResults = true
         
-        recognitionTask = speechRecognizer?.recognitionTask(with: recognitionRequest) { result, error in
-            var isFinal = false
-            
-            if let result = result {
-                self.speechText = result.bestTranscription.formattedString
-                isFinal = result.isFinal
-            }
-            
-            if error != nil || isFinal {
-                self.audioEngine.stop()
-                inputNode.removeTap(onBus: 0)
+        // Add timeout handling
+        recognitionRequest.taskHint = .search
+        if #available(iOS 16.0, *) {
+            recognitionRequest.addsPunctuation = false
+            recognitionRequest.requiresOnDeviceRecognition = false
+        }
+        
+        recognitionTask = speechRecognizer.recognitionTask(with: recognitionRequest) { result, error in
+            DispatchQueue.main.async {
                 
-                self.recognitionRequest = nil
-                self.recognitionTask = nil
+                var isFinal = false
+                
+                if let result = result {
+                    speechText = result.bestTranscription.formattedString
+                    isFinal = result.isFinal
+                }
+                
+                if let error = error {
+                    print("Speech recognition error: \(error)")
+                    errorMessage = "Recognition error: \(error.localizedDescription)"
+                    stopRecording()
+                    return
+                }
                 
                 if isFinal {
-                    self.processSpokenText()
+                    stopRecording()
+                    if !speechText.isEmpty {
+                        processSpokenText()
+                    } else {
+                        errorMessage = "No speech detected. Please try again."
+                    }
                 }
             }
         }
         
+        let inputNode = audioEngine.inputNode
         let recordingFormat = inputNode.outputFormat(forBus: 0)
+        
         inputNode.installTap(onBus: 0, bufferSize: 1024, format: recordingFormat) { buffer, _ in
-            self.recognitionRequest?.append(buffer)
+            recognitionRequest.append(buffer)
         }
         
         audioEngine.prepare()
         
         do {
             try audioEngine.start()
-            isRecording = true
+            DispatchQueue.main.async {
+                isRecording = true
+            }
+            
+            // Set up 15-second timeout
+            recordingTimer = Timer.scheduledTimer(withTimeInterval: 15.0, repeats: false) { _ in
+                DispatchQueue.main.async {
+                    stopRecording()
+                    if speechText.isEmpty {
+                        errorMessage = "Recording timeout. Please try again and speak more clearly."
+                    }
+                }
+            }
         } catch {
-            errorMessage = "Audio engine couldn't start"
+            errorMessage = "Audio engine couldn't start: \(error.localizedDescription)"
         }
     }
     
     private func stopRecording() {
-        audioEngine.stop()
+        // Cancel timer
+        recordingTimer?.invalidate()
+        recordingTimer = nil
+        
+        if audioEngine.isRunning {
+            audioEngine.stop()
+            audioEngine.inputNode.removeTap(onBus: 0)
+        }
+        
         recognitionRequest?.endAudio()
-        isRecording = false
+        recognitionRequest = nil
+        recognitionTask?.cancel()
+        recognitionTask = nil
+        
+        DispatchQueue.main.async {
+            isRecording = false
+        }
+        
+        // Deactivate audio session
+        do {
+            try AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
+        } catch {
+            print("Failed to deactivate audio session: \(error)")
+        }
     }
     
     private func processSpokenText() {
@@ -276,54 +343,186 @@ struct VoiceInputView: View {
         let lowercased = text.lowercased()
         var detectedFoods: [DetectedFood] = []
         
-        // Common food database (this would be expanded)
+        // Expanded food database with common variations
         let foodDatabase: [String: (calories: Double, protein: Double, carbs: Double, fat: Double)] = [
+            // Sandwiches & Wraps
             "turkey sandwich": (300, 24, 30, 12),
             "sandwich": (350, 20, 35, 15),
+            "ham sandwich": (320, 22, 28, 14),
+            "tuna sandwich": (280, 25, 25, 10),
+            "chicken sandwich": (380, 28, 32, 16),
+            "wrap": (250, 15, 30, 8),
+            "burrito": (450, 20, 50, 18),
+            
+            // Proteins
             "chicken": (165, 31, 0, 4),
+            "chicken breast": (165, 31, 0, 4),
+            "beef": (250, 26, 0, 15),
+            "pork": (200, 22, 0, 12),
+            "fish": (140, 26, 0, 3),
+            "salmon": (180, 25, 0, 8),
+            "tuna": (130, 28, 0, 1),
+            "turkey": (135, 30, 0, 1),
+            "ham": (140, 22, 1, 5),
+            
+            // Starches
             "rice": (130, 2.7, 28, 0.3),
-            "egg": (155, 13, 1.1, 11),
-            "eggs": (155, 13, 1.1, 11),
+            "white rice": (130, 2.7, 28, 0.3),
+            "brown rice": (110, 2.6, 22, 0.9),
+            "pasta": (220, 8, 43, 1.3),
+            "spaghetti": (220, 8, 43, 1.3),
+            "noodles": (220, 8, 43, 1.3),
+            "bread": (80, 4, 15, 1),
             "toast": (75, 3, 14, 1),
-            "coffee": (5, 0.3, 1, 0),
+            "bagel": (280, 11, 55, 2),
+            "potato": (160, 4, 37, 0.2),
+            "sweet potato": (100, 2, 23, 0.1),
+            
+            // Eggs & Dairy
+            "egg": (70, 6, 0.6, 5),
+            "eggs": (140, 12, 1.2, 10), // 2 eggs
+            "scrambled eggs": (140, 12, 1.2, 10),
+            "omelette": (200, 15, 2, 15),
             "milk": (150, 8, 12, 8),
+            "cheese": (115, 7, 1, 9),
+            "yogurt": (100, 6, 15, 0.4),
+            "cottage cheese": (100, 14, 5, 2),
+            
+            // Fruits
             "apple": (95, 0.5, 25, 0.3),
             "banana": (105, 1.3, 27, 0.4),
+            "orange": (65, 1.3, 16, 0.2),
+            "grapes": (90, 0.9, 23, 0.2),
+            "strawberries": (50, 1, 12, 0.5),
+            "blueberries": (80, 1, 21, 0.5),
+            
+            // Vegetables
             "salad": (50, 3, 10, 0.5),
             "vegetables": (50, 2, 10, 0.5),
+            "broccoli": (25, 3, 5, 0.3),
+            "carrots": (25, 0.5, 6, 0.1),
+            "spinach": (20, 3, 3, 0.4),
+            "tomato": (20, 1, 4, 0.2),
+            
+            // Fast Food
             "burger": (500, 25, 40, 28),
+            "hamburger": (500, 25, 40, 28),
+            "cheeseburger": (550, 28, 42, 32),
             "pizza": (285, 12, 36, 10),
-            "pasta": (220, 8, 43, 1.3)
+            "pizza slice": (285, 12, 36, 10),
+            "fries": (365, 4, 63, 17),
+            "french fries": (365, 4, 63, 17),
+            "hot dog": (300, 12, 25, 18),
+            
+            // Beverages
+            "coffee": (5, 0.3, 1, 0),
+            "tea": (2, 0, 0.5, 0),
+            "soda": (140, 0, 39, 0),
+            "juice": (110, 0.5, 26, 0.3),
+            "orange juice": (110, 1.7, 26, 0.5),
+            "beer": (150, 1.6, 13, 0),
+            "wine": (125, 0.1, 4, 0),
+            "water": (0, 0, 0, 0),
+            
+            // Snacks
+            "chips": (150, 2, 15, 10),
+            "crackers": (120, 2.5, 20, 4),
+            "nuts": (180, 6, 6, 16),
+            "almonds": (160, 6, 6, 14),
+            "peanuts": (160, 7, 4, 14),
+            "cookie": (150, 2, 20, 7),
+            "cake": (250, 3, 35, 12),
+            
+            // Breakfast Items
+            "cereal": (150, 3, 32, 2),
+            "oatmeal": (150, 5, 27, 3),
+            "pancakes": (520, 8, 100, 9),
+            "waffles": (520, 8, 100, 9),
+            "muffin": (420, 6, 61, 16)
         ]
         
-        // Quantity words
-        let quantities = [
-            "one": 1, "two": 2, "three": 3, "four": 4, "five": 5,
-            "a": 1, "an": 1, "some": 1, "bowl": 1, "cup": 1, "glass": 1,
-            "small": 0.75, "large": 1.5, "big": 1.5, "huge": 2
+        // Enhanced quantity detection
+        let quantities: [String: Double] = [
+            "zero": 0, "one": 1, "two": 2, "three": 3, "four": 4, "five": 5,
+            "six": 6, "seven": 7, "eight": 8, "nine": 9, "ten": 10,
+            "a": 1, "an": 1, "some": 1, "few": 2, "couple": 2, "pair": 2,
+            "bowl": 1, "cup": 1, "glass": 1, "plate": 1, "serving": 1,
+            "small": 0.75, "medium": 1, "large": 1.5, "big": 1.5, "huge": 2,
+            "half": 0.5, "quarter": 0.25, "piece": 1, "slice": 1, "scoop": 1
         ]
         
-        // Search for food items
-        for (food, macros) in foodDatabase {
-            if lowercased.contains(food) {
-                // Try to find quantity
-                var quantity = 1.0
-                for (word, multiplier) in quantities {
-                    if lowercased.contains(word + " " + food) || 
-                       lowercased.contains(word + " of " + food) {
-                        quantity = multiplier
-                        break
-                    }
+        // Clean up the text for better parsing
+        let cleanText = lowercased
+            .replacingOccurrences(of: "i ate", with: "")
+            .replacingOccurrences(of: "i had", with: "")
+            .replacingOccurrences(of: "i just ate", with: "")
+            .replacingOccurrences(of: "i just had", with: "")
+            .replacingOccurrences(of: "for breakfast", with: "")
+            .replacingOccurrences(of: "for lunch", with: "")
+            .replacingOccurrences(of: "for dinner", with: "")
+            .replacingOccurrences(of: "for snack", with: "")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        // Sort foods by length (longest first) to match specific items before general ones
+        let sortedFoods = foodDatabase.keys.sorted { $0.count > $1.count }
+        
+        var usedRanges: [Range<String.Index>] = []
+        
+        // Search for food items (avoiding overlaps)
+        for food in sortedFoods {
+            if let range = cleanText.range(of: food) {
+                // Check if this range overlaps with any already used range
+                let overlaps = usedRanges.contains { usedRange in
+                    range.overlaps(usedRange) || usedRange.overlaps(range)
                 }
                 
-                detectedFoods.append(DetectedFood(
-                    name: food.capitalized,
-                    quantity: quantity == 1 ? nil : "\(Int(quantity))",
-                    calories: macros.calories * quantity,
-                    protein: macros.protein * quantity,
-                    carbs: macros.carbs * quantity,
-                    fat: macros.fat * quantity
-                ))
+                if !overlaps {
+                    usedRanges.append(range)
+                    let macros = foodDatabase[food]!
+                    
+                    // Enhanced quantity detection
+                    var quantity = 1.0
+                    
+                    // Safely get context around the food item
+                    var contextualText = cleanText
+                    if let range = cleanText.range(of: food) {
+                        let startOffset = max(0, cleanText.distance(from: cleanText.startIndex, to: range.lowerBound) - 20)
+                        let endOffset = min(cleanText.count, cleanText.distance(from: cleanText.startIndex, to: range.upperBound) + 20)
+                        
+                        let startIndex = cleanText.index(cleanText.startIndex, offsetBy: startOffset)
+                        let endIndex = cleanText.index(cleanText.startIndex, offsetBy: endOffset)
+                        contextualText = String(cleanText[startIndex..<endIndex])
+                    }
+                    
+                    // Look for numbers first (1-10)
+                    for i in 1...10 {
+                        if contextualText.contains("\(i) " + food) || contextualText.contains("\(i)" + food) {
+                            quantity = Double(i)
+                            break
+                        }
+                    }
+                    
+                    // If no number found, look for quantity words
+                    if quantity == 1.0 {
+                        for (word, multiplier) in quantities {
+                            if contextualText.contains(word + " " + food) || 
+                               contextualText.contains(word + " of " + food) ||
+                               contextualText.contains(word + food) {
+                                quantity = multiplier
+                                break
+                            }
+                        }
+                    }
+                    
+                    detectedFoods.append(DetectedFood(
+                        name: food.capitalized,
+                        quantity: quantity == 1.0 ? nil : (quantity.truncatingRemainder(dividingBy: 1) == 0 ? "\(Int(quantity))" : String(format: "%.1f", quantity)),
+                        calories: macros.calories * quantity,
+                        protein: macros.protein * quantity,
+                        carbs: macros.carbs * quantity,
+                        fat: macros.fat * quantity
+                    ))
+                }
             }
         }
         
