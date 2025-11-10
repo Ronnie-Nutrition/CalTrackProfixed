@@ -109,46 +109,75 @@ struct DailySummaryCard: View {
     }
     
     var body: some View {
-        VStack(spacing: 16) {
-            // Calorie Ring
-            ZStack {
-                Circle()
-                    .stroke(Color.gray.opacity(0.3), lineWidth: 12)
-                    .frame(width: 120, height: 120)
+        LiquidGlassCard {
+            VStack(spacing: 16) {
+                // Liquid Glass Calorie Ring
+                ZStack {
+                    LiquidProgressRing(
+                        progress: totalCalories,
+                        total: appState.currentUser?.dailyCalorieTarget ?? 2000,
+                        color: .blue,
+                        size: 120,
+                        lineWidth: 12
+                    )
+                    
+                    VStack {
+                        Text("\(Int(totalCalories))")
+                            .font(.title2)
+                            .fontWeight(.bold)
+                        Text("of \(Int(appState.currentUser?.dailyCalorieTarget ?? 2000))")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        Text("calories")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
                 
-                Circle()
-                    .trim(from: 0, to: min(totalCalories / (appState.currentUser?.dailyCalorieTarget ?? 2000), 1.0))
-                    .stroke(Color.blue, style: StrokeStyle(lineWidth: 12, lineCap: .round))
-                    .frame(width: 120, height: 120)
-                    .rotationEffect(.degrees(-90))
-                
-                VStack {
-                    Text("\(Int(totalCalories))")
-                        .font(.title2)
-                        .fontWeight(.bold)
-                    Text("of \(Int(appState.currentUser?.dailyCalorieTarget ?? 2000))")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                    Text("calories")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+                // Liquid Glass Macros
+                HStack(spacing: 20) {
+                    LiquidMacroView(value: totalProtein, target: appState.currentUser?.dailyProteinTarget ?? 150, 
+                                   unit: "g", label: "Protein 💪", color: .red)
+                    LiquidMacroView(value: totalCarbs, target: appState.currentUser?.dailyCarbTarget ?? 250, 
+                                   unit: "g", label: "Carbs", color: .orange)
+                    LiquidMacroView(value: totalFat, target: appState.currentUser?.dailyFatTarget ?? 65, 
+                                   unit: "g", label: "Fat", color: .yellow)
                 }
             }
-            
-            // Macros
-            HStack(spacing: 20) {
-                MacroView(value: totalProtein, target: appState.currentUser?.dailyProteinTarget ?? 150, 
-                         unit: "g", label: "Protein 💪", color: .red)
-                MacroView(value: totalCarbs, target: appState.currentUser?.dailyCarbTarget ?? 250, 
-                         unit: "g", label: "Carbs", color: .orange)
-                MacroView(value: totalFat, target: appState.currentUser?.dailyFatTarget ?? 65, 
-                         unit: "g", label: "Fat", color: .yellow)
-            }
+            .padding()
         }
-        .padding()
-        .background(Color(.systemBackground))
-        .cornerRadius(16)
-        .shadow(color: Color.black.opacity(0.1), radius: 10)
+        .fluidGlow(color: .blue.opacity(0.3))
+    }
+}
+
+struct LiquidMacroView: View {
+    let value: Double
+    let target: Double
+    let unit: String
+    let label: String
+    let color: Color
+    
+    var body: some View {
+        VStack(spacing: 8) {
+            ZStack {
+                LiquidProgressRing(
+                    progress: value,
+                    total: target,
+                    color: color,
+                    size: 50,
+                    lineWidth: 6
+                )
+                
+                Text("\(Int(value))")
+                    .font(.caption)
+                    .fontWeight(.semibold)
+            }
+            .liquidPulse(color: color, intensity: 0.2)
+            
+            Text(label)
+                .font(.caption)
+                .foregroundColor(.secondary)
+        }
     }
 }
 
@@ -194,21 +223,61 @@ struct QuickAddButton: View {
     let color: Color
     let action: () -> Void
     
+    @State private var isPressed = false
+    
     var body: some View {
-        Button(action: action) {
+        Button(action: {
+            withAnimation(FluidSpring.snappy) {
+                isPressed = true
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                withAnimation(FluidSpring.gentle) {
+                    isPressed = false
+                }
+            }
+            action()
+        }) {
             VStack(spacing: 8) {
                 Image(systemName: icon)
                     .font(.title2)
                     .foregroundColor(.white)
                     .frame(width: 60, height: 60)
-                    .background(color)
-                    .cornerRadius(16)
+                    .background(
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 16)
+                                .fill(color)
+                            
+                            RoundedRectangle(cornerRadius: 16)
+                                .fill(
+                                    LinearGradient(
+                                        colors: [.white.opacity(0.3), .clear],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    )
+                                )
+                        }
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 16)
+                            .stroke(
+                                LinearGradient(
+                                    colors: [.white.opacity(0.4), .clear],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                ),
+                                lineWidth: 1
+                            )
+                    )
+                    .scaleEffect(isPressed ? 0.95 : 1.0)
+                    .shadow(color: color.opacity(0.4), radius: isPressed ? 5 : 10)
                 
                 Text(title)
                     .font(.caption)
+                    .fontWeight(.medium)
                     .foregroundColor(.primary)
             }
         }
+        .buttonStyle(PlainButtonStyle())
     }
 }
 
@@ -265,7 +334,21 @@ struct RecentMealRow: View {
         }
         .padding(.vertical, 8)
         .padding(.horizontal, 12)
-        .background(Color(.secondarySystemBackground))
-        .cornerRadius(10)
+        .background(
+            RoundedRectangle(cornerRadius: 10)
+                .fill(.regularMaterial)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 10)
+                        .stroke(
+                            LinearGradient(
+                                colors: [.white.opacity(0.2), .clear],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 0.5
+                        )
+                )
+        )
+        .liquidTransition()
     }
 }

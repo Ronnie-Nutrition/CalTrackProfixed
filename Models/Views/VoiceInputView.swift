@@ -29,13 +29,8 @@ struct VoiceInputView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                // Background gradient
-                LinearGradient(
-                    colors: [Color.blue.opacity(0.1), Color.purple.opacity(0.1)],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-                .ignoresSafeArea()
+                // Liquid glass background
+                GlassmorphismBackground(colors: [.blue, .purple, .pink])
                 
                 VStack(spacing: 30) {
                     // Title
@@ -55,29 +50,49 @@ struct VoiceInputView: View {
                             .padding(.horizontal)
                     }
                     
-                    // Recording button
+                    // Liquid glass recording button
                     Button(action: toggleRecording) {
                         ZStack {
-                            Circle()
-                                .fill(isRecording ? Color.red : Color.blue)
-                                .frame(width: 120, height: 120)
-                            
                             if isRecording {
-                                // Pulse animation
-                                Circle()
-                                    .stroke(Color.red, lineWidth: 4)
-                                    .frame(width: 120, height: 120)
-                                    .scaleEffect(isRecording ? 1.5 : 1)
-                                    .opacity(isRecording ? 0 : 1)
-                                    .animation(.easeOut(duration: 1).repeatForever(autoreverses: false), value: isRecording)
+                                // Liquid wave animation while recording
+                                LiquidWaveAnimation(
+                                    height: 120,
+                                    color: .red
+                                )
+                                .clipShape(Circle())
+                                .frame(width: 120, height: 120)
                             }
+                            
+                            Circle()
+                                .fill(.ultraThinMaterial)
+                                .frame(width: 120, height: 120)
+                                .overlay(
+                                    Circle()
+                                        .stroke(
+                                            LinearGradient(
+                                                colors: isRecording ? [.red.opacity(0.8), .red] : [.blue.opacity(0.8), .blue],
+                                                startPoint: .topLeading,
+                                                endPoint: .bottomTrailing
+                                            ),
+                                            lineWidth: 3
+                                        )
+                                )
+                                .liquidPulse(color: isRecording ? .red : .blue, intensity: 0.6)
                             
                             Image(systemName: isRecording ? "stop.fill" : "mic.fill")
                                 .font(.system(size: 50))
-                                .foregroundColor(.white)
+                                .foregroundStyle(
+                                    LinearGradient(
+                                        colors: isRecording ? [.red, .red.opacity(0.7)] : [.blue, .blue.opacity(0.7)],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    )
+                                )
+                                .shadow(color: isRecording ? .red.opacity(0.3) : .blue.opacity(0.3), radius: 5)
                         }
                     }
                     .disabled(!isAuthorized)
+                    .fluidGlow(color: isRecording ? .red : .blue)
                     
                     // Status text
                     if isRecording {

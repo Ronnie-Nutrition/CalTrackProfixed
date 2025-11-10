@@ -1,46 +1,4 @@
 import SwiftUI
-import SwiftData
-
-struct ContentView: View {
-    @State private var selectedFood: FoodItem? = nil
-    @StateObject private var appState = AppState()
-    
-    var body: some View {
-        TabView {
-            HomeView()
-                .tabItem {
-                    Label("Home", systemImage: "house.fill")
-                }
-                .environmentObject(appState)
-            
-            DiaryView()
-                .tabItem {
-                    Label("Diary", systemImage: "book.fill")
-                }
-            
-            FoodSearchView(selectedFood: $selectedFood)
-                .tabItem {
-                    Label("Search", systemImage: "magnifyingglass")
-                }
-            
-            InsightsView()
-                .tabItem {
-                    Label("Insights", systemImage: "chart.line.uptrend.xyaxis")
-                }
-            
-            ProfileView()
-                .tabItem {
-                    Label("Profile", systemImage: "person.fill")
-                }
-        }
-        .environmentObject(appState)
-    }
-}
-
-#Preview {
-    ContentView()
-        .modelContainer(for: [FoodEntry.self, Recipe.self, UserProfile.self])
-}
 
 // MARK: - Liquid Glass Components
 // Premium glassmorphism effects for CalTrackPro using native iOS APIs
@@ -74,6 +32,67 @@ struct LiquidGlassCard<Content: View>: View {
                     )
             )
             .clipShape(RoundedRectangle(cornerRadius: 20))
+    }
+}
+
+struct LiquidGlassButton: View {
+    let title: String
+    let icon: String
+    let color: Color
+    let action: () -> Void
+    
+    @State private var isPressed = false
+    
+    var body: some View {
+        Button(action: {
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                isPressed = true
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                    isPressed = false
+                }
+            }
+            action()
+        }) {
+            HStack(spacing: 12) {
+                Image(systemName: icon)
+                    .font(.title3)
+                    .foregroundStyle(
+                        LinearGradient(
+                            colors: [color, color.opacity(0.7)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                
+                Text(title)
+                    .font(.headline)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.primary)
+            }
+            .padding(.vertical, 16)
+            .padding(.horizontal, 24)
+            .background(
+                ZStack {
+                    RoundedRectangle(cornerRadius: 16)
+                        .fill(.regularMaterial)
+                    
+                    RoundedRectangle(cornerRadius: 16)
+                        .stroke(
+                            LinearGradient(
+                                colors: [color.opacity(0.6), .clear],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 2
+                        )
+                }
+            )
+            .scaleEffect(isPressed ? 0.95 : 1.0)
+            .shadow(color: color.opacity(0.3), radius: isPressed ? 5 : 10, x: 0, y: isPressed ? 2 : 5)
+        }
+        .buttonStyle(PlainButtonStyle())
     }
 }
 
@@ -295,73 +314,46 @@ struct AnimatedGradientBlob: View {
     }
 }
 
-// MARK: - Fluid Animation Utilities
-struct FluidSpring {
-    static let gentle = Animation.spring(response: 0.8, dampingFraction: 0.8, blendDuration: 0)
-    static let bouncy = Animation.spring(response: 0.6, dampingFraction: 0.7, blendDuration: 0)
-    static let snappy = Animation.spring(response: 0.4, dampingFraction: 0.9, blendDuration: 0)
-    static let smooth = Animation.easeInOut(duration: 0.6)
-    static let liquid = Animation.interpolatingSpring(mass: 1, stiffness: 100, damping: 10)
-}
-
-struct LiquidPulseEffect: ViewModifier {
-    @State private var isPulsing = false
-    let color: Color
-    let intensity: Double
-    
-    func body(content: Content) -> some View {
-        content
-            .overlay(
-                Circle()
-                    .stroke(color.opacity(isPulsing ? 0.0 : intensity), lineWidth: 2)
-                    .scaleEffect(isPulsing ? 2.0 : 1.0)
-                    .animation(
-                        .easeInOut(duration: 1.5)
-                        .repeatForever(autoreverses: false),
-                        value: isPulsing
-                    )
-            )
-            .onAppear {
-                isPulsing = true
-            }
-    }
-}
-
-struct FluidGlowEffect: ViewModifier {
-    @State private var glowIntensity: Double = 0.5
-    let color: Color
-    
-    func body(content: Content) -> some View {
-        content
-            .shadow(color: color.opacity(glowIntensity), radius: 10)
-            .shadow(color: color.opacity(glowIntensity * 0.5), radius: 20)
-            .onAppear {
-                withAnimation(
-                    .easeInOut(duration: 2)
-                    .repeatForever(autoreverses: true)
+// MARK: - Preview Helpers
+struct LiquidGlassPreview: View {
+    var body: some View {
+        ZStack {
+            GlassmorphismBackground(colors: [.blue, .purple, .pink])
+            
+            VStack(spacing: 20) {
+                LiquidGlassCard {
+                    VStack {
+                        Text("Liquid Glass Card")
+                            .font(.title2)
+                            .fontWeight(.bold)
+                        Text("Premium glassmorphism effect")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    .padding(20)
+                }
+                
+                LiquidProgressRing(
+                    progress: 850,
+                    total: 2000,
+                    color: .blue,
+                    size: 120,
+                    lineWidth: 12
+                )
+                
+                LiquidGlassButton(
+                    title: "Premium Feature",
+                    icon: "star.fill",
+                    color: .orange
                 ) {
-                    glowIntensity = 1.0
+                    // Action
                 }
             }
+            .padding()
+        }
     }
 }
 
-// MARK: - View Extensions
-extension View {
-    func liquidPulse(color: Color = .blue, intensity: Double = 0.3) -> some View {
-        modifier(LiquidPulseEffect(color: color, intensity: intensity))
-    }
-    
-    func fluidGlow(color: Color) -> some View {
-        modifier(FluidGlowEffect(color: color))
-    }
-    
-    func liquidTransition() -> some View {
-        transition(
-            .asymmetric(
-                insertion: .scale.combined(with: .opacity).animation(FluidSpring.bouncy),
-                removal: .scale.combined(with: .opacity).animation(FluidSpring.gentle)
-            )
-        )
-    }
+#Preview {
+    LiquidGlassPreview()
 }
