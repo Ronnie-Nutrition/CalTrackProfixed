@@ -17,6 +17,7 @@ struct VoiceInputView: View {
     @State private var recognitionTask: SFSpeechRecognitionTask?
     @State private var isAuthorized = false
     @State private var recordingTimer: Timer?
+    @State private var simulatorDemoTimer: Timer?
     
     struct DetectedFood {
         let name: String
@@ -44,15 +45,29 @@ struct VoiceInputView: View {
                             .font(.largeTitle)
                             .fontWeight(.bold)
                         
+                        #if targetEnvironment(simulator)
+                        Text("Simulator Demo: Tap the button to see a sample voice recognition")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal)
+                        #else
                         Text("Say what you ate, like \"I had a turkey sandwich\"")
                             .font(.subheadline)
                             .foregroundColor(.secondary)
                             .multilineTextAlignment(.center)
                             .padding(.horizontal)
+                        #endif
                     }
                     
-                    // Liquid glass recording button
-                    Button(action: toggleRecording) {
+                    // Liquid glass recording button (with simulator demo)
+                    Button(action: {
+                        #if targetEnvironment(simulator)
+                        simulatorDemoMode()
+                        #else
+                        toggleRecording()
+                        #endif
+                    }) {
                         ZStack {
                             if isRecording {
                                 // Liquid wave animation while recording
@@ -163,11 +178,45 @@ struct VoiceInputView: View {
             }
             .onDisappear {
                 if isRecording {
+                    #if targetEnvironment(simulator)
+                    simulatorDemoTimer?.invalidate()
+                    simulatorDemoTimer = nil
+                    isRecording = false
+                    #else
                     stopRecording()
+                    #endif
                 }
             }
             .sheet(isPresented: $showingResults) {
                 FoodResultsView(detectedFoods: detectedFoods, speechText: speechText)
+            }
+        }
+    }
+    
+    private func simulatorDemoMode() {
+        if isRecording {
+            // Stop demo
+            simulatorDemoTimer?.invalidate()
+            simulatorDemoTimer = nil
+            isRecording = false
+            return
+        }
+        
+        // Start demo recording simulation
+        isRecording = true
+        speechText = ""
+        errorMessage = nil
+        
+        // Simulate recording for 3 seconds
+        simulatorDemoTimer = Timer.scheduledTimer(withTimeInterval: 3.0, repeats: false) { _ in
+            DispatchQueue.main.async {
+                self.isRecording = false
+                self.speechText = "I ate a turkey sandwich and an apple"
+                
+                // Process the demo text after a short delay
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    self.processSpokenText()
+                }
             }
         }
     }
@@ -181,19 +230,37 @@ struct VoiceInputView: View {
     }
     
     private func requestSpeechAuthorization() {
+        // Check if we're running in simulator
+        #if targetEnvironment(simulator)
+        DispatchQueue.main.async {
+            self.isAuthorized = false
+            self.errorMessage = "Voice input requires a physical device. Speech recognition is not available in the iOS Simulator."
+        }
+        return
+        #endif
+        
+        // Check if speech recognizer is available
+        guard let speechRecognizer = speechRecognizer, speechRecognizer.isAvailable else {
+            DispatchQueue.main.async {
+                self.isAuthorized = false
+                self.errorMessage = "Speech recognition is not available on this device."
+            }
+            return
+        }
+        
         SFSpeechRecognizer.requestAuthorization { authStatus in
             DispatchQueue.main.async {
                 switch authStatus {
                 case .authorized:
                     self.isAuthorized = true
                 case .denied:
-                    self.errorMessage = "Speech recognition access denied"
+                    self.errorMessage = "Speech recognition access denied. Please enable in Settings → Privacy & Security → Speech Recognition."
                 case .restricted:
-                    self.errorMessage = "Speech recognition restricted"
+                    self.errorMessage = "Speech recognition is restricted on this device."
                 case .notDetermined:
-                    self.errorMessage = "Speech recognition not determined"
+                    self.errorMessage = "Speech recognition permission not determined. Please grant permission."
                 @unknown default:
-                    self.errorMessage = "Speech recognition unavailable"
+                    self.errorMessage = "Speech recognition is unavailable."
                 }
             }
         }
