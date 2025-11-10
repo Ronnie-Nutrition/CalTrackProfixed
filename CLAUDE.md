@@ -9,6 +9,11 @@ When implementing new features, use these templates:
 - `/Users/ronniecraig/ai-dev-tasks/generate-tasks.md` - For breaking PRDs into tasks
 - `/Users/ronniecraig/ai-dev-tasks/process-task-list.md` - For systematic implementation
 
+### Project Documentation
+- `tasks/PRD-INDEX.md` - Index of all PRDs (implemented and planned)
+- `GIT-COMMIT-GUIDELINES.md` - Conventional commit format requirements
+- `tasks/` - Directory containing all PRDs and task lists
+
 ## Project Overview
 CalTrackPro is a nutrition tracking iOS app built with SwiftUI and SwiftData.
 
@@ -142,10 +147,10 @@ cmd+shift+k  # Clean build folder
 cmd+b        # Build project
 cmd+r        # Run in simulator
 
-# Git workflow
+# Git workflow (follow GIT-COMMIT-GUIDELINES.md)
 git status
 git add -A
-git commit -m "Description"
+git commit -m "type(scope): description"  # See GIT-COMMIT-GUIDELINES.md
 git push origin main
 ```
 
