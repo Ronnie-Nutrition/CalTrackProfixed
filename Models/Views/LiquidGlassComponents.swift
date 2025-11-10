@@ -1,96 +1,230 @@
 import SwiftUI
 
 // MARK: - Liquid Glass Components
-// Premium glassmorphism effects for CalTrackPro using native iOS APIs
+// Premium glassmorphism effects for CalTrackPro with adaptive dark mode support
 
 struct LiquidGlassCard<Content: View>: View {
     let content: Content
     var blur: CGFloat = 10
     var opacity: Double = 0.1
+    var cornerRadius: CGFloat = 20
     
-    init(blur: CGFloat = 10, opacity: Double = 0.1, @ViewBuilder content: () -> Content) {
+    @ObservedObject private var themeManager = ThemeManager.shared
+    @Environment(\.colorScheme) private var colorScheme
+    
+    init(blur: CGFloat = 10, opacity: Double = 0.1, cornerRadius: CGFloat = 20, @ViewBuilder content: () -> Content) {
         self.blur = blur
         self.opacity = opacity
+        self.cornerRadius = cornerRadius
         self.content = content()
+    }
+    
+    private var adaptiveBorderGradient: LinearGradient {
+        if themeManager.isDarkMode || colorScheme == .dark {
+            return LinearGradient(
+                colors: [.white.opacity(0.15), .white.opacity(0.05), .clear],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+        } else {
+            return LinearGradient(
+                colors: [.white.opacity(0.4), .white.opacity(0.1), .clear],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+        }
+    }
+    
+    private var adaptiveBackground: some View {
+        RoundedRectangle(cornerRadius: cornerRadius)
+            .fill(.regularMaterial)
+            .overlay(
+                RoundedRectangle(cornerRadius: cornerRadius)
+                    .fill(themeManager.isDarkMode ? AppColors.darkGlassGradient : AppColors.glassGradient)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: cornerRadius)
+                    .stroke(adaptiveBorderGradient, lineWidth: 1)
+            )
     }
     
     var body: some View {
         content
-            .background(
-                RoundedRectangle(cornerRadius: 20)
-                    .fill(.ultraThinMaterial)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 20)
-                            .stroke(
-                                LinearGradient(
-                                    colors: [.white.opacity(0.3), .clear],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                ),
-                                lineWidth: 1
-                            )
-                    )
+            .background(adaptiveBackground)
+            .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
+            .shadow(
+                color: themeManager.isDarkMode ? .black.opacity(0.3) : .black.opacity(0.1),
+                radius: 10,
+                x: 0,
+                y: 5
             )
-            .clipShape(RoundedRectangle(cornerRadius: 20))
+    }
+}
+
+// MARK: - Liquid Progress Indicator
+struct LiquidProgressIndicator: View {
+    let progress: Double
+    let color: Color
+    let height: CGFloat
+    
+    @State private var animatedProgress: Double = 0
+    @ObservedObject private var themeManager = ThemeManager.shared
+    @Environment(\.colorScheme) private var colorScheme
+    
+    private var adaptiveOverlayGradient: LinearGradient {
+        if themeManager.isDarkMode || colorScheme == .dark {
+            return LinearGradient(
+                colors: [.white.opacity(0.2), .clear],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+        } else {
+            return LinearGradient(
+                colors: [.white.opacity(0.5), .clear],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+        }
+    }
+    
+    private var backgroundOpacity: Double {
+        themeManager.isDarkMode || colorScheme == .dark ? 0.15 : 0.1
+    }
+    
+    var body: some View {
+        GeometryReader { geometry in
+            ZStack(alignment: .leading) {
+                // Background track
+                RoundedRectangle(cornerRadius: height / 2)
+                    .fill(color.opacity(backgroundOpacity))
+                    .frame(width: geometry.size.width)
+                
+                // Progress bar
+                RoundedRectangle(cornerRadius: height / 2)
+                    .fill(
+                        LinearGradient(
+                            colors: [
+                                color.opacity(0.9),
+                                themeManager.currentAccentColor,
+                                color.opacity(0.7)
+                            ],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
+                    .frame(width: geometry.size.width * min(animatedProgress, 1.0))
+                    .shadow(
+                        color: color.opacity(themeManager.isDarkMode ? 0.4 : 0.3),
+                        radius: themeManager.isDarkMode ? 3 : 2
+                    )
+                
+                // Adaptive liquid glass overlay
+                RoundedRectangle(cornerRadius: height / 2)
+                    .fill(adaptiveOverlayGradient)
+                    .frame(width: geometry.size.width * min(animatedProgress, 1.0))
+                    .frame(height: height * 0.6)
+                    .offset(y: -height * 0.1)
+            }
+        }
+        .frame(height: height)
+        .onAppear {
+            withAnimation(AppAnimations.smooth) {
+                animatedProgress = progress
+            }
+        }
+        .onChange(of: progress) { oldValue, newValue in
+            withAnimation(AppAnimations.spring) {
+                animatedProgress = newValue
+            }
+        }
     }
 }
 
 struct LiquidGlassButton: View {
     let title: String
-    let icon: String
+    let icon: String?
     let color: Color
     let action: () -> Void
     
     @State private var isPressed = false
+    @ObservedObject private var themeManager = ThemeManager.shared
+    @Environment(\.colorScheme) private var colorScheme
+    
+    private var adaptiveBorderGradient: LinearGradient {
+        if themeManager.isDarkMode || colorScheme == .dark {
+            return LinearGradient(
+                colors: [color.opacity(0.4), color.opacity(0.1)],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+        } else {
+            return LinearGradient(
+                colors: [color.opacity(0.6), color.opacity(0.2)],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+        }
+    }
+    
+    private var adaptiveIconGradient: LinearGradient {
+        LinearGradient(
+            colors: [themeManager.currentAccentColor, color.opacity(0.8)],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
+    }
     
     var body: some View {
         Button(action: {
-            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+            // Haptic feedback
+            AppHaptics.light()
+            
+            withAnimation(AppAnimations.buttonPress) {
                 isPressed = true
             }
+            
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                withAnimation(AppAnimations.buttonPress) {
                     isPressed = false
                 }
             }
+            
             action()
         }) {
-            HStack(spacing: 12) {
-                Image(systemName: icon)
-                    .font(.title3)
-                    .foregroundStyle(
-                        LinearGradient(
-                            colors: [color, color.opacity(0.7)],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
+            HStack(spacing: 8) {
+                if let icon = icon {
+                    Image(systemName: icon)
+                        .font(AppFonts.caption(.medium))
+                        .foregroundStyle(adaptiveIconGradient)
+                }
                 
                 Text(title)
-                    .font(.headline)
-                    .fontWeight(.semibold)
-                    .foregroundColor(.primary)
+                    .font(AppFonts.caption(.medium))
+                    .foregroundColor(AppColors.primaryText)
             }
-            .padding(.vertical, 16)
-            .padding(.horizontal, 24)
+            .padding(.horizontal, AppSpacing.md)
+            .padding(.vertical, AppSpacing.sm)
             .background(
                 ZStack {
-                    RoundedRectangle(cornerRadius: 16)
+                    RoundedRectangle(cornerRadius: AppSpacing.radiusMedium)
                         .fill(.regularMaterial)
-                    
-                    RoundedRectangle(cornerRadius: 16)
-                        .stroke(
-                            LinearGradient(
-                                colors: [color.opacity(0.6), .clear],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            ),
-                            lineWidth: 2
+                        .overlay(
+                            RoundedRectangle(cornerRadius: AppSpacing.radiusMedium)
+                                .fill(themeManager.isDarkMode ? AppColors.darkGlassGradient : AppColors.glassGradient)
                         )
+                    
+                    RoundedRectangle(cornerRadius: AppSpacing.radiusMedium)
+                        .stroke(adaptiveBorderGradient, lineWidth: 1)
                 }
             )
             .scaleEffect(isPressed ? 0.95 : 1.0)
-            .shadow(color: color.opacity(0.3), radius: isPressed ? 5 : 10, x: 0, y: isPressed ? 2 : 5)
+            .shadow(
+                color: color.opacity(themeManager.isDarkMode ? 0.4 : 0.3),
+                radius: isPressed ? 5 : 10,
+                x: 0,
+                y: isPressed ? 2 : 5
+            )
+            .animation(AppAnimations.buttonPress, value: isPressed)
         }
         .buttonStyle(PlainButtonStyle())
     }
@@ -104,9 +238,46 @@ struct LiquidProgressRing: View {
     let lineWidth: CGFloat
     
     @State private var animatedProgress: Double = 0
+    @ObservedObject private var themeManager = ThemeManager.shared
+    @Environment(\.colorScheme) private var colorScheme
     
     private var progressValue: Double {
         min(progress / total, 1.0)
+    }
+    
+    private var backgroundOpacity: Double {
+        themeManager.isDarkMode || colorScheme == .dark ? 0.15 : 0.2
+    }
+    
+    private var adaptiveProgressGradient: AngularGradient {
+        AngularGradient(
+            colors: [
+                color.opacity(0.4),
+                themeManager.currentAccentColor,
+                color.opacity(0.9),
+                themeManager.currentAccentColor.opacity(0.6),
+                color.opacity(0.4)
+            ],
+            center: .center,
+            startAngle: .degrees(-90),
+            endAngle: .degrees(270)
+        )
+    }
+    
+    private var adaptiveOverlayGradient: LinearGradient {
+        if themeManager.isDarkMode || colorScheme == .dark {
+            return LinearGradient(
+                colors: [.white.opacity(0.3), .clear],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+        } else {
+            return LinearGradient(
+                colors: [.white.opacity(0.6), .clear],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+        }
     }
     
     var body: some View {
@@ -114,53 +285,42 @@ struct LiquidProgressRing: View {
             // Background ring
             Circle()
                 .stroke(
-                    color.opacity(0.2),
+                    color.opacity(backgroundOpacity),
                     style: StrokeStyle(lineWidth: lineWidth, lineCap: .round)
                 )
                 .frame(width: size, height: size)
             
-            // Liquid glass progress ring
+            // Adaptive liquid glass progress ring
             Circle()
                 .trim(from: 0, to: animatedProgress)
                 .stroke(
-                    AngularGradient(
-                        colors: [
-                            color.opacity(0.3),
-                            color,
-                            color.opacity(0.8),
-                            color.opacity(0.3)
-                        ],
-                        center: .center,
-                        startAngle: .degrees(-90),
-                        endAngle: .degrees(270)
-                    ),
+                    adaptiveProgressGradient,
                     style: StrokeStyle(lineWidth: lineWidth, lineCap: .round)
                 )
                 .frame(width: size, height: size)
                 .rotationEffect(.degrees(-90))
-                .shadow(color: color.opacity(0.5), radius: 3)
+                .shadow(
+                    color: color.opacity(themeManager.isDarkMode ? 0.6 : 0.4),
+                    radius: themeManager.isDarkMode ? 4 : 3
+                )
             
-            // Liquid glass overlay
+            // Adaptive liquid glass overlay
             Circle()
                 .trim(from: 0, to: animatedProgress)
                 .stroke(
-                    LinearGradient(
-                        colors: [.white.opacity(0.6), .clear],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    ),
+                    adaptiveOverlayGradient,
                     style: StrokeStyle(lineWidth: 2, lineCap: .round)
                 )
                 .frame(width: size, height: size)
                 .rotationEffect(.degrees(-90))
         }
         .onAppear {
-            withAnimation(.easeInOut(duration: 1.5)) {
+            withAnimation(AppAnimations.smooth.delay(0.2)) {
                 animatedProgress = progressValue
             }
         }
         .onChange(of: progressValue) { oldValue, newValue in
-            withAnimation(.spring(response: 0.8, dampingFraction: 0.8)) {
+            withAnimation(AppAnimations.spring) {
                 animatedProgress = newValue
             }
         }
@@ -250,9 +410,27 @@ struct WaveShape: Shape {
 struct GlassmorphismBackground: View {
     let colors: [Color]
     
+    @ObservedObject private var themeManager = ThemeManager.shared
+    @Environment(\.colorScheme) private var colorScheme
+    
+    private var adaptiveBaseBackground: some View {
+        Group {
+            if themeManager.isDarkMode || colorScheme == .dark {
+                AppColors.primaryBackground
+                    .overlay(.thinMaterial)
+            } else {
+                AppColors.primaryBackground
+                    .overlay(.ultraThinMaterial)
+            }
+        }
+    }
+    
     var body: some View {
         ZStack {
-            // Animated background gradients
+            // Adaptive base background
+            adaptiveBaseBackground
+            
+            // Animated background gradients with theme-aware opacity
             ForEach(0..<colors.count, id: \.self) { index in
                 AnimatedGradientBlob(
                     color: colors[index],
@@ -261,11 +439,11 @@ struct GlassmorphismBackground: View {
                         width: CGFloat.random(in: -100...100),
                         height: CGFloat.random(in: -100...100)
                     ),
-                    animationDelay: Double(index) * 0.5
+                    animationDelay: Double(index) * 0.5,
+                    isDarkMode: themeManager.isDarkMode || colorScheme == .dark
                 )
             }
         }
-        .background(.ultraThinMaterial)
         .ignoresSafeArea()
     }
 }
@@ -275,35 +453,46 @@ struct AnimatedGradientBlob: View {
     let size: CGFloat
     @State private var offset: CGSize
     let animationDelay: Double
+    let isDarkMode: Bool
     
     @State private var animatedOffset: CGSize
     
-    init(color: Color, size: CGFloat, offset: CGSize, animationDelay: Double) {
+    init(color: Color, size: CGFloat, offset: CGSize, animationDelay: Double, isDarkMode: Bool = false) {
         self.color = color
         self.size = size
         self.offset = offset
         self.animationDelay = animationDelay
+        self.isDarkMode = isDarkMode
         self._animatedOffset = State(initialValue: offset)
+    }
+    
+    private var adaptiveGradient: RadialGradient {
+        if isDarkMode {
+            return RadialGradient(
+                colors: [color.opacity(0.2), color.opacity(0.1), .clear],
+                center: .center,
+                startRadius: 0,
+                endRadius: size / 2
+            )
+        } else {
+            return RadialGradient(
+                colors: [color.opacity(0.4), color.opacity(0.15), .clear],
+                center: .center,
+                startRadius: 0,
+                endRadius: size / 2
+            )
+        }
     }
     
     var body: some View {
         Circle()
-            .fill(
-                RadialGradient(
-                    colors: [color.opacity(0.3), color.opacity(0.1), .clear],
-                    center: .center,
-                    startRadius: 0,
-                    endRadius: size / 2
-                )
-            )
+            .fill(adaptiveGradient)
             .frame(width: size, height: size)
-            .blur(radius: 30)
+            .blur(radius: isDarkMode ? 25 : 30)
             .offset(animatedOffset)
             .onAppear {
                 withAnimation(
-                    .easeInOut(duration: 4)
-                    .repeatForever(autoreverses: true)
-                    .delay(animationDelay)
+                    AppAnimations.wave.delay(animationDelay)
                 ) {
                     animatedOffset = CGSize(
                         width: offset.width + CGFloat.random(in: -50...50),
@@ -314,46 +503,218 @@ struct AnimatedGradientBlob: View {
     }
 }
 
-// MARK: - Preview Helpers
-struct LiquidGlassPreview: View {
-    var body: some View {
-        ZStack {
-            GlassmorphismBackground(colors: [.blue, .purple, .pink])
-            
-            VStack(spacing: 20) {
-                LiquidGlassCard {
-                    VStack {
-                        Text("Liquid Glass Card")
-                            .font(.title2)
-                            .fontWeight(.bold)
-                        Text("Premium glassmorphism effect")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-                    .padding(20)
-                }
-                
-                LiquidProgressRing(
-                    progress: 850,
-                    total: 2000,
-                    color: .blue,
-                    size: 120,
-                    lineWidth: 12
-                )
-                
-                LiquidGlassButton(
-                    title: "Premium Feature",
-                    icon: "star.fill",
-                    color: .orange
-                ) {
-                    // Action
+// MARK: - Fluid Animation Utilities
+struct FluidSpring {
+    static let gentle = Animation.spring(response: 0.8, dampingFraction: 0.8, blendDuration: 0)
+    static let bouncy = Animation.spring(response: 0.6, dampingFraction: 0.7, blendDuration: 0)
+    static let snappy = Animation.spring(response: 0.4, dampingFraction: 0.9, blendDuration: 0)
+    static let smooth = Animation.easeInOut(duration: 0.6)
+    static let liquid = Animation.interpolatingSpring(mass: 1, stiffness: 100, damping: 10)
+}
+
+struct LiquidPulseEffect: ViewModifier {
+    @State private var isPulsing = false
+    let color: Color
+    let intensity: Double
+    
+    @ObservedObject private var themeManager = ThemeManager.shared
+    
+    func body(content: Content) -> some View {
+        content
+            .overlay(
+                Circle()
+                    .stroke(
+                        themeManager.currentAccentColor.opacity(isPulsing ? 0.0 : intensity),
+                        lineWidth: 2
+                    )
+                    .scaleEffect(isPulsing ? 2.0 : 1.0)
+                    .animation(AppAnimations.pulse, value: isPulsing)
+            )
+            .onAppear {
+                isPulsing = true
+            }
+    }
+}
+
+struct FluidGlowEffect: ViewModifier {
+    @State private var glowIntensity: Double = 0.5
+    let color: Color
+    
+    @ObservedObject private var themeManager = ThemeManager.shared
+    @Environment(\.colorScheme) private var colorScheme
+    
+    private var adaptiveGlowIntensity: Double {
+        let baseIntensity = glowIntensity
+        return (themeManager.isDarkMode || colorScheme == .dark) ? baseIntensity * 0.8 : baseIntensity
+    }
+    
+    func body(content: Content) -> some View {
+        content
+            .shadow(color: color.opacity(adaptiveGlowIntensity), radius: 10)
+            .shadow(color: color.opacity(adaptiveGlowIntensity * 0.5), radius: 20)
+            .onAppear {
+                withAnimation(AppAnimations.wave) {
+                    glowIntensity = 1.0
                 }
             }
-            .padding()
+    }
+}
+
+// MARK: - View Extensions
+extension View {
+    func liquidPulse(color: Color = .blue, intensity: Double = 0.3) -> some View {
+        modifier(LiquidPulseEffect(color: color, intensity: intensity))
+    }
+    
+    func fluidGlow(color: Color) -> some View {
+        modifier(FluidGlowEffect(color: color))
+    }
+    
+    func liquidTransition() -> some View {
+        transition(
+            .asymmetric(
+                insertion: .scale.combined(with: .opacity).animation(AppAnimations.bouncy),
+                removal: .scale.combined(with: .opacity).animation(AppAnimations.smooth)
+            )
+        )
+    }
+    
+    /// Apply the app's adaptive theme with smooth transitions
+    func applyAdaptiveTheme() -> some View {
+        self.modifier(AdaptiveThemeModifier())
+    }
+    
+    /// Apply responsive haptic feedback on tap
+    func responsiveHaptic(_ type: HapticFeedbackType = .light) -> some View {
+        self.onTapGesture {
+            switch type {
+            case .light: AppHaptics.light()
+            case .medium: AppHaptics.medium()
+            case .heavy: AppHaptics.heavy()
+            case .success: AppHaptics.success()
+            case .warning: AppHaptics.warning()
+            case .error: AppHaptics.error()
+            case .selection: AppHaptics.selection()
+            }
+        }
+    }
+    
+    /// Apply liquid glass styling with theme awareness
+    func liquidGlass(cornerRadius: CGFloat = 20) -> some View {
+        LiquidGlassCard(cornerRadius: cornerRadius) {
+            self
         }
     }
 }
 
-#Preview {
+// MARK: - Preview Helpers
+struct LiquidGlassPreview: View {
+    @State private var showDarkMode = false
+    
+    var body: some View {
+        ZStack {
+            GlassmorphismBackground(colors: [.blue, .purple, .pink])
+            
+            VStack(spacing: AppSpacing.lg) {
+                // Theme toggle
+                LiquidGlassCard {
+                    HStack {
+                        Text("Dark Mode Preview")
+                            .font(AppFonts.headline())
+                            .foregroundColor(AppColors.primaryText)
+                        
+                        Spacer()
+                        
+                        Toggle("", isOn: $showDarkMode)
+                            .toggleStyle(SwitchToggleStyle())
+                    }
+                    .padding(AppSpacing.md)
+                }
+                
+                LiquidGlassCard {
+                    VStack(spacing: AppSpacing.sm) {
+                        HStack {
+                            Image(systemName: "sparkles")
+                                .font(.title2)
+                                .foregroundColor(AppColors.accent)
+                            
+                            Text("Enhanced Liquid Glass")
+                                .font(AppFonts.title2(.semibold))
+                                .foregroundColor(AppColors.primaryText)
+                        }
+                        
+                        Text("Adaptive glassmorphism with dark mode support")
+                            .font(AppFonts.caption())
+                            .foregroundColor(AppColors.secondaryText)
+                            .multilineTextAlignment(.center)
+                    }
+                    .padding(AppSpacing.lg)
+                }
+                
+                HStack(spacing: AppSpacing.md) {
+                    LiquidProgressRing(
+                        progress: 1450,
+                        total: 2000,
+                        color: .blue,
+                        size: 100,
+                        lineWidth: 10
+                    )
+                    
+                    LiquidProgressRing(
+                        progress: 85,
+                        total: 100,
+                        color: .green,
+                        size: 100,
+                        lineWidth: 10
+                    )
+                }
+                
+                VStack(spacing: AppSpacing.sm) {
+                    LiquidProgressIndicator(
+                        progress: 0.75,
+                        color: .orange,
+                        height: 8
+                    )
+                    
+                    LiquidProgressIndicator(
+                        progress: 0.45,
+                        color: .purple,
+                        height: 12
+                    )
+                }
+                .frame(maxWidth: 200)
+                
+                HStack(spacing: AppSpacing.sm) {
+                    LiquidGlassButton(
+                        title: "Success",
+                        icon: "checkmark.circle.fill",
+                        color: .green
+                    ) {
+                        AppHaptics.success()
+                    }
+                    
+                    LiquidGlassButton(
+                        title: "Premium",
+                        icon: "crown.fill",
+                        color: .orange
+                    ) {
+                        AppHaptics.medium()
+                    }
+                }
+            }
+            .padding(AppSpacing.md)
+        }
+        .applyAdaptiveTheme()
+        .preferredColorScheme(showDarkMode ? .dark : .light)
+    }
+}
+
+#Preview("Light Mode") {
     LiquidGlassPreview()
+        .preferredColorScheme(.light)
+}
+
+#Preview("Dark Mode") {
+    LiquidGlassPreview()
+        .preferredColorScheme(.dark)
 }

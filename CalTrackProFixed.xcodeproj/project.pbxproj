@@ -9,6 +9,37 @@
 /* Begin PBXBuildFile section */
 		FB0B70B72EAB9C53004E511A /* SwiftData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FB0B70B62EAB9C53004E511A /* SwiftData.framework */; };
 		FB0B70BC2EABA62A004E511A /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB0B70BB2EABA62A004E511A /* AppState.swift */; };
+		083E32155EE40E59C2FD8C2 /* AdvancedUIComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8083E32155EE40E59C2FD8C2 /* AdvancedUIComponents.swift */; };
+		AE2B6BE8FB84C31A3985869 /* ThemeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AE2B6BE8FB84C31A3985869 /* ThemeManager.swift */; };
+		BF05B81BA2140188B8268BD /* AppearanceSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BF05B81BA2140188B8268BD /* AppearanceSettingsView.swift */; };
+		5434CEA3373438E8D5CCECE /* SubscriptionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75434CEA3373438E8D5CCECE /* SubscriptionManager.swift */; };
+		5D0C751E04F40C2AF24ED8D /* PremiumUpgradeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05D0C751E04F40C2AF24ED8D /* PremiumUpgradeView.swift */; };
+		77B5B64E24B4B2FA7BC8277 /* MealPlanningView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 077B5B64E24B4B2FA7BC8277 /* MealPlanningView.swift */; };
+		33234AAA16E4A298D49D1F6 /* AdvancedAnalyticsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 133234AAA16E4A298D49D1F6 /* AdvancedAnalyticsView.swift */; };
+		1F1997AF4EF43DB9B899A05 /* DataExportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71F1997AF4EF43DB9B899A05 /* DataExportView.swift */; };
+		A78AA933E1B4964947ABA20 /* EnhancedFoodDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A78AA933E1B4964947ABA20 /* EnhancedFoodDatabase.swift */; };
+		C0C6FC87EF24241BE8E8550 /* USDAFoodDataService.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC0C6FC87EF24241BE8E8550 /* USDAFoodDataService.swift */; };
+		7619A6E26414A0B8216483B /* OpenFoodFactsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67619A6E26414A0B8216483B /* OpenFoodFactsService.swift */; };
+		63A72A4437E45F9AD1C99B2 /* EdamamService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E63A72A4437E45F9AD1C99B2 /* EdamamService.swift */; };
+		631872F9A04487FB8F85D57 /* EnhancedFoodSearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6631872F9A04487FB8F85D57 /* EnhancedFoodSearchView.swift */; };
+		F1CC7617B504A7397B0D75F /* SearchFiltersView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF1CC7617B504A7397B0D75F /* SearchFiltersView.swift */; };
+		CB8322BAB0D42A695D4B4E8 /* EnhancedFoodDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1CB8322BAB0D42A695D4B4E8 /* EnhancedFoodDetailView.swift */; };
+		3FA8343FBE943BBB2E53D1E /* HealthKitManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3FA8343FBE943BBB2E53D1E /* HealthKitManager.swift */; };
+		206960557BF4D418D53D5F0 /* HealthIntegrationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4206960557BF4D418D53D5F0 /* HealthIntegrationView.swift */; };
+		B1C995EDBD94EB6990DAF5B /* FoodRecognition.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB1C995EDBD94EB6990DAF5B /* FoodRecognition.swift */; };
+		C8CABA136284C6D9580EA56 /* AIFoodCameraView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC8CABA136284C6D9580EA56 /* AIFoodCameraView.swift */; };
+		6884B0F346F4BD6A2BC81EC /* AIFoodRecognitionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26884B0F346F4BD6A2BC81EC /* AIFoodRecognitionView.swift */; };
+		D54AC4F86C743E6A3F2FF51 /* FoodRecognitionResultView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD54AC4F86C743E6A3F2FF51 /* FoodRecognitionResultView.swift */; };
+		4785903289B4F9288F4338D /* Goal.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14785903289B4F9288F4338D /* Goal.swift */; };
+		A0C8B6527F24382935C9FCD /* Achievement.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0C8B6527F24382935C9FCD /* Achievement.swift */; };
+		5A0343B6A0242509F302771 /* SmartGoalsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25A0343B6A0242509F302771 /* SmartGoalsView.swift */; };
+		7980774AEAE46D2A930E349 /* GoalCreatorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7980774AEAE46D2A930E349 /* GoalCreatorView.swift */; };
+		163DC2841F44F0698BC58FC /* GoalDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0163DC2841F44F0698BC58FC /* GoalDetailView.swift */; };
+		DEF3975A1E3490D8D64BE70 /* AchievementDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DEF3975A1E3490D8D64BE70 /* AchievementDetailView.swift */; };
+		F89B542D41D435F80FA1603 /* RecipeBuilderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F89B542D41D435F80FA1603 /* RecipeBuilderView.swift */; };
+		4BDF6395DD84E9995D787A1 /* RecipeLibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4BDF6395DD84E9995D787A1 /* RecipeLibraryView.swift */; };
+		F7918A6E341471E96592DB4 /* EnhancedInsightsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F7918A6E341471E96592DB4 /* EnhancedInsightsView.swift */; };
+		7ACF8AA0784475D88719417 /* LiquidGlassComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97ACF8AA0784475D88719417 /* LiquidGlassComponents.swift */; };
 		FB0B70BE2EABA64D004E511A /* FoodEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB0B70BD2EABA64D004E511A /* FoodEntry.swift */; };
 		FB0B70C02EABA660004E511A /* Recipe.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB0B70BF2EABA660004E511A /* Recipe.swift */; };
 		FB0B70C22EABA66A004E511A /* UserProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB0B70C12EABA66A004E511A /* UserProfile.swift */; };
@@ -59,6 +90,37 @@
 		FB0B70A22EAB9B09004E511A /* CalTrackProFixedUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CalTrackProFixedUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		FB0B70B62EAB9C53004E511A /* SwiftData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftData.framework; path = System/Library/Frameworks/SwiftData.framework; sourceTree = SDKROOT; };
 		FB0B70BB2EABA62A004E511A /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
+		8083E32155EE40E59C2FD8C2 /* AdvancedUIComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Models/Views/AdvancedUIComponents.swift"; sourceTree = "<group>"; };
+		7AE2B6BE8FB84C31A3985869 /* ThemeManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Services/ThemeManager.swift"; sourceTree = "<group>"; };
+		8BF05B81BA2140188B8268BD /* AppearanceSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Models/Views/AppearanceSettingsView.swift"; sourceTree = "<group>"; };
+		75434CEA3373438E8D5CCECE /* SubscriptionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Services/SubscriptionManager.swift"; sourceTree = "<group>"; };
+		05D0C751E04F40C2AF24ED8D /* PremiumUpgradeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Models/Views/PremiumUpgradeView.swift"; sourceTree = "<group>"; };
+		077B5B64E24B4B2FA7BC8277 /* MealPlanningView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Models/Views/MealPlanningView.swift"; sourceTree = "<group>"; };
+		133234AAA16E4A298D49D1F6 /* AdvancedAnalyticsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Models/Views/AdvancedAnalyticsView.swift"; sourceTree = "<group>"; };
+		71F1997AF4EF43DB9B899A05 /* DataExportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Models/Views/DataExportView.swift"; sourceTree = "<group>"; };
+		3A78AA933E1B4964947ABA20 /* EnhancedFoodDatabase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Services/EnhancedFoodDatabase.swift"; sourceTree = "<group>"; };
+		DC0C6FC87EF24241BE8E8550 /* USDAFoodDataService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Services/USDAFoodDataService.swift"; sourceTree = "<group>"; };
+		67619A6E26414A0B8216483B /* OpenFoodFactsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Services/OpenFoodFactsService.swift"; sourceTree = "<group>"; };
+		E63A72A4437E45F9AD1C99B2 /* EdamamService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Services/EdamamService.swift"; sourceTree = "<group>"; };
+		6631872F9A04487FB8F85D57 /* EnhancedFoodSearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Models/Views/EnhancedFoodSearchView.swift"; sourceTree = "<group>"; };
+		DF1CC7617B504A7397B0D75F /* SearchFiltersView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Models/Views/SearchFiltersView.swift"; sourceTree = "<group>"; };
+		1CB8322BAB0D42A695D4B4E8 /* EnhancedFoodDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Models/Views/EnhancedFoodDetailView.swift"; sourceTree = "<group>"; };
+		A3FA8343FBE943BBB2E53D1E /* HealthKitManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Models/HealthKitManager.swift"; sourceTree = "<group>"; };
+		4206960557BF4D418D53D5F0 /* HealthIntegrationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Models/Views/HealthIntegrationView.swift"; sourceTree = "<group>"; };
+		CB1C995EDBD94EB6990DAF5B /* FoodRecognition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Models/FoodRecognition.swift"; sourceTree = "<group>"; };
+		EC8CABA136284C6D9580EA56 /* AIFoodCameraView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Models/Views/AIFoodCameraView.swift"; sourceTree = "<group>"; };
+		26884B0F346F4BD6A2BC81EC /* AIFoodRecognitionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Models/Views/AIFoodRecognitionView.swift"; sourceTree = "<group>"; };
+		FD54AC4F86C743E6A3F2FF51 /* FoodRecognitionResultView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Models/Views/FoodRecognitionResultView.swift"; sourceTree = "<group>"; };
+		14785903289B4F9288F4338D /* Goal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Models/Goal.swift"; sourceTree = "<group>"; };
+		DA0C8B6527F24382935C9FCD /* Achievement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Models/Achievement.swift"; sourceTree = "<group>"; };
+		25A0343B6A0242509F302771 /* SmartGoalsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Models/Views/SmartGoalsView.swift"; sourceTree = "<group>"; };
+		E7980774AEAE46D2A930E349 /* GoalCreatorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Models/Views/GoalCreatorView.swift"; sourceTree = "<group>"; };
+		0163DC2841F44F0698BC58FC /* GoalDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Models/Views/GoalDetailView.swift"; sourceTree = "<group>"; };
+		0DEF3975A1E3490D8D64BE70 /* AchievementDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Models/Views/AchievementDetailView.swift"; sourceTree = "<group>"; };
+		4F89B542D41D435F80FA1603 /* RecipeBuilderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Models/Views/RecipeBuilderView.swift"; sourceTree = "<group>"; };
+		D4BDF6395DD84E9995D787A1 /* RecipeLibraryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Models/Views/RecipeLibraryView.swift"; sourceTree = "<group>"; };
+		2F7918A6E341471E96592DB4 /* EnhancedInsightsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "EnhancedInsightsView.swift"; sourceTree = "<group>"; };
+		97ACF8AA0784475D88719417 /* LiquidGlassComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LiquidGlassComponents.swift"; sourceTree = "<group>"; };
 		FB0B70BD2EABA64D004E511A /* FoodEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodEntry.swift; sourceTree = "<group>"; };
 		FB0B70BF2EABA660004E511A /* Recipe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Recipe.swift; sourceTree = "<group>"; };
 		FB0B70C12EABA66A004E511A /* UserProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserProfile.swift; sourceTree = "<group>"; };
@@ -184,6 +246,27 @@
 				FB0B70C52EABA6F5004E511A /* HomeView.swift */,
 				FB0B70C72EABA707004E511A /* DiaryView.swift */,
 				FB0B70C92EABA7B4004E511A /* InsightsView.swift */,
+				2F7918A6E341471E96592DB4 /* EnhancedInsightsView.swift */,
+				97ACF8AA0784475D88719417 /* LiquidGlassComponents.swift */,
+				8083E32155EE40E59C2FD8C2 /* AdvancedUIComponents.swift */,
+				8BF05B81BA2140188B8268BD /* AppearanceSettingsView.swift */,
+				05D0C751E04F40C2AF24ED8D /* PremiumUpgradeView.swift */,
+				077B5B64E24B4B2FA7BC8277 /* MealPlanningView.swift */,
+				133234AAA16E4A298D49D1F6 /* AdvancedAnalyticsView.swift */,
+				71F1997AF4EF43DB9B899A05 /* DataExportView.swift */,
+				6631872F9A04487FB8F85D57 /* EnhancedFoodSearchView.swift */,
+				DF1CC7617B504A7397B0D75F /* SearchFiltersView.swift */,
+				1CB8322BAB0D42A695D4B4E8 /* EnhancedFoodDetailView.swift */,
+				4206960557BF4D418D53D5F0 /* HealthIntegrationView.swift */,
+				EC8CABA136284C6D9580EA56 /* AIFoodCameraView.swift */,
+				26884B0F346F4BD6A2BC81EC /* AIFoodRecognitionView.swift */,
+				FD54AC4F86C743E6A3F2FF51 /* FoodRecognitionResultView.swift */,
+				25A0343B6A0242509F302771 /* SmartGoalsView.swift */,
+				E7980774AEAE46D2A930E349 /* GoalCreatorView.swift */,
+				0163DC2841F44F0698BC58FC /* GoalDetailView.swift */,
+				0DEF3975A1E3490D8D64BE70 /* AchievementDetailView.swift */,
+				4F89B542D41D435F80FA1603 /* RecipeBuilderView.swift */,
+				D4BDF6395DD84E9995D787A1 /* RecipeLibraryView.swift */,
 				FB0B70CB2EABA7C8004E511A /* ProfileView.swift */,
 				FB0B70CD2EABA7DB004E511A /* OnboardingView.swift */,
 				FB0B70CF2EABA7E7004E511A /* BarcodeScannerView.swift */,
@@ -379,6 +462,37 @@
 				FB0B711A2EAEF8A1004E511A /* FoodSearchView.swift in Sources */,
 				FB0B70CE2EABA7DB004E511A /* OnboardingView.swift in Sources */,
 				FB0B70BC2EABA62A004E511A /* AppState.swift in Sources */,
+				083E32155EE40E59C2FD8C2 /* AdvancedUIComponents.swift in Sources */,
+				AE2B6BE8FB84C31A3985869 /* ThemeManager.swift in Sources */,
+				BF05B81BA2140188B8268BD /* AppearanceSettingsView.swift in Sources */,
+				5434CEA3373438E8D5CCECE /* SubscriptionManager.swift in Sources */,
+				5D0C751E04F40C2AF24ED8D /* PremiumUpgradeView.swift in Sources */,
+				77B5B64E24B4B2FA7BC8277 /* MealPlanningView.swift in Sources */,
+				33234AAA16E4A298D49D1F6 /* AdvancedAnalyticsView.swift in Sources */,
+				1F1997AF4EF43DB9B899A05 /* DataExportView.swift in Sources */,
+				A78AA933E1B4964947ABA20 /* EnhancedFoodDatabase.swift in Sources */,
+				C0C6FC87EF24241BE8E8550 /* USDAFoodDataService.swift in Sources */,
+				7619A6E26414A0B8216483B /* OpenFoodFactsService.swift in Sources */,
+				63A72A4437E45F9AD1C99B2 /* EdamamService.swift in Sources */,
+				631872F9A04487FB8F85D57 /* EnhancedFoodSearchView.swift in Sources */,
+				F1CC7617B504A7397B0D75F /* SearchFiltersView.swift in Sources */,
+				CB8322BAB0D42A695D4B4E8 /* EnhancedFoodDetailView.swift in Sources */,
+				3FA8343FBE943BBB2E53D1E /* HealthKitManager.swift in Sources */,
+				206960557BF4D418D53D5F0 /* HealthIntegrationView.swift in Sources */,
+				B1C995EDBD94EB6990DAF5B /* FoodRecognition.swift in Sources */,
+				C8CABA136284C6D9580EA56 /* AIFoodCameraView.swift in Sources */,
+				6884B0F346F4BD6A2BC81EC /* AIFoodRecognitionView.swift in Sources */,
+				D54AC4F86C743E6A3F2FF51 /* FoodRecognitionResultView.swift in Sources */,
+				4785903289B4F9288F4338D /* Goal.swift in Sources */,
+				A0C8B6527F24382935C9FCD /* Achievement.swift in Sources */,
+				5A0343B6A0242509F302771 /* SmartGoalsView.swift in Sources */,
+				7980774AEAE46D2A930E349 /* GoalCreatorView.swift in Sources */,
+				163DC2841F44F0698BC58FC /* GoalDetailView.swift in Sources */,
+				DEF3975A1E3490D8D64BE70 /* AchievementDetailView.swift in Sources */,
+				F89B542D41D435F80FA1603 /* RecipeBuilderView.swift in Sources */,
+				4BDF6395DD84E9995D787A1 /* RecipeLibraryView.swift in Sources */,
+				F7918A6E341471E96592DB4 /* EnhancedInsightsView.swift in Sources */,
+				7ACF8AA0784475D88719417 /* LiquidGlassComponents.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

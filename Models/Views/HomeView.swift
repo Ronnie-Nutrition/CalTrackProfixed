@@ -28,7 +28,7 @@ struct HomeView: View {
                     
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 12) {
-                            QuickAddButton(icon: "camera.fill", title: "Photo", color: .blue) {
+                            QuickAddButton(icon: "camera.viewfinder", title: "AI Photo", color: .blue) {
                                 showingCamera = true
                             }
                             
@@ -60,7 +60,7 @@ struct HomeView: View {
             .navigationTitle("Track")
             .navigationBarTitleDisplayMode(.large)
             .sheet(isPresented: $showingCamera) {
-                CameraView(selectedMealType: $selectedMealType)
+                AIFoodRecognitionView()
             }
             .sheet(isPresented: $showingImagePicker) {
                 ImagePicker(selectedImage: $selectedImage)
