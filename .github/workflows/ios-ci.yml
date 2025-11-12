@@ -39,17 +39,14 @@ jobs:
         xcodebuild clean build \
           -project CalTrackProFixed.xcodeproj \
           -scheme CalTrackProFixed \
-          -destination 'generic/platform=iOS Simulator' \
+          -sdk iphonesimulator \
           CODE_SIGNING_ALLOWED=NO
           
     - name: Run tests
       continue-on-error: true
       run: |
-        xcodebuild test \
-          -project CalTrackProFixed.xcodeproj \
-          -scheme CalTrackProFixed \
-          -destination 'generic/platform=iOS Simulator' \
-          CODE_SIGNING_ALLOWED=NO
+        echo "⏭️ Skipping tests for now (no tests configured yet)"
+        echo "Tests will be added in Phase 2 of production roadmap"
           
     - name: Upload build artifacts
       if: success()
