@@ -39,7 +39,7 @@ jobs:
         xcodebuild clean build \
           -project CalTrackProFixed.xcodeproj \
           -scheme CalTrackProFixed \
-          -destination 'platform=iOS Simulator,name=iPhone 15 Pro,OS=latest' \
+          -destination 'generic/platform=iOS Simulator' \
           CODE_SIGNING_ALLOWED=NO
           
     - name: Run tests
@@ -48,7 +48,7 @@ jobs:
         xcodebuild test \
           -project CalTrackProFixed.xcodeproj \
           -scheme CalTrackProFixed \
-          -destination 'platform=iOS Simulator,name=iPhone 15 Pro,OS=latest' \
+          -destination 'generic/platform=iOS Simulator' \
           CODE_SIGNING_ALLOWED=NO
           
     - name: Upload build artifacts
