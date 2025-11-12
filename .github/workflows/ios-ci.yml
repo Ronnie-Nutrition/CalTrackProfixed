@@ -1,101 +1,29 @@
-name: iOS CI/CD Pipeline
+# iOS CI/CD Pipeline - TEMPORARILY DISABLED
+# 
+# This workflow is disabled while we implement core services.
+# Will be re-enabled in Phase 2 after:
+# - FoodRecognitionService is implemented
+# - BarcodeService is implemented  
+# - DatabaseService is implemented
+# - Basic tests are written
+#
+# To re-enable: Uncomment the sections below
 
+name: iOS CI/CD Pipeline (Disabled)
+
+# Disabled - no triggers
 on:
-  push:
-    branches: [ main, develop ]
-  pull_request:
-    branches: [ main ]
+  workflow_dispatch:  # Only runs manually
 
 jobs:
-  build-and-test:
-    name: Build and Test
-    runs-on: macos-latest
+  placeholder:
+    name: Placeholder Job
+    runs-on: ubuntu-latest
     
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Setup Xcode
-      uses: maxim-lobanov/setup-xcode@v1
-      with:
-        xcode-version: latest-stable
-        
-    - name: Install SwiftLint
-      run: brew install swiftlint
-      
-    - name: Install SwiftFormat
-      run: brew install swiftformat
-        
-    - name: Cache derived data
-      uses: actions/cache@v4
-      with:
-        path: ~/Library/Developer/Xcode/DerivedData
-        key: ${{ runner.os }}-derived-data-${{ hashFiles('**/*.pbxproj') }}
-        restore-keys: |
-          ${{ runner.os }}-derived-data-
-          
-    - name: Build project
+    - name: CI/CD Temporarily Disabled
       run: |
-        xcodebuild clean build \
-          -project CalTrackProFixed.xcodeproj \
-          -scheme CalTrackProFixed \
-          -sdk iphoneos \
-          -configuration Debug \
-          CODE_SIGNING_ALLOWED=NO \
-          ONLY_ACTIVE_ARCH=NO
-          
-    - name: Run tests
-      continue-on-error: true
-      run: |
-        echo "⏭️ Skipping tests for now (no tests configured yet)"
-        echo "Tests will be added in Phase 2 of production roadmap"
-          
-    - name: Upload build artifacts
-      if: success()
-      uses: actions/upload-artifact@v4
-      with:
-        name: build-artifacts-${{ github.sha }}
-        path: ~/Library/Developer/Xcode/DerivedData
-        retention-days: 7
-
-  code-quality:
-    name: Code Quality Checks
-    runs-on: macos-latest
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Setup Xcode
-      uses: maxim-lobanov/setup-xcode@v1
-      with:
-        xcode-version: latest-stable
-        
-    - name: Install SwiftLint
-      run: brew install swiftlint
-      
-    - name: Install SwiftFormat
-      run: brew install swiftformat
-        
-    - name: SwiftLint
-      continue-on-error: true
-      run: swiftlint || echo "SwiftLint found issues but continuing"
-        
-    - name: SwiftFormat check
-      continue-on-error: true
-      run: swiftformat --lint . || echo "SwiftFormat found issues but continuing"
-
-  notify-status:
-    name: Notify Build Status
-    runs-on: macos-latest
-    needs: [build-and-test, code-quality]
-    if: always()
-    
-    steps:
-    - name: Check build result
-      run: |
-        if [ "${{ needs.build-and-test.result }}" == "success" ]; then
-          echo "✅ Build passed successfully!"
-        else
-          echo "❌ Build failed. Check the logs above."
-        fi
+        echo "🚧 CI/CD is temporarily disabled"
+        echo "Focus: Implementing core app functionality"
+        echo "Status: Building FoodRecognitionService, BarcodeService, DatabaseService"
+        echo "Will re-enable after core services are complete"
