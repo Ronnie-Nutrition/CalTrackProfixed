@@ -80,13 +80,11 @@ jobs:
         
     - name: SwiftLint
       continue-on-error: true
-      run: |
-        swiftlint || echo "⚠️ SwiftLint found issues but continuing..."
+      run: swiftlint || echo "SwiftLint found issues but continuing"
         
     - name: SwiftFormat check
       continue-on-error: true
-      run: |
-        swiftformat --lint . || echo "⚠️ SwiftFormat found issues but continuing..."
+      run: swiftformat --lint . || echo "SwiftFormat found issues but continuing"
 
   notify-status:
     name: Notify Build Status
@@ -95,12 +93,10 @@ jobs:
     if: always()
     
     steps:
-    - name: Build Success
-      if: needs.build-and-test.result == 'success'
-      run: echo "✅ Build passed successfully! (Code quality warnings can be fixed later)"
-      
-    - name: Build Failed
-      if: needs.build-and-test.result == 'failure'
-      run: echo "❌ Build failed. Check the logs above."
-      if: needs.build-and-test.result == 'failure' || needs.code-quality.result == 'failure'
-      run: echo "❌ Build or tests failed. Check the logs above."
+    - name: Check build result
+      run: |
+        if [ "${{ needs.build-and-test.result }}" == "success" ]; then
+          echo "✅ Build passed successfully!"
+        else
+          echo "❌ Build failed. Check the logs above."
+        fi
