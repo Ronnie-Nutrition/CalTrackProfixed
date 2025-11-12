@@ -39,8 +39,10 @@ jobs:
         xcodebuild clean build \
           -project CalTrackProFixed.xcodeproj \
           -scheme CalTrackProFixed \
-          -sdk iphonesimulator \
-          CODE_SIGNING_ALLOWED=NO
+          -sdk iphoneos \
+          -configuration Debug \
+          CODE_SIGNING_ALLOWED=NO \
+          ONLY_ACTIVE_ARCH=NO
           
     - name: Run tests
       continue-on-error: true
