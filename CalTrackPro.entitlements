@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+    CALTRACKPRO ENTITLEMENTS
+    
+    In Xcode: Select your target → Signing & Capabilities → Add these capabilities
+    This file is auto-generated when you add capabilities in Xcode.
+    
+    Keep this as reference for required capabilities.
+-->
+<plist version="1.0">
+<dict>
+    <!-- ==================== HEALTHKIT ==================== -->
+    <!-- Required for Apple Health integration -->
+    <key>com.apple.developer.healthkit</key>
+    <true/>
+    
+    <key>com.apple.developer.healthkit.access</key>
+    <array>
+        <!-- Read/Write nutrition data -->
+        <string>health-records</string>
+    </array>
+    
+    <key>com.apple.developer.healthkit.background-delivery</key>
+    <true/>
+    
+    <!-- ==================== SIGN IN WITH APPLE ==================== -->
+    <!-- Required for Apple authentication -->
+    <key>com.apple.developer.applesignin</key>
+    <array>
+        <string>Default</string>
+    </array>
+    
+    <!-- ==================== ICLOUD / CLOUDKIT ==================== -->
+    <!-- Required for cross-device sync -->
+    <key>com.apple.developer.icloud-container-identifiers</key>
+    <array>
+        <string>iCloud.com.ronnienutrition.CalTrackPro</string>
+    </array>
+    
+    <key>com.apple.developer.icloud-services</key>
+    <array>
+        <string>CloudKit</string>
+    </array>
+    
+    <key>com.apple.developer.ubiquity-kvstore-identifier</key>
+    <string>$(TeamIdentifierPrefix)com.ronnienutrition.CalTrackPro</string>
+    
+    <!-- ==================== PUSH NOTIFICATIONS ==================== -->
+    <!-- Required for CloudKit sync notifications -->
+    <key>aps-environment</key>
+    <string>production</string>
+    
+    <!-- ==================== APP GROUPS (Optional) ==================== -->
+    <!-- Enable if adding widgets or extensions -->
+    <!--
+    <key>com.apple.security.application-groups</key>
+    <array>
+        <string>group.com.ronnienutrition.CalTrackPro</string>
+    </array>
+    -->
+</dict>
+</plist>

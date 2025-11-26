@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+    INFO.PLIST ADDITIONS FOR CALTRACKPRO
+    
+    Add these keys to your existing Info.plist file in Xcode.
+    These are REQUIRED for App Store submission when using Camera, HealthKit, etc.
+-->
+<plist version="1.0">
+<dict>
+    <!-- ==================== CAMERA ==================== -->
+    <key>NSCameraUsageDescription</key>
+    <string>CalTrackPro uses your camera to scan food items and barcodes for automatic nutrition tracking.</string>
+    
+    <!-- ==================== PHOTO LIBRARY ==================== -->
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>CalTrackPro needs access to your photo library to analyze food photos for nutrition information.</string>
+    
+    <key>NSPhotoLibraryAddUsageDescription</key>
+    <string>CalTrackPro can save food photos to your library for your records.</string>
+    
+    <!-- ==================== HEALTHKIT ==================== -->
+    <key>NSHealthShareUsageDescription</key>
+    <string>CalTrackPro reads your health data including weight, active calories, and step count to provide personalized nutrition recommendations and track your overall wellness progress.</string>
+    
+    <key>NSHealthUpdateUsageDescription</key>
+    <string>CalTrackPro saves your nutrition data (calories, protein, carbs, fat) to Apple Health so you can view all your health information in one place.</string>
+    
+    <!-- Required HealthKit entitlement indicator -->
+    <key>UIRequiredDeviceCapabilities</key>
+    <array>
+        <string>healthkit</string>
+        <string>arm64</string>
+    </array>
+    
+    <!-- ==================== APP TRANSPORT SECURITY ==================== -->
+    <!-- Only needed if you're hitting non-HTTPS endpoints (not recommended) -->
+    <!--
+    <key>NSAppTransportSecurity</key>
+    <dict>
+        <key>NSAllowsArbitraryLoads</key>
+        <false/>
+    </dict>
+    -->
+    
+    <!-- ==================== BACKGROUND MODES ==================== -->
+    <key>UIBackgroundModes</key>
+    <array>
+        <!-- For CloudKit sync notifications -->
+        <string>remote-notification</string>
+        <!-- For HealthKit background delivery -->
+        <string>processing</string>
+    </array>
+    
+    <!-- ==================== APP CATEGORY ==================== -->
+    <key>LSApplicationCategoryType</key>
+    <string>public.app-category.healthcare-fitness</string>
+    
+    <!-- ==================== SUPPORTED ORIENTATIONS ==================== -->
+    <key>UISupportedInterfaceOrientations</key>
+    <array>
+        <string>UIInterfaceOrientationPortrait</string>
+    </array>
+    
+    <key>UISupportedInterfaceOrientations~ipad</key>
+    <array>
+        <string>UIInterfaceOrientationPortrait</string>
+        <string>UIInterfaceOrientationPortraitUpsideDown</string>
+        <string>UIInterfaceOrientationLandscapeLeft</string>
+        <string>UIInterfaceOrientationLandscapeRight</string>
+    </array>
+    
+    <!-- ==================== LAUNCH STORYBOARD ==================== -->
+    <key>UILaunchStoryboardName</key>
+    <string>LaunchScreen</string>
+    
+    <!-- ==================== STATUS BAR ==================== -->
+    <key>UIViewControllerBasedStatusBarAppearance</key>
+    <true/>
+    
+    <!-- ==================== MINIMUM iOS VERSION ==================== -->
+    <key>MinimumOSVersion</key>
+    <string>17.0</string>
+    
+    <!-- ==================== SUPPORTS MULTIPLE WINDOWS (iPad) ==================== -->
+    <key>UIApplicationSupportsMultipleScenes</key>
+    <true/>
+</dict>
+</plist>

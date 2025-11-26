@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- Export destination -->
+    <key>destination</key>
+    <string>export</string>
+    
+    <!-- Distribution method: app-store, ad-hoc, enterprise, development -->
+    <key>method</key>
+    <string>app-store</string>
+    
+    <!-- Provisioning profiles - UPDATE WITH YOUR ACTUAL PROFILE -->
+    <key>provisioningProfiles</key>
+    <dict>
+        <!-- Key: Bundle ID, Value: Provisioning Profile Name -->
+        <key>com.ronnienutrition.CalTrackPro</key>
+        <string>CalTrackPro App Store Distribution</string>
+    </dict>
+    
+    <!-- Signing certificate type -->
+    <key>signingCertificate</key>
+    <string>Apple Distribution</string>
+    
+    <!-- Signing style: automatic or manual -->
+    <key>signingStyle</key>
+    <string>automatic</string>
+    
+    <!-- Strip Swift symbols to reduce binary size -->
+    <key>stripSwiftSymbols</key>
+    <true/>
+    
+    <!-- Your Apple Developer Team ID - UPDATE THIS -->
+    <key>teamID</key>
+    <string>YOUR_TEAM_ID</string>
+    
+    <!-- App thinning: none, thin-for-all-variants -->
+    <key>thinning</key>
+    <string>&lt;none&gt;</string>
+    
+    <!-- Upload symbols for crash reporting -->
+    <key>uploadSymbols</key>
+    <true/>
+    
+    <!-- Upload bitcode (deprecated but sometimes needed) -->
+    <key>uploadBitcode</key>
+    <false/>
+    
+    <!-- Generate App Store information -->
+    <key>generateAppStoreInformation</key>
+    <true/>
+    
+    <!-- Manage App Version and Build Number -->
+    <key>manageAppVersionAndBuildNumber</key>
+    <true/>
+</dict>
+</plist>
