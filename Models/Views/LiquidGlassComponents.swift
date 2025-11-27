@@ -194,12 +194,12 @@ struct LiquidGlassButton: View {
             HStack(spacing: 8) {
                 if let icon = icon {
                     Image(systemName: icon)
-                        .font(AppFonts.caption(.medium))
+                        .font(AppFonts.caption(weight: .medium))
                         .foregroundStyle(adaptiveIconGradient)
                 }
                 
                 Text(title)
-                    .font(AppFonts.caption(.medium))
+                    .font(AppFonts.caption(weight: .medium))
                     .foregroundColor(AppColors.primaryText)
             }
             .padding(.horizontal, AppSpacing.md)

@@ -463,9 +463,8 @@ struct DataExportView: View {
         case .recipes:
             return recipes.count
         case .goals:
-            return goals.filter {
-                $0.createdDate >= startDate && $0.createdDate <= endDate
-            }.count
+            // Return total goals count (date filtering done at export time)
+            return goals.count
         case .complete:
             let nutritionCount = foodEntries.filter { 
                 $0.timestamp >= startDate && $0.timestamp <= endDate 
@@ -556,7 +555,7 @@ struct DataExportView: View {
             dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
             let dateString = dateFormatter.string(from: entry.timestamp)
             
-            csvContent += "\(dateString),\(entry.foodName),\(entry.totalCalories),\(entry.totalProtein),\(entry.totalCarbs),\(entry.totalFat),\(entry.mealType.rawValue)\n"
+            csvContent += "\(dateString),\(entry.name),\(entry.totalCalories),\(entry.totalProtein),\(entry.totalCarbs),\(entry.totalFat),\(entry.mealType.rawValue)\n"
         }
         
         do {
@@ -913,7 +912,7 @@ struct ExportEntry: Codable {
     init(from foodEntry: FoodEntry) {
         self.id = foodEntry.id.uuidString
         self.timestamp = foodEntry.timestamp
-        self.foodName = foodEntry.foodName
+        self.foodName = foodEntry.name
         self.calories = foodEntry.totalCalories
         self.protein = foodEntry.totalProtein
         self.carbs = foodEntry.totalCarbs

@@ -75,8 +75,8 @@ class HealthKitManager: ObservableObject {
             case .walking: return "Walking"
             case .swimming: return "Swimming"
             case .yoga: return "Yoga"
-            case .strength: return "Strength Training"
-            case .hiit: return "HIIT"
+            case .traditionalStrengthTraining: return "Strength Training"
+            case .highIntensityIntervalTraining: return "HIIT"
             case .dance: return "Dance"
             case .pilates: return "Pilates"
             default: return "Workout"
@@ -90,8 +90,8 @@ class HealthKitManager: ObservableObject {
             case .walking: return "figure.walk"
             case .swimming: return "figure.pool.swim"
             case .yoga: return "figure.yoga"
-            case .strength: return "dumbbell.fill"
-            case .hiit: return "flame.fill"
+            case .traditionalStrengthTraining: return "dumbbell.fill"
+            case .highIntensityIntervalTraining: return "flame.fill"
             case .dance: return "music.note"
             case .pilates: return "figure.pilates"
             default: return "figure.mixed.cardio"
@@ -105,8 +105,8 @@ class HealthKitManager: ObservableObject {
             case .walking: return .green
             case .swimming: return .cyan
             case .yoga: return .purple
-            case .strength: return .red
-            case .hiit: return .pink
+            case .traditionalStrengthTraining: return .red
+            case .highIntensityIntervalTraining: return .pink
             case .dance: return .yellow
             case .pilates: return .indigo
             default: return .gray

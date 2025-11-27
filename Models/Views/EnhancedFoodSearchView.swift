@@ -235,7 +235,7 @@ struct EnhancedFoodSearchView: View {
         VStack(spacing: 16) {
             Spacer()
             
-            LiquidWaveAnimation()
+            LiquidWaveAnimation(height: 80, color: .blue)
                 .frame(width: 80, height: 80)
             
             Text("Searching across multiple databases...")

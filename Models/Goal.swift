@@ -203,7 +203,7 @@ final class Goal {
                 name: "Daily Calorie Target",
                 goalDescription: "Maintain your daily calorie goal for optimal health",
                 type: .calorieTarget,
-                target: profile.calorieGoal,
+                target: profile.dailyCalorieTarget,
                 unit: "cal",
                 timeFrame: .daily,
                 endDate: Calendar.current.date(byAdding: .month, value: 1, to: Date()) ?? Date(),

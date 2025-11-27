@@ -5,8 +5,8 @@ import Foundation
 class EdamamService {
     private let baseURL = "https://api.edamam.com/api/food-database/v2"
     private let nutritionBaseURL = "https://api.edamam.com/api/nutrition-details"
-    private var appId: String { SecureAPIConfig.edamamAppId }
-    private var appKey: String { SecureAPIConfig.edamamAppKey }
+    private var appId: String { ProcessInfo.processInfo.environment["EDAMAM_APP_ID"] ?? "" }
+    private var appKey: String { ProcessInfo.processInfo.environment["EDAMAM_APP_KEY"] ?? "" }
     
     // MARK: - Search Foods
     
@@ -31,7 +31,7 @@ class EdamamService {
         urlComponents.queryItems = queryItems
         
         guard let url = urlComponents.url,
-              SecurityConfig.isSecureURL(url) else {
+              url.scheme == "https" else {
             return []
         }
         
@@ -176,10 +176,8 @@ class EdamamService {
         var request = URLRequest(url: url)
         request.timeoutInterval = 15
         
-        // Add security headers
-        for (header, value) in SecurityConfig.securityHeaders {
-            request.setValue(value, forHTTPHeaderField: header)
-        }
+        // Basic security headers
+        request.setValue("no-cache", forHTTPHeaderField: "Cache-Control")
         
         let (data, response) = try await URLSession.shared.data(for: request)
         

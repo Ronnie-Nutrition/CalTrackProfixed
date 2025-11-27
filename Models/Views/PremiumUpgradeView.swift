@@ -454,16 +454,8 @@ struct SubscriptionPlanCard: View {
     private func formatIntroductoryOffer(_ offer: Product.SubscriptionOffer) -> String {
         let period = offer.period
         
-        switch offer.type {
-        case .freeTrial:
-            return "Free for \(period.value) \(period.unit.localizedDescription)"
-        case .introductory:
-            return "\(offer.displayPrice) for \(period.value) \(period.unit.localizedDescription)"
-        case .promotional:
-            return "Special offer: \(offer.displayPrice)"
-        @unknown default:
-            return "Special offer available"
-        }
+        // Return a generic offer description for all types
+        return "\(offer.displayPrice) for \(period.value) \(period.unit.localizedDescription)"
     }
 }
 

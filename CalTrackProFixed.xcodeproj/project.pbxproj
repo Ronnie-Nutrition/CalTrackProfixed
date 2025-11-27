@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B9A2BE55491B4140BCEEE6DE /* AIMealPlanningService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 907B801AEF7240C798D15570 /* AIMealPlanningService.swift */; };
+		7F079C057ECF4C4485F91CAE /* AIMealPlannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D118C24087D84B469B2C8564 /* AIMealPlannerView.swift */; };
 		FB0B70B72EAB9C53004E511A /* SwiftData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FB0B70B62EAB9C53004E511A /* SwiftData.framework */; };
 		FB0B70BC2EABA62A004E511A /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB0B70BB2EABA62A004E511A /* AppState.swift */; };
 		083E32155EE40E59C2FD8C2 /* AdvancedUIComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8083E32155EE40E59C2FD8C2 /* AdvancedUIComponents.swift */; };
@@ -85,6 +87,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		907B801AEF7240C798D15570 /* AIMealPlanningService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Services/AIMealPlanningService.swift"; sourceTree = "<group>"; };
+		D118C24087D84B469B2C8564 /* AIMealPlannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Models/Views/AIMealPlannerView.swift"; sourceTree = "<group>"; };
 		FB0B70892EAB9AFC004E511A /* CalTrackProFixed.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CalTrackProFixed.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		FB0B70982EAB9B09004E511A /* CalTrackProFixedTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CalTrackProFixedTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		FB0B70A22EAB9B09004E511A /* CalTrackProFixedUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CalTrackProFixedUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -436,6 +440,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B9A2BE55491B4140BCEEE6DE /* AIMealPlanningService.swift in Sources */,
+				7F079C057ECF4C4485F91CAE /* AIMealPlannerView.swift in Sources */,
 				FB0B70DE2EABA84F004E511A /* SettingsView.swift in Sources */,
 				FB0B70C82EABA707004E511A /* DiaryView.swift in Sources */,
 				FB0B70D62EABA811004E511A /* EditProfileView.swift in Sources */,

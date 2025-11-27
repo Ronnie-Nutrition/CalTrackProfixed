@@ -315,7 +315,7 @@ class AIFoodRecognitionService: ObservableObject {
 extension RecognizedFood {
     func toFoodEntry(mealType: FoodEntry.MealType = .lunch, quantity: Double? = nil) -> FoodEntry {
         let weight = quantity ?? estimatedWeight ?? 100.0
-        let nutrition = nutritionInfo?.scaled(to: weight) ?? NutritionInfo(calories: 100, protein: 5, carbs: 15, fat: 2)
+        let nutrition = nutritionInfo?.scaled(to: weight) ?? NutritionInfo(calories: 100, protein: 5, carbs: 15, fat: 2, fiber: nil, sugar: nil)
         
         return FoodEntry(
             name: name,

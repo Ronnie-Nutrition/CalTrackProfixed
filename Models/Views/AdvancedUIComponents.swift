@@ -52,13 +52,13 @@ struct MorphingButton: View {
                 
                 HStack(spacing: AppSpacing.sm) {
                     Image(systemName: icon)
-                        .font(AppFonts.subheadline(.semibold))
+                        .font(AppFonts.subheadline(weight: .semibold))
                         .foregroundColor(.white)
                         .scaleEffect(isPressed ? 1.2 : 1.0)
                         .rotationEffect(.degrees(isPressed ? 360 : 0))
                     
                     Text(text)
-                        .font(AppFonts.subheadline(.semibold))
+                        .font(AppFonts.subheadline(weight: .semibold))
                         .foregroundColor(.white)
                         .scaleEffect(isPressed ? 1.05 : 1.0)
                 }
@@ -158,8 +158,8 @@ struct ParallaxCard<Content: View>: View {
                     .onChanged { value in
                         withAnimation(AppAnimations.smooth) {
                             offset = CGSize(
-                                width: max(-20, min(20, value.translation.x / 10)),
-                                height: max(-20, min(20, value.translation.y / 10))
+                                width: max(-20, min(20, value.translation.width / 10)),
+                                height: max(-20, min(20, value.translation.height / 10))
                             )
                         }
                     }
@@ -231,11 +231,11 @@ struct MagneticButton: View {
             HStack(spacing: AppSpacing.xs) {
                 if let icon = icon {
                     Image(systemName: icon)
-                        .font(AppFonts.subheadline(.medium))
+                        .font(AppFonts.subheadline(weight: .medium))
                 }
                 
                 Text(title)
-                    .font(AppFonts.subheadline(.medium))
+                    .font(AppFonts.subheadline(weight: .medium))
             }
             .foregroundColor(.white)
             .padding(.horizontal, AppSpacing.md)
@@ -258,14 +258,14 @@ struct MagneticButton: View {
         .gesture(
             DragGesture(coordinateSpace: .local)
                 .onChanged { value in
-                    let distance = sqrt(pow(value.translation.x, 2) + pow(value.translation.y, 2))
+                    let distance = sqrt(pow(value.translation.width, 2) + pow(value.translation.height, 2))
                     
                     if distance < 50 {
                         let magnetStrength = max(0, 50 - distance) / 50
                         withAnimation(AppAnimations.spring) {
                             magnetOffset = CGSize(
-                                width: -value.translation.x * magnetStrength * 0.3,
-                                height: -value.translation.y * magnetStrength * 0.3
+                                width: -value.translation.width * magnetStrength * 0.3,
+                                height: -value.translation.height * magnetStrength * 0.3
                             )
                             isAttracted = magnetStrength > 0.3
                         }
@@ -485,14 +485,14 @@ struct MagneticHoverEffect: ViewModifier {
             .gesture(
                 DragGesture(coordinateSpace: .local)
                     .onChanged { value in
-                        let distance = sqrt(pow(value.translation.x, 2) + pow(value.translation.y, 2))
+                        let distance = sqrt(pow(value.translation.width, 2) + pow(value.translation.height, 2))
                         
                         if distance < 30 {
                             let attraction = (30 - distance) / 30
                             withAnimation(AppAnimations.spring) {
                                 offset = CGSize(
-                                    width: value.translation.x * attraction * 0.2,
-                                    height: value.translation.y * attraction * 0.2
+                                    width: value.translation.width * attraction * 0.2,
+                                    height: value.translation.height * attraction * 0.2
                                 )
                                 scale = 1.0 + attraction * 0.1
                             }

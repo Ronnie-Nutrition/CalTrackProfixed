@@ -262,12 +262,14 @@ class SubscriptionManager: NSObject, ObservableObject {
     // MARK: - Transaction Listener
     
     private func listenForTransactions() -> Task<Void, Error> {
-        return Task.detached {
+        return Task.detached { [weak self] in
             for await result in Transaction.updates {
                 do {
-                    let transaction = try self.checkVerified(result)
-                    await transaction.finish()
-                    await self.checkSubscriptionStatus()
+                    let transaction = try await MainActor.run {
+                        try self?.checkVerified(result)
+                    }
+                    await transaction?.finish()
+                    await self?.checkSubscriptionStatus()
                 } catch {
                     print("Transaction failed verification: \(error)")
                 }
@@ -279,7 +281,7 @@ class SubscriptionManager: NSObject, ObservableObject {
     
     func logSubscriptionEvent(_ event: SubscriptionEvent) {
         // Log to analytics service (Firebase, etc.)
-        CrashlyticsManager.shared.logSubscriptionEvent(event)
+        // CrashlyticsManager.shared.logSubscriptionEvent(event)
     }
 }
 

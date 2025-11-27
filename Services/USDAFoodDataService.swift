@@ -7,8 +7,8 @@ class USDAFoodDataService {
     private let apiKey: String
     
     init() {
-        // Load API key securely from Keychain
-        self.apiKey = SecureAPIConfig.usdaAPIKey
+        // Load API key from environment or use demo key
+        self.apiKey = ProcessInfo.processInfo.environment["USDA_API_KEY"] ?? "DEMO_KEY"
     }
     
     // MARK: - Search Foods

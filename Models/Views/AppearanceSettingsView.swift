@@ -46,7 +46,7 @@ struct AppearanceSettingsView: View {
                         .foregroundColor(themeManager.currentAccentColor)
                     
                     Text("Theme")
-                        .font(AppFonts.headline(.semibold))
+                        .font(AppFonts.headline(weight: .semibold))
                         .foregroundColor(AppColors.primaryText)
                 }
                 
@@ -83,7 +83,7 @@ struct AppearanceSettingsView: View {
                         .foregroundColor(themeManager.currentAccentColor)
                     
                     Text("Accent Color")
-                        .font(AppFonts.headline(.semibold))
+                        .font(AppFonts.headline(weight: .semibold))
                         .foregroundColor(AppColors.primaryText)
                 }
                 
@@ -125,7 +125,7 @@ struct AppearanceSettingsView: View {
                         .foregroundColor(themeManager.currentAccentColor)
                     
                     Text("Display Options")
-                        .font(AppFonts.headline(.semibold))
+                        .font(AppFonts.headline(weight: .semibold))
                         .foregroundColor(AppColors.primaryText)
                 }
                 
@@ -166,7 +166,7 @@ struct AppearanceSettingsView: View {
                         .foregroundColor(themeManager.currentAccentColor)
                     
                     Text("Accessibility")
-                        .font(AppFonts.headline(.semibold))
+                        .font(AppFonts.headline(weight: .semibold))
                         .foregroundColor(AppColors.primaryText)
                 }
                 
@@ -189,7 +189,7 @@ struct AppearanceSettingsView: View {
                         
                         VStack(alignment: .leading, spacing: 2) {
                             Text("System Accessibility")
-                                .font(AppFonts.subheadline(.medium))
+                                .font(AppFonts.subheadline(weight: .medium))
                                 .foregroundColor(AppColors.primaryText)
                             
                             Text("Open iOS accessibility settings")
@@ -221,7 +221,7 @@ struct AppearanceSettingsView: View {
                         .foregroundColor(themeManager.currentAccentColor)
                     
                     Text("Theme System")
-                        .font(AppFonts.headline(.semibold))
+                        .font(AppFonts.headline(weight: .semibold))
                         .foregroundColor(AppColors.primaryText)
                 }
                 
@@ -247,7 +247,7 @@ struct AppearanceSettingsView: View {
                         .foregroundColor(.orange)
                     
                     Text("Reset Appearance")
-                        .font(AppFonts.headline(.semibold))
+                        .font(AppFonts.headline(weight: .semibold))
                         .foregroundColor(AppColors.primaryText)
                     
                     Spacer()
@@ -266,7 +266,7 @@ struct AppearanceSettingsView: View {
                             .font(.subheadline)
                         
                         Text("Reset to Defaults")
-                            .font(AppFonts.subheadline(.medium))
+                            .font(AppFonts.subheadline(weight: .medium))
                     }
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
@@ -327,7 +327,7 @@ struct ThemeOptionRow: View {
                 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(theme.displayName)
-                        .font(AppFonts.subheadline(.medium))
+                        .font(AppFonts.subheadline(weight: .medium))
                         .foregroundColor(AppColors.primaryText)
                     
                     Text(themeDescription(for: theme))
@@ -411,7 +411,7 @@ struct SettingsToggleRow: View {
             
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
-                    .font(AppFonts.subheadline(.medium))
+                    .font(AppFonts.subheadline(weight: .medium))
                     .foregroundColor(AppColors.primaryText)
                 
                 Text(description)
@@ -444,7 +444,7 @@ struct InfoRow: View {
             Spacer()
             
             Text(value)
-                .font(AppFonts.caption(.medium))
+                .font(AppFonts.caption(weight: .medium))
                 .foregroundColor(AppColors.primaryText)
         }
     }
@@ -464,7 +464,7 @@ struct SystemAccessibilityView: View {
                 
                 VStack(spacing: AppSpacing.sm) {
                     Text("System Accessibility")
-                        .font(AppFonts.title(.bold))
+                        .font(AppFonts.title(weight: .bold))
                         .foregroundColor(AppColors.primaryText)
                         .multilineTextAlignment(.center)
                     
@@ -485,7 +485,7 @@ struct SystemAccessibilityView: View {
                             .font(.title3)
                         
                         Text("Open Settings")
-                            .font(AppFonts.headline(.semibold))
+                            .font(AppFonts.headline(weight: .semibold))
                     }
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)

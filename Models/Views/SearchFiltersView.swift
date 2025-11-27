@@ -137,15 +137,17 @@ struct SearchFiltersView: View {
                     VStack(spacing: 16) {
                         NutritionRangeSlider(
                             title: "Calories",
-                            range: $minCalories...$maxCalories,
+                            minValue: $minCalories,
+                            maxValue: $maxCalories,
                             bounds: 0...2000,
                             step: 10,
                             unit: "cal"
                         )
-                        
+
                         NutritionRangeSlider(
                             title: "Protein",
-                            range: $minProtein...$maxProtein,
+                            minValue: $minProtein,
+                            maxValue: $maxProtein,
                             bounds: 0...200,
                             step: 1,
                             unit: "g"
@@ -384,50 +386,58 @@ struct SourceFilterButton: View {
 
 struct NutritionRangeSlider: View {
     let title: String
-    @Binding var range: ClosedRange<Double>
+    @Binding var minValue: Double
+    @Binding var maxValue: Double
     let bounds: ClosedRange<Double>
     let step: Double
     let unit: String
-    
+
+    // Legacy init for range binding (deprecated)
+    init(title: String, range: Binding<ClosedRange<Double>>, bounds: ClosedRange<Double>, step: Double, unit: String) {
+        self.title = title
+        self._minValue = Binding(get: { range.wrappedValue.lowerBound }, set: { _ in })
+        self._maxValue = Binding(get: { range.wrappedValue.upperBound }, set: { _ in })
+        self.bounds = bounds
+        self.step = step
+        self.unit = unit
+    }
+
+    init(title: String, minValue: Binding<Double>, maxValue: Binding<Double>, bounds: ClosedRange<Double>, step: Double, unit: String) {
+        self.title = title
+        self._minValue = minValue
+        self._maxValue = maxValue
+        self.bounds = bounds
+        self.step = step
+        self.unit = unit
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
                 Text(title)
                     .font(.subheadline)
                     .fontWeight(.medium)
-                
+
                 Spacer()
-                
-                Text("\(Int(range.lowerBound))-\(Int(range.upperBound)) \(unit)")
+
+                Text("\(Int(minValue))-\(Int(maxValue)) \(unit)")
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
-            
-            // Custom range slider implementation would go here
-            // For now, using separate sliders
+
             VStack(spacing: 4) {
                 HStack {
                     Text("Min:")
                         .font(.caption)
-                    
-                    Slider(value: Binding(
-                        get: { range.lowerBound },
-                        set: { newValue in
-                            range = newValue...min(range.upperBound, bounds.upperBound)
-                        }
-                    ), in: bounds, step: step)
+
+                    Slider(value: $minValue, in: bounds, step: step)
                 }
-                
+
                 HStack {
                     Text("Max:")
                         .font(.caption)
-                    
-                    Slider(value: Binding(
-                        get: { range.upperBound },
-                        set: { newValue in
-                            range = max(range.lowerBound, bounds.lowerBound)...newValue
-                        }
-                    ), in: bounds, step: step)
+
+                    Slider(value: $maxValue, in: bounds, step: step)
                 }
             }
         }

@@ -442,6 +442,19 @@ struct Macronutrients: Codable {
     let cholesterol: Double?
     let sodium: Double?
     let potassium: Double?
+
+    init(protein: Double, carbohydrates: Double, fat: Double, fiber: Double? = nil, sugar: Double? = nil, saturatedFat: Double? = nil, transFat: Double? = nil, cholesterol: Double? = nil, sodium: Double? = nil, potassium: Double? = nil) {
+        self.protein = protein
+        self.carbohydrates = carbohydrates
+        self.fat = fat
+        self.fiber = fiber
+        self.sugar = sugar
+        self.saturatedFat = saturatedFat
+        self.transFat = transFat
+        self.cholesterol = cholesterol
+        self.sodium = sodium
+        self.potassium = potassium
+    }
 }
 
 // MARK: - Food Source

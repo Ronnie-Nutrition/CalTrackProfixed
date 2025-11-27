@@ -1,4 +1,5 @@
 import Foundation
+import Combine
 import SwiftUI
 
 // MARK: - AI Meal Planning Service
@@ -11,6 +12,22 @@ class AIMealPlanningService: ObservableObject {
     
     private let nutritionService = NutritionAPIService.shared
     private let userDefaults = UserDefaults.standard
+
+    // Async wrapper for the completion-based searchFood
+    private func searchFoodAsync(query: String) async -> [FoodItem]? {
+        await withCheckedContinuation { continuation in
+            nutritionService.searchFood(query: query) { result in
+                switch result {
+                case .success(let response):
+                    // Extract FoodItems from parsed results
+                    let foods = response.parsed.map { $0.food }
+                    continuation.resume(returning: foods)
+                case .failure:
+                    continuation.resume(returning: nil)
+                }
+            }
+        }
+    }
     
     // MARK: - Meal Plan Generation
     func generateWeeklyMealPlan(
@@ -69,7 +86,7 @@ class AIMealPlanningService: ObservableObject {
         dayOfWeek: Int
     ) async throws -> DailyMealPlan {
         
-        let targetCalories = profile.dailyCalorieGoal
+        let targetCalories = profile.dailyCalorieTarget
         let targetMacros = calculateTargetMacros(profile: profile, preferences: preferences)
         
         // Generate meals based on preferences
@@ -283,7 +300,7 @@ class AIMealPlanningService: ObservableObject {
         }
         
         // Preparation time (10% weight)
-        let prepScore = food.preparationTime <= preferences.maxPrepTime ? 10 : 0
+        let prepScore: Double = food.preparationTime <= preferences.maxPrepTime ? 10.0 : 0.0
         score += prepScore
         
         // Cost efficiency (10% weight)
@@ -346,7 +363,7 @@ class AIMealPlanningService: ObservableObject {
         profile: UserProfile,
         preferences: MealPlanPreferences
     ) -> MacroTargets {
-        let calories = profile.dailyCalorieGoal
+        let calories = profile.dailyCalorieTarget
         
         switch preferences.dietType {
         case .balanced:
@@ -422,21 +439,21 @@ class AIMealPlanningService: ObservableObject {
         
         // Fetch foods for each search term
         for term in searchTerms.prefix(5) { // Limit API calls
-            if let foods = try? await nutritionService.searchFood(query: term) {
+            if let foods = await searchFoodAsync(query: term) {
                 let options = foods.prefix(3).map { food in
                     FoodOption(
-                        name: food.name,
-                        brand: food.brand,
+                        name: food.label,
+                        brand: food.category,
                         calories: food.nutrients.calories,
-                        protein: food.nutrients.protein ?? 0,
-                        carbs: food.nutrients.carbs ?? 0,
-                        fat: food.nutrients.fat ?? 0,
-                        fiber: food.nutrients.fiber ?? 0,
-                        standardServing: food.servingSize ?? 100,
-                        unit: food.servingUnit ?? "g",
-                        estimatedCost: estimateFoodCost(food.name),
-                        preparationTime: estimatePreparationTime(food.name),
-                        preparationNotes: generatePreparationNotes(food.name, mealType: mealType)
+                        protein: food.nutrients.protein,
+                        carbs: food.nutrients.carbs,
+                        fat: food.nutrients.fat,
+                        fiber: food.nutrients.fiber,
+                        standardServing: 100,
+                        unit: "g",
+                        estimatedCost: estimateFoodCost(food.label),
+                        preparationTime: estimatePreparationTime(food.label),
+                        preparationNotes: generatePreparationNotes(food.label, mealType: mealType)
                     )
                 }
                 allOptions.append(contentsOf: options)
@@ -686,9 +703,9 @@ struct MealPlanPreferences: Codable {
 }
 
 struct MacroTargets {
-    let protein: Double
-    let carbs: Double
-    let fat: Double
+    var protein: Double
+    var carbs: Double
+    var fat: Double
 }
 
 enum MealType: String, Codable, CaseIterable {

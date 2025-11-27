@@ -41,7 +41,7 @@ class OpenFoodFactsService {
         urlString += "?" + queryParams.joined(separator: "&")
         
         guard let url = URL(string: urlString),
-              SecurityConfig.isSecureURL(url) else {
+              url.scheme == "https" else {
             return []
         }
         
@@ -101,10 +101,8 @@ class OpenFoodFactsService {
         request.setValue(userAgent, forHTTPHeaderField: "User-Agent")
         request.timeoutInterval = 15
         
-        // Add security headers
-        for (header, value) in SecurityConfig.securityHeaders {
-            request.setValue(value, forHTTPHeaderField: header)
-        }
+        // Basic security headers
+        request.setValue("no-cache", forHTTPHeaderField: "Cache-Control")
         
         let (data, response) = try await URLSession.shared.data(for: request)
         

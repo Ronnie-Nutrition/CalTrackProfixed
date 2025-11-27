@@ -327,7 +327,7 @@ struct MealPlanningView: View {
         selectedWeek = Calendar.current.date(byAdding: .weekOfYear, value: 1, to: selectedWeek) ?? selectedWeek
     }
     
-    private func mealPlanForDay(_ date: Date) -> DayMealPlan? {
+    private func mealPlanForDay(_ date: Date) -> MealPlanDayPlan? {
         // In a real implementation, this would fetch from Core Data or similar
         return nil
     }
@@ -341,7 +341,7 @@ struct MealPlanningView: View {
 
 struct DayMealPlanCard: View {
     let date: Date
-    let mealPlan: DayMealPlan?
+    let mealPlan: MealPlanDayPlan?
     
     @State private var showingAddMeal = false
     
@@ -441,7 +441,7 @@ struct SavedMealPlanCard: View {
 }
 
 struct MealPlanRow: View {
-    let meal: PlannedMeal
+    let meal: MealPlanPlannedMeal
     
     var body: some View {
         HStack {
@@ -551,7 +551,7 @@ struct MealPlan: Identifiable {
     let id = UUID()
     let name: String
     let description: String?
-    let days: [DayMealPlan]
+    let days: [MealPlanDayPlan]
     let createdDate: Date
     let tags: [String]
     
@@ -566,17 +566,17 @@ struct MealPlan: Identifiable {
     }
 }
 
-struct DayMealPlan: Identifiable {
+struct MealPlanDayPlan: Identifiable {
     let id = UUID()
     let date: Date
-    let meals: [PlannedMeal]
+    let meals: [MealPlanPlannedMeal]
     
     var totalCalories: Int {
         meals.reduce(0) { $0 + $1.calories }
     }
 }
 
-struct PlannedMeal: Identifiable {
+struct MealPlanPlannedMeal: Identifiable {
     let id = UUID()
     let name: String
     let mealType: MealType

@@ -388,8 +388,8 @@ struct EnhancedFoodDetailView: View {
                     // Serving Information
                     DetailSection(title: "Serving Information") {
                         DetailRow(label: "Standard Serving", value: food.basicNutrition.servingSize)
-                        DetailRow(label: "Weight", value: "\(food.basicNutrition.servingSizeGrams, specifier: "%.0f")g")
-                        DetailRow(label: "Selected Quantity", value: "\(servingQuantity, specifier: "%.1f")")
+                        DetailRow(label: "Weight", value: String(format: "%.0fg", food.basicNutrition.servingSizeGrams))
+                        DetailRow(label: "Selected Quantity", value: String(format: "%.1f", servingQuantity))
                     }
                     
                     // Certifications
@@ -564,13 +564,14 @@ struct EnhancedFoodDetailView: View {
         let convertedFood = FoodItem(
             foodId: food.foodId,
             label: food.name,
-            categoryLabel: food.category,
-            nutrients: FoodNutrients(
-                calories: adjustedValue(food.basicNutrition.calories),
-                protein: adjustedValue(food.basicNutrition.protein),
-                carbs: adjustedValue(food.basicNutrition.carbohydrates),
-                fat: adjustedValue(food.basicNutrition.fat)
-            )
+            nutrients: Nutrients(
+                ENERC_KCAL: adjustedValue(food.basicNutrition.calories),
+                PROCNT: adjustedValue(food.basicNutrition.protein),
+                FAT: adjustedValue(food.basicNutrition.fat),
+                CHOCDF: adjustedValue(food.basicNutrition.carbohydrates)
+            ),
+            category: nil,
+            categoryLabel: food.category
         )
         
         onAddToLog(convertedFood)
