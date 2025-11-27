@@ -41,7 +41,8 @@ final class Recipe {
         let fat: Double
     }
     
-    struct SimpleFoodItem: Codable {
+    struct SimpleFoodItem: Codable, Identifiable {
+        let id: UUID
         let name: String
         let brand: String?
         let barcode: String?
@@ -51,10 +52,11 @@ final class Recipe {
         let fat: Double
         let servingSize: Double
         let servingUnit: String
-        
-        init(name: String, brand: String? = nil, barcode: String? = nil, 
+
+        init(name: String, brand: String? = nil, barcode: String? = nil,
              calories: Double, protein: Double, carbs: Double, fat: Double,
              servingSize: Double, servingUnit: String) {
+            self.id = UUID()
             self.name = name
             self.brand = brand
             self.barcode = barcode

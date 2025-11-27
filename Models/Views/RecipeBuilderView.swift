@@ -14,7 +14,7 @@ struct RecipeBuilderView: View {
     @State private var category = Recipe.Category.main
     @State private var ingredients: [Recipe.RecipeIngredient] = []
     @State private var instructions: [String] = [""]
-    @State private var selectedImageData: Data?
+    @State private var selectedImage: UIImage?
     
     @State private var showingFoodSearch = false
     @State private var showingImagePicker = false
@@ -49,328 +49,23 @@ struct RecipeBuilderView: View {
         NavigationStack {
             ZStack {
                 GlassmorphismBackground(colors: [.green, .blue, .purple])
-                
-                ScrollView {
+
+                ScrollView(.vertical, showsIndicators: true) {
                     VStack(spacing: 24) {
-                        // Header Section
-                        LiquidGlassCard {
-                            VStack(spacing: 16) {
-                                HStack {
-                                    Image(systemName: "book.fill")
-                                        .font(.title)
-                                        .foregroundStyle(
-                                            LinearGradient(
-                                                colors: [.green, .blue],
-                                                startPoint: .topLeading,
-                                                endPoint: .bottomTrailing
-                                            )
-                                        )
-                                    
-                                    VStack(alignment: .leading) {
-                                        Text("Recipe Builder")
-                                            .font(.title2)
-                                            .fontWeight(.bold)
-                                        Text("Create your custom recipes")
-                                            .font(.caption)
-                                            .foregroundColor(.secondary)
-                                    }
-                                    
-                                    Spacer()
-                                    
-                                    Button(action: { showingNutritionPreview = true }) {
-                                        Image(systemName: "chart.bar.fill")
-                                            .font(.title3)
-                                            .foregroundColor(.blue)
-                                    }
-                                }
-                                
-                                // Recipe Image
-                                Button(action: { showingImagePicker = true }) {
-                                    if let imageData = selectedImageData,
-                                       let uiImage = UIImage(data: imageData) {
-                                        Image(uiImage: uiImage)
-                                            .resizable()
-                                            .aspectRatio(contentMode: .fill)
-                                            .frame(height: 120)
-                                            .clipShape(RoundedRectangle(cornerRadius: 12))
-                                    } else {
-                                        RoundedRectangle(cornerRadius: 12)
-                                            .fill(.ultraThinMaterial)
-                                            .frame(height: 120)
-                                            .overlay(
-                                                VStack {
-                                                    Image(systemName: "camera.fill")
-                                                        .font(.title)
-                                                        .foregroundColor(.secondary)
-                                                    Text("Add Photo")
-                                                        .font(.caption)
-                                                        .foregroundColor(.secondary)
-                                                }
-                                            )
-                                    }
-                                }
-                                .liquidTransition()
-                            }
-                            .padding()
-                        }
-                        .padding(.horizontal)
-                        
-                        // Basic Info Section
-                        LiquidGlassCard {
-                            VStack(spacing: 16) {
-                                Text("Basic Information")
-                                    .font(.headline)
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                
-                                VStack(spacing: 12) {
-                                    CustomTextField(title: "Recipe Name", text: $recipeName, placeholder: "My Amazing Recipe")
-                                    CustomTextField(title: "Description", text: $recipeDescription, placeholder: "A delicious and nutritious meal...")
-                                    
-                                    HStack(spacing: 16) {
-                                        VStack(alignment: .leading) {
-                                            Text("Servings")
-                                                .font(.caption)
-                                                .foregroundColor(.secondary)
-                                            HStack {
-                                                Button("-") { if servings > 1 { servings -= 1 } }
-                                                    .foregroundColor(.blue)
-                                                Text("\(Int(servings))")
-                                                    .frame(minWidth: 40)
-                                                    .contentTransition(.numericText())
-                                                Button("+") { servings += 1 }
-                                                    .foregroundColor(.blue)
-                                            }
-                                        }
-                                        
-                                        Spacer()
-                                        
-                                        VStack(alignment: .trailing) {
-                                            Text("Cook Time")
-                                                .font(.caption)
-                                                .foregroundColor(.secondary)
-                                            Text("\(Int(cookingTime)) min")
-                                                .contentTransition(.numericText())
-                                        }
-                                    }
-                                    
-                                    Slider(value: $cookingTime, in: 5...180, step: 5)
-                                        .tint(.green)
-                                    
-                                    HStack {
-                                        VStack(alignment: .leading) {
-                                            Text("Difficulty")
-                                                .font(.caption)
-                                                .foregroundColor(.secondary)
-                                            Picker("Difficulty", selection: $difficulty) {
-                                                ForEach(Recipe.Difficulty.allCases, id: \.self) { diff in
-                                                    Text(diff.rawValue.capitalized).tag(diff)
-                                                }
-                                            }
-                                            .pickerStyle(.segmented)
-                                        }
-                                        
-                                        Spacer()
-                                        
-                                        VStack(alignment: .trailing) {
-                                            Text("Category")
-                                                .font(.caption)
-                                                .foregroundColor(.secondary)
-                                            Picker("Category", selection: $category) {
-                                                ForEach(Recipe.Category.allCases, id: \.self) { cat in
-                                                    Text(cat.rawValue.capitalized).tag(cat)
-                                                }
-                                            }
-                                            .pickerStyle(.menu)
-                                        }
-                                    }
-                                }
-                            }
-                            .padding()
-                        }
-                        .padding(.horizontal)
-                        
-                        // Ingredients Section
-                        LiquidGlassCard {
-                            VStack(spacing: 16) {
-                                HStack {
-                                    Text("Ingredients")
-                                        .font(.headline)
-                                    
-                                    Spacer()
-                                    
-                                    Button("Add Ingredient") {
-                                        showingFoodSearch = true
-                                    }
-                                    .font(.caption)
-                                    .padding(.horizontal, 12)
-                                    .padding(.vertical, 6)
-                                    .background(.blue.opacity(0.2))
-                                    .foregroundColor(.blue)
-                                    .cornerRadius(12)
-                                }
-                                
-                                if ingredients.isEmpty {
-                                    VStack(spacing: 8) {
-                                        Image(systemName: "plus.circle.dashed")
-                                            .font(.title)
-                                            .foregroundColor(.secondary)
-                                        Text("No ingredients added yet")
-                                            .font(.caption)
-                                            .foregroundColor(.secondary)
-                                    }
-                                    .frame(maxWidth: .infinity)
-                                    .padding(.vertical, 20)
-                                } else {
-                                    ForEach(Array(ingredients.enumerated()), id: \.offset) { index, ingredient in
-                                        IngredientRow(
-                                            ingredient: ingredient,
-                                            onQuantityChange: { newQuantity in
-                                                ingredients[index].quantity = newQuantity
-                                            },
-                                            onDelete: {
-                                                withAnimation(FluidSpring.bouncy) {
-                                                    ingredients.remove(at: index)
-                                                }
-                                            }
-                                        )
-                                        .liquidTransition()
-                                    }
-                                }
-                            }
-                            .padding()
-                        }
-                        .padding(.horizontal)
-                        
-                        // Instructions Section
-                        LiquidGlassCard {
-                            VStack(spacing: 16) {
-                                HStack {
-                                    Text("Instructions")
-                                        .font(.headline)
-                                    
-                                    Spacer()
-                                    
-                                    Button("Add Step") {
-                                        withAnimation(FluidSpring.bouncy) {
-                                            instructions.append("")
-                                        }
-                                    }
-                                    .font(.caption)
-                                    .padding(.horizontal, 12)
-                                    .padding(.vertical, 6)
-                                    .background(.green.opacity(0.2))
-                                    .foregroundColor(.green)
-                                    .cornerRadius(12)
-                                }
-                                
-                                ForEach(Array(instructions.enumerated()), id: \.offset) { index, instruction in
-                                    HStack(alignment: .top, spacing: 12) {
-                                        ZStack {
-                                            Circle()
-                                                .fill(.green.opacity(0.2))
-                                                .frame(width: 24, height: 24)
-                                            Text("\(index + 1)")
-                                                .font(.caption)
-                                                .fontWeight(.medium)
-                                                .foregroundColor(.green)
-                                        }
-                                        
-                                        TextField("Step \(index + 1)", text: .constant(instruction), axis: .vertical)
-                                            .textFieldStyle(.plain)
-                                            .onChange(of: instruction) { _, newValue in
-                                                instructions[index] = newValue
-                                            }
-                                        
-                                        if instructions.count > 1 {
-                                            Button(action: {
-                                                withAnimation(FluidSpring.gentle) {
-                                                    instructions.remove(at: index)
-                                                }
-                                            }) {
-                                                Image(systemName: "minus.circle.fill")
-                                                    .foregroundColor(.red)
-                                            }
-                                        }
-                                    }
-                                    .liquidTransition()
-                                }
-                            }
-                            .padding()
-                        }
-                        .padding(.horizontal)
-                        
-                        // Nutrition Preview
-                        if !ingredients.isEmpty {
-                            LiquidGlassCard {
-                                VStack(spacing: 16) {
-                                    Text("Nutrition Per Serving")
-                                        .font(.headline)
-                                        .frame(maxWidth: .infinity, alignment: .leading)
-                                    
-                                    HStack(spacing: 20) {
-                                        NutritionBadge(
-                                            title: "Calories",
-                                            value: Int(nutritionPerServing.calories),
-                                            unit: "cal",
-                                            color: .orange,
-                                            icon: "flame.fill"
-                                        )
-                                        
-                                        NutritionBadge(
-                                            title: "Protein",
-                                            value: Int(nutritionPerServing.protein),
-                                            unit: "g",
-                                            color: .red,
-                                            icon: "p.square"
-                                        )
-                                        
-                                        NutritionBadge(
-                                            title: "Carbs",
-                                            value: Int(nutritionPerServing.carbs),
-                                            unit: "g",
-                                            color: .blue,
-                                            icon: "c.square"
-                                        )
-                                        
-                                        NutritionBadge(
-                                            title: "Fat",
-                                            value: Int(nutritionPerServing.fat),
-                                            unit: "g",
-                                            color: .green,
-                                            icon: "f.square"
-                                        )
-                                    }
-                                    .animation(FluidSpring.smooth, value: nutritionPerServing.calories)
-                                }
-                                .padding()
-                            }
-                            .padding(.horizontal)
-                        }
-                        
-                        // Save Button
-                        Button(action: saveRecipe) {
-                            HStack {
-                                Image(systemName: "checkmark.circle.fill")
-                                Text("Save Recipe")
-                            }
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(.green)
-                            .foregroundColor(.white)
-                            .cornerRadius(16)
-                            .shadow(color: .green.opacity(0.3), radius: 10)
-                        }
-                        .padding(.horizontal)
-                        .disabled(recipeName.isEmpty || ingredients.isEmpty)
-                        .opacity(recipeName.isEmpty || ingredients.isEmpty ? 0.6 : 1.0)
+                        headerSection
+                        basicInfoSection
+                        ingredientsSection
+                        instructionsSection
+                        nutritionPreviewSection
+                        saveButtonSection
                     }
                     .padding(.vertical)
                 }
             }
             .navigationTitle("Recipe Builder")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
+            .toolbar(id: "recipeBuilder") {
+                ToolbarItem(id: "cancel", placement: .navigationBarLeading) {
                     Button("Cancel") {
                         dismiss()
                     }
@@ -385,7 +80,7 @@ struct RecipeBuilderView: View {
                 )
             }
             .sheet(isPresented: $showingImagePicker) {
-                ImagePicker(selectedImageData: $selectedImageData)
+                ImagePicker(selectedImage: $selectedImage)
             }
             .sheet(isPresented: $showingNutritionPreview) {
                 RecipeNutritionDetailView(
@@ -396,7 +91,332 @@ struct RecipeBuilderView: View {
             }
         }
     }
-    
+
+    // MARK: - Extracted View Sections
+
+    @ViewBuilder
+    private var headerSection: some View {
+        LiquidGlassCard {
+            VStack(spacing: 16) {
+                HStack {
+                    Image(systemName: "book.fill")
+                        .font(.title)
+                        .foregroundStyle(
+                            LinearGradient(
+                                colors: [.green, .blue],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+
+                    VStack(alignment: .leading) {
+                        Text("Recipe Builder")
+                            .font(.title2)
+                            .fontWeight(.bold)
+                        Text("Create your custom recipes")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+
+                    Spacer()
+
+                    Button(action: { showingNutritionPreview = true }) {
+                        Image(systemName: "chart.bar.fill")
+                            .font(.title3)
+                            .foregroundColor(.blue)
+                    }
+                }
+
+                Button(action: { showingImagePicker = true }) {
+                    if let uiImage = selectedImage {
+                        Image(uiImage: uiImage)
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                            .frame(height: 120)
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                    } else {
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(.ultraThinMaterial)
+                            .frame(height: 120)
+                            .overlay(
+                                VStack {
+                                    Image(systemName: "camera.fill")
+                                        .font(.title)
+                                        .foregroundColor(.secondary)
+                                    Text("Add Photo")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                }
+                            )
+                    }
+                }
+                .liquidTransition()
+            }
+            .padding()
+        }
+        .padding(.horizontal)
+    }
+
+    @ViewBuilder
+    private var basicInfoSection: some View {
+        LiquidGlassCard {
+            VStack(spacing: 16) {
+                Text("Basic Information")
+                    .font(.headline)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+
+                VStack(spacing: 12) {
+                    CustomTextField(title: "Recipe Name", text: $recipeName, placeholder: "My Amazing Recipe")
+                    CustomTextField(title: "Description", text: $recipeDescription, placeholder: "A delicious and nutritious meal...")
+
+                    HStack(spacing: 16) {
+                        VStack(alignment: .leading) {
+                            Text("Servings")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                            HStack {
+                                Button("-") { if servings > 1 { servings -= 1 } }
+                                    .foregroundColor(.blue)
+                                Text("\(Int(servings))")
+                                    .frame(minWidth: 40)
+                                    .contentTransition(.numericText())
+                                Button("+") { servings += 1 }
+                                    .foregroundColor(.blue)
+                            }
+                        }
+
+                        Spacer()
+
+                        VStack(alignment: .trailing) {
+                            Text("Cook Time")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                            Text("\(Int(cookingTime)) min")
+                                .contentTransition(.numericText())
+                        }
+                    }
+
+                    Slider(value: $cookingTime, in: 5...180, step: 5)
+                        .tint(.green)
+
+                    HStack {
+                        VStack(alignment: .leading) {
+                            Text("Difficulty")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                            Picker("Difficulty", selection: $difficulty) {
+                                ForEach(Recipe.Difficulty.allCases, id: \.self) { diff in
+                                    Text(diff.rawValue.capitalized).tag(diff)
+                                }
+                            }
+                            .pickerStyle(.segmented)
+                        }
+
+                        Spacer()
+
+                        VStack(alignment: .trailing) {
+                            Text("Category")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                            Picker("Category", selection: $category) {
+                                ForEach(Recipe.Category.allCases, id: \.self) { cat in
+                                    Text(cat.rawValue.capitalized).tag(cat)
+                                }
+                            }
+                            .pickerStyle(.menu)
+                        }
+                    }
+                }
+            }
+            .padding()
+        }
+        .padding(.horizontal)
+    }
+
+    @ViewBuilder
+    private var ingredientsSection: some View {
+        LiquidGlassCard {
+            VStack(spacing: 16) {
+                HStack {
+                    Text("Ingredients")
+                        .font(.headline)
+
+                    Spacer()
+
+                    Button("Add Ingredient") {
+                        showingFoodSearch = true
+                    }
+                    .font(.caption)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(.blue.opacity(0.2))
+                    .foregroundColor(.blue)
+                    .cornerRadius(12)
+                }
+
+                if ingredients.isEmpty {
+                    VStack(spacing: 8) {
+                        Image(systemName: "plus.circle.dashed")
+                            .font(.title)
+                            .foregroundColor(.secondary)
+                        Text("No ingredients added yet")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 20)
+                } else {
+                    ForEach(Array(ingredients.enumerated()), id: \.offset) { item in
+                        let index = item.offset
+                        let ingredient = item.element
+                        IngredientRow(
+                            ingredient: ingredient,
+                            onQuantityChange: { newQuantity in
+                                ingredients[index].quantity = newQuantity
+                            },
+                            onDelete: {
+                                withAnimation(FluidSpring.bouncy) {
+                                    _ = ingredients.remove(at: index)
+                                }
+                            }
+                        )
+                        .liquidTransition()
+                    }
+                }
+            }
+            .padding()
+        }
+        .padding(.horizontal)
+    }
+
+    @ViewBuilder
+    private var instructionsSection: some View {
+        LiquidGlassCard {
+            VStack(spacing: 16) {
+                HStack {
+                    Text("Instructions")
+                        .font(.headline)
+
+                    Spacer()
+
+                    Button("Add Step") {
+                        withAnimation(FluidSpring.bouncy) {
+                            instructions.append("")
+                        }
+                    }
+                    .font(.caption)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(.green.opacity(0.2))
+                    .foregroundColor(.green)
+                    .cornerRadius(12)
+                }
+
+                ForEach(Array(instructions.enumerated()), id: \.offset) { item in
+                    let index = item.offset
+                    let instruction = item.element
+                    HStack(alignment: .top, spacing: 12) {
+                        ZStack {
+                            Circle()
+                                .fill(.green.opacity(0.2))
+                                .frame(width: 24, height: 24)
+                            Text("\(index + 1)")
+                                .font(.caption)
+                                .fontWeight(.medium)
+                                .foregroundColor(.green)
+                        }
+
+                        TextField("Step \(index + 1)", text: $instructions[index], axis: .vertical)
+                            .textFieldStyle(.plain)
+
+                        if instructions.count > 1 {
+                            Button(action: {
+                                withAnimation(FluidSpring.gentle) {
+                                    _ = instructions.remove(at: index)
+                                }
+                            }) {
+                                Image(systemName: "minus.circle.fill")
+                                    .foregroundColor(.red)
+                            }
+                        }
+                    }
+                    .liquidTransition()
+                }
+            }
+            .padding()
+        }
+        .padding(.horizontal)
+    }
+
+    @ViewBuilder
+    private var nutritionPreviewSection: some View {
+        if !ingredients.isEmpty {
+            LiquidGlassCard {
+                VStack(spacing: 16) {
+                    Text("Nutrition Per Serving")
+                        .font(.headline)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+
+                    HStack(spacing: 20) {
+                        NutritionBadge(
+                            title: "Calories",
+                            value: Int(nutritionPerServing.calories),
+                            unit: "cal",
+                            color: .orange,
+                            icon: "flame.fill"
+                        )
+
+                        NutritionBadge(
+                            title: "Protein",
+                            value: Int(nutritionPerServing.protein),
+                            unit: "g",
+                            color: .red,
+                            icon: "p.square"
+                        )
+
+                        NutritionBadge(
+                            title: "Carbs",
+                            value: Int(nutritionPerServing.carbs),
+                            unit: "g",
+                            color: .blue,
+                            icon: "c.square"
+                        )
+
+                        NutritionBadge(
+                            title: "Fat",
+                            value: Int(nutritionPerServing.fat),
+                            unit: "g",
+                            color: .green,
+                            icon: "f.square"
+                        )
+                    }
+                    .animation(FluidSpring.smooth, value: nutritionPerServing.calories)
+                }
+                .padding()
+            }
+            .padding(.horizontal)
+        }
+    }
+
+    @ViewBuilder
+    private var saveButtonSection: some View {
+        Button(action: saveRecipe) {
+            HStack {
+                Image(systemName: "checkmark.circle.fill")
+                Text("Save Recipe")
+            }
+            .frame(maxWidth: .infinity)
+            .padding()
+            .background(.green)
+            .foregroundColor(.white)
+            .cornerRadius(16)
+            .shadow(color: .green.opacity(0.3), radius: 10)
+        }
+        .padding(.horizontal)
+        .disabled(recipeName.isEmpty || ingredients.isEmpty)
+        .opacity(recipeName.isEmpty || ingredients.isEmpty ? 0.6 : 1.0)
+    }
+
     private func addIngredient(_ foodItem: Recipe.SimpleFoodItem) {
         let ingredient = Recipe.RecipeIngredient(
             foodItem: foodItem,
@@ -417,7 +437,7 @@ struct RecipeBuilderView: View {
             cookingTimeMinutes: Int(cookingTime),
             difficulty: difficulty,
             category: category,
-            imageData: selectedImageData,
+            imageData: selectedImage?.jpegData(compressionQuality: 0.8),
             nutritionPerServing: Recipe.NutritionInfo(
                 calories: nutritionPerServing.calories,
                 protein: nutritionPerServing.protein,
@@ -461,7 +481,7 @@ struct CustomTextField: View {
 }
 
 struct IngredientRow: View {
-    let ingredient: RecipeIngredient
+    let ingredient: Recipe.RecipeIngredient
     let onQuantityChange: (Double) -> Void
     let onDelete: () -> Void
     

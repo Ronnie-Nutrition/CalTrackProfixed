@@ -639,7 +639,7 @@ struct LiquidGlassPreview: View {
                                 .foregroundColor(AppColors.accent)
                             
                             Text("Enhanced Liquid Glass")
-                                .font(AppFonts.title2(.semibold))
+                                .font(AppFonts.title2(weight: .semibold))
                                 .foregroundColor(AppColors.primaryText)
                         }
                         

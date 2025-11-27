@@ -345,7 +345,7 @@ class AchievementManager: ObservableObject {
             return Double(recipes.count) >= achievement.requirement
             
         case .perfectDay:
-            return checkPerfectDays(foodEntries: foodEntries, targetDays: Int(achievement.requirement))
+            return checkPerfectDays(foodEntries: foodEntries, targetDays: Int(achievement.requirement)) >= Int(achievement.requirement)
             
         case .discovery:
             let uniqueFoods = Set(foodEntries.map { $0.name })

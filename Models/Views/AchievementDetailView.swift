@@ -248,7 +248,7 @@ struct AchievementDetailView: View {
     
     private var formattedRequirement: String {
         switch achievement.type {
-        case .streak, .consecutiveDays:
+        case .streak:
             return "\(Int(achievement.requirement)) days"
         case .goalCompletion:
             return "\(Int(achievement.requirement)) goals"
