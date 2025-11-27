@@ -516,7 +516,7 @@ struct MagneticHoverEffect: ViewModifier {
         ScrollView {
             VStack(spacing: AppSpacing.lg) {
                 Text("Advanced UI Components")
-                    .font(AppFonts.title(.bold))
+                    .font(AppFonts.title(weight: .bold))
                     .foregroundColor(AppColors.primaryText)
                 
                 MorphingButton(
@@ -541,7 +541,7 @@ struct MagneticHoverEffect: ViewModifier {
                 ParallaxCard {
                     VStack {
                         Text("Parallax Card")
-                            .font(AppFonts.headline(.semibold))
+                            .font(AppFonts.headline(weight: .semibold))
                             .foregroundColor(AppColors.primaryText)
                         
                         Text("Drag me around!")

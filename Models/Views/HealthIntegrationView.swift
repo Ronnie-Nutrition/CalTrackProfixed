@@ -500,28 +500,33 @@ struct HealthIntegrationView: View {
 
 struct AuthStatusBadge: View {
     let status: HealthKitManager.AuthorizationStatus
-    
-    private var (text, color): (String, Color) {
+
+    private var statusText: String {
         switch status {
-        case .notDetermined:
-            return ("Not Connected", .gray)
-        case .denied:
-            return ("Denied", .red)
-        case .authorized:
-            return ("Connected", .green)
-        case .restricted:
-            return ("Restricted", .orange)
+        case .notDetermined: return "Not Connected"
+        case .denied: return "Denied"
+        case .authorized: return "Connected"
+        case .restricted: return "Restricted"
         }
     }
-    
+
+    private var statusColor: Color {
+        switch status {
+        case .notDetermined: return .gray
+        case .denied: return .red
+        case .authorized: return .green
+        case .restricted: return .orange
+        }
+    }
+
     var body: some View {
-        Text(text)
+        Text(statusText)
             .font(.caption)
             .fontWeight(.medium)
-            .foregroundColor(color)
+            .foregroundColor(statusColor)
             .padding(.horizontal, 8)
             .padding(.vertical, 4)
-            .background(color.opacity(0.2))
+            .background(statusColor.opacity(0.2))
             .cornerRadius(8)
     }
 }

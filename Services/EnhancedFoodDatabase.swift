@@ -1,4 +1,5 @@
 import Foundation
+import Combine
 import SwiftUI
 
 // MARK: - Enhanced Food Database Service
@@ -473,16 +474,40 @@ enum FoodSource: String, CaseIterable, Codable {
 // MARK: - Search Filters
 
 struct SearchFilters: Codable {
-    let category: String?
-    let brand: String?
-    let minCalories: Double?
-    let maxCalories: Double?
-    let minProtein: Double?
-    let maxProtein: Double?
-    let allergenFree: [String]?
-    let certifications: [String]?
-    let hasNutritionFacts: Bool?
-    let source: FoodSource?
+    var category: String?
+    var brand: String?
+    var minCalories: Double?
+    var maxCalories: Double?
+    var minProtein: Double?
+    var maxProtein: Double?
+    var allergenFree: [String]?
+    var certifications: [String]?
+    var hasNutritionFacts: Bool?
+    var source: FoodSource?
+
+    init(
+        category: String? = nil,
+        brand: String? = nil,
+        minCalories: Double? = nil,
+        maxCalories: Double? = nil,
+        minProtein: Double? = nil,
+        maxProtein: Double? = nil,
+        allergenFree: [String]? = nil,
+        certifications: [String]? = nil,
+        hasNutritionFacts: Bool? = nil,
+        source: FoodSource? = nil
+    ) {
+        self.category = category
+        self.brand = brand
+        self.minCalories = minCalories
+        self.maxCalories = maxCalories
+        self.minProtein = minProtein
+        self.maxProtein = maxProtein
+        self.allergenFree = allergenFree
+        self.certifications = certifications
+        self.hasNutritionFacts = hasNutritionFacts
+        self.source = source
+    }
 }
 
 // MARK: - Local Database Extension

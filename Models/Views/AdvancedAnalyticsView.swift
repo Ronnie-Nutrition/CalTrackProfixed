@@ -502,7 +502,7 @@ struct AdvancedAnalyticsView: View {
         return foodEntries.filter { $0.timestamp >= startDate }
     }
     
-    private func getChartData() -> [ChartDataPoint] {
+    private func getChartData() -> [AnalyticsChartDataPoint] {
         let entries = getEntriesForTimeRange()
         
         let dailyData = Dictionary(grouping: entries) { entry in
@@ -522,7 +522,7 @@ struct AdvancedAnalyticsView: View {
                 value = entries.reduce(0) { $0 + $1.totalFat }
             }
             
-            return ChartDataPoint(date: date, value: value)
+            return AnalyticsChartDataPoint(date: date, value: value)
         }
         .sorted { $0.date < $1.date }
     }
@@ -815,7 +815,7 @@ enum InsightType {
     }
 }
 
-struct ChartDataPoint: Identifiable {
+struct AnalyticsChartDataPoint: Identifiable {
     let id = UUID()
     let date: Date
     let value: Double

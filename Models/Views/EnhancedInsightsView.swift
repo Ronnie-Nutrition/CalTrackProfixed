@@ -8,7 +8,7 @@ struct EnhancedInsightsView: View {
     @State private var selectedMetric = Metric.calories
     @EnvironmentObject var appState: AppState
     @State private var animationProgress: Double = 0
-    @State private var selectedDataPoint: ChartDataPoint?
+    @State private var selectedDataPoint: EnhancedChartDataPoint?
     
     enum TimeRange: String, CaseIterable {
         case week = "Week"
@@ -358,12 +358,12 @@ struct EnhancedInsightsView: View {
         return entries.filter { $0.timestamp >= startDate }
     }
     
-    private var chartData: [ChartDataPoint] {
+    private var chartData: [EnhancedChartDataPoint] {
         let calendar = Calendar.current
         let endDate = Date()
         let startDate = calendar.date(byAdding: .day, value: -timeRange.days, to: endDate)!
         
-        var data: [ChartDataPoint] = []
+        var data: [EnhancedChartDataPoint] = []
         var currentDate = startDate
         
         while currentDate <= endDate {
@@ -385,7 +385,7 @@ struct EnhancedInsightsView: View {
                 value = 0 // Placeholder for water tracking
             }
             
-            data.append(ChartDataPoint(
+            data.append(EnhancedChartDataPoint(
                 date: currentDate,
                 value: value,
                 animatedValue: value * animationProgress
@@ -951,7 +951,7 @@ struct EnhancedAchievement: Identifiable {
 
 // Extension to fix the ChartDataPoint name conflict
 extension EnhancedInsightsView {
-    struct ChartDataPoint: Identifiable {
+    struct EnhancedChartDataPoint: Identifiable {
         let id = UUID()
         let date: Date
         let value: Double

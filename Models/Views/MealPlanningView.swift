@@ -547,7 +547,7 @@ struct EmptyMealPlansView: View {
 
 // MARK: - Data Models
 
-struct MealPlan: Identifiable, Hashable {
+struct MealPlan: Identifiable {
     let id = UUID()
     let name: String
     let description: String?

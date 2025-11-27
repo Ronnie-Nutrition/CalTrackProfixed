@@ -104,7 +104,7 @@ struct InsightsView: View {
         return entries.filter { $0.timestamp >= startDate }
     }
     
-    private var chartData: [ChartDataPoint] {
+    private var chartData: [InsightsChartDataPoint] {
         let calendar = Calendar.current
         let groupedByDay = Dictionary(grouping: filteredEntries) { entry in
             calendar.startOfDay(for: entry.timestamp)
@@ -124,12 +124,12 @@ struct InsightsView: View {
             case .weight:
                 value = 0 // Would need weight tracking
             }
-            return ChartDataPoint(date: date, value: value)
+            return InsightsChartDataPoint(date: date, value: value)
         }.sorted { $0.date < $1.date }
     }
 }
 
-struct ChartDataPoint: Identifiable {
+struct InsightsChartDataPoint: Identifiable {
     let id = UUID()
     let date: Date
     let value: Double
@@ -165,7 +165,7 @@ struct ProgressSummaryCard: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
             
             HStack(spacing: 20) {
-                StatBox(
+                InsightsStatBox(
                     title: "Avg Daily",
                     value: "\(Int(averageCalories))",
                     unit: "cal",
@@ -173,7 +173,7 @@ struct ProgressSummaryCard: View {
                     color: .orange
                 )
                 
-                StatBox(
+                InsightsStatBox(
                     title: "Days on Track",
                     value: "\(daysOnTrack)",
                     unit: "days",
@@ -181,7 +181,7 @@ struct ProgressSummaryCard: View {
                     color: .green
                 )
                 
-                StatBox(
+                InsightsStatBox(
                     title: "Streak",
                     value: "\(currentStreak)",
                     unit: "days",
@@ -217,7 +217,7 @@ struct ProgressSummaryCard: View {
     }
 }
 
-struct StatBox: View {
+struct InsightsStatBox: View {
     let title: String
     let value: String
     let unit: String
@@ -321,9 +321,9 @@ struct Insight: Identifiable {
 
 struct AchievementsSection: View {
     let achievements = [
-        Achievement(icon: "trophy.fill", title: "First Week", description: "Logged meals for 7 days", isUnlocked: true, color: .yellow),
-        Achievement(icon: "flame.fill", title: "10 Day Streak", description: "Keep the momentum going!", isUnlocked: false, color: .orange),
-        Achievement(icon: "target", title: "Goal Crusher", description: "Hit your calorie goal 5 days in a row", isUnlocked: false, color: .green)
+        InsightsAchievement(icon: "trophy.fill", title: "First Week", description: "Logged meals for 7 days", isUnlocked: true, color: .yellow),
+        InsightsAchievement(icon: "flame.fill", title: "10 Day Streak", description: "Keep the momentum going!", isUnlocked: false, color: .orange),
+        InsightsAchievement(icon: "target", title: "Goal Crusher", description: "Hit your calorie goal 5 days in a row", isUnlocked: false, color: .green)
     ]
     
     var body: some View {
@@ -334,7 +334,7 @@ struct AchievementsSection: View {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 12) {
                     ForEach(achievements) { achievement in
-                        AchievementCard(achievement: achievement)
+                        InsightsAchievementCard(achievement: achievement)
                     }
                 }
             }
@@ -342,7 +342,7 @@ struct AchievementsSection: View {
     }
 }
 
-struct Achievement: Identifiable {
+struct InsightsAchievement: Identifiable {
     let id = UUID()
     let icon: String
     let title: String
@@ -351,8 +351,8 @@ struct Achievement: Identifiable {
     let color: Color
 }
 
-struct AchievementCard: View {
-    let achievement: Achievement
+struct InsightsAchievementCard: View {
+    let achievement: InsightsAchievement
     
     var body: some View {
         VStack(spacing: 8) {

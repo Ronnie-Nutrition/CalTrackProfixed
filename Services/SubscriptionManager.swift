@@ -1,4 +1,5 @@
 import Foundation
+import Combine
 import StoreKit
 import SwiftUI
 
@@ -511,11 +512,9 @@ enum SubscriptionError: LocalizedError {
     }
 }
 
-// MARK: - CrashlyticsManager Extension
-
-extension CrashlyticsManager {
-    func logSubscriptionEvent(_ event: SubscriptionEvent) {
-        // Log subscription events for analytics
-        logEvent(event.eventName, parameters: [:])
-    }
-}
+// MARK: - Crashlytics Extension (disabled - enable when Firebase is configured)
+// extension CrashlyticsManager {
+//     func logSubscriptionEvent(_ event: SubscriptionEvent) {
+//         logEvent(event.eventName, parameters: [:])
+//     }
+// }

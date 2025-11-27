@@ -1,4 +1,5 @@
 import SwiftData
+import Combine
 import Foundation
 
 @Model

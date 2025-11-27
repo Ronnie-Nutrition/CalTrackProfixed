@@ -122,7 +122,7 @@ struct FoodRecognitionResultView: View {
                         
                         // Nutrition Summary
                         if adjustedFoods.contains(where: { $0.isSelected }) {
-                            NutritionSummaryCard(nutrition: totalNutrition)
+                            RecognitionNutritionSummaryCard(nutrition: totalNutrition)
                         }
                         
                         // Meal Type Selection
@@ -385,7 +385,7 @@ struct EmptyFoodView: View {
     }
 }
 
-struct NutritionSummaryCard: View {
+struct RecognitionNutritionSummaryCard: View {
     let nutrition: (calories: Double, protein: Double, carbs: Double, fat: Double)
     
     var body: some View {

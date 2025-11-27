@@ -357,10 +357,11 @@ struct USDANutrient: Codable {
     let unitName: String
 }
 
-// MARK: - SecureAPIConfig Extension for USDA
-
-extension SecureAPIConfig {
-    static var usdaAPIKey: String {
-        return getAPIKey(for: "USDA_API_KEY") ?? "DEMO_KEY"
+// MARK: - USDA API Key Configuration
+// Using DEMO_KEY by default - replace with your USDA API key in production
+private let usdaAPIKeyDefault: String = {
+    if let envKey = ProcessInfo.processInfo.environment["USDA_API_KEY"], !envKey.isEmpty {
+        return envKey
     }
-}
+    return "DEMO_KEY"
+}()

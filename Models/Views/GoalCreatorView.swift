@@ -119,13 +119,13 @@ struct GoalCreatorView: View {
                                         .fontWeight(.semibold)
                                         .frame(maxWidth: .infinity, alignment: .leading)
                                     
-                                    CustomTextField(
+                                    GoalCustomTextField(
                                         title: "Goal Name",
                                         text: $goalName,
                                         placeholder: selectedType.displayName
                                     )
                                     
-                                    CustomTextField(
+                                    GoalCustomTextField(
                                         title: "Description",
                                         text: $goalDescription,
                                         placeholder: "Describe what you want to achieve..."
@@ -418,7 +418,7 @@ struct GoalPreviewCard: View {
     }
 }
 
-struct CustomTextField: View {
+struct GoalCustomTextField: View {
     let title: String
     @Binding var text: String
     let placeholder: String

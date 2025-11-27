@@ -52,6 +52,57 @@ struct HomeView: View {
                     }
                 }
                 
+                // AI Meal Planner
+                NavigationLink(destination: AIMealPlannerView()) {
+                    HStack {
+                        Image(systemName: "wand.and.stars")
+                            .font(.title2)
+                            .foregroundStyle(.linearGradient(
+                                colors: [.purple, .blue],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ))
+                        
+                        VStack(alignment: .leading) {
+                            Text("AI Meal Planner")
+                                .font(.headline)
+                                .foregroundColor(.primary)
+                            
+                            Text("Generate personalized weekly meal plans")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                        
+                        Spacer()
+                        
+                        Image(systemName: "chevron.right")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    .padding()
+                    .background(
+                        LinearGradient(
+                            colors: [.purple.opacity(0.1), .blue.opacity(0.1)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                        .cornerRadius(12)
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(
+                                LinearGradient(
+                                    colors: [.purple.opacity(0.3), .blue.opacity(0.3)],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                ),
+                                lineWidth: 1
+                            )
+                    )
+                }
+                .padding(.horizontal)
+                .buttonStyle(PlainButtonStyle())
+                
                 // Recent Meals
                 RecentMealsView()
                 
