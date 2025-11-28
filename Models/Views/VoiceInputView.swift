@@ -236,9 +236,7 @@ struct VoiceInputView: View {
             self.isAuthorized = false
             self.errorMessage = "Voice input requires a physical device. Speech recognition is not available in the iOS Simulator."
         }
-        return
-        #endif
-        
+        #else
         // Check if speech recognizer is available
         guard let speechRecognizer = speechRecognizer, speechRecognizer.isAvailable else {
             DispatchQueue.main.async {
@@ -264,8 +262,9 @@ struct VoiceInputView: View {
                 }
             }
         }
+        #endif
     }
-    
+
     private func startRecording() {
         // Reset previous session
         speechText = ""

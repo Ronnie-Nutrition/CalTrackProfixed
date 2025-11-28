@@ -521,7 +521,7 @@ struct RecipeDetailView: View {
                             .font(.headline)
                             .frame(maxWidth: .infinity, alignment: .leading)
                         
-                        ForEach(scaledIngredients, id: \.id) { ingredient in
+                        ForEach(scaledIngredients, id: \.self) { ingredient in
                             HStack {
                                 Text("•")
                                     .foregroundColor(.orange)

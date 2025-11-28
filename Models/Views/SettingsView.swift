@@ -10,6 +10,8 @@ struct SettingsView: View {
     @AppStorage("units") private var units = "metric"
     @State private var showingHealthIntegration = false
     @State private var showingPremiumUpgrade = false
+    @State private var showingAPIKeySetup = false
+    @State private var hasOpenAIKey = AIFoodRecognitionService.hasOpenAIAPIKey()
     @Environment(\.dismiss) private var dismiss
     
     var body: some View {
@@ -55,6 +57,36 @@ struct SettingsView: View {
                     }
                 }
                 
+                Section("AI Food Camera") {
+                    Button(action: { showingAPIKeySetup = true }) {
+                        HStack {
+                            Image(systemName: "camera.viewfinder")
+                                .foregroundColor(.purple)
+                            Text("OpenAI Vision API")
+                            Spacer()
+                            if hasOpenAIKey {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .foregroundColor(.green)
+                            } else {
+                                Text("Not configured")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+                    }
+                    .foregroundColor(.primary)
+
+                    if hasOpenAIKey {
+                        Text("AI camera uses OpenAI Vision for accurate food recognition")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    } else {
+                        Text("Configure OpenAI API key to enable advanced AI food recognition. Without it, basic recognition is used.")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
+
                 Section("Health & Premium") {
                     Button(action: { showingHealthIntegration = true }) {
                         HStack {
@@ -68,7 +100,7 @@ struct SettingsView: View {
                         }
                     }
                     .foregroundColor(.primary)
-                    
+
                     Button(action: { showingPremiumUpgrade = true }) {
                         HStack {
                             Image(systemName: "crown.fill")
@@ -147,6 +179,154 @@ struct SettingsView: View {
                 Text("Premium upgrade feature coming soon!")
                     .padding()
             }
+            .sheet(isPresented: $showingAPIKeySetup) {
+                OpenAIAPIKeySetupView(hasOpenAIKey: $hasOpenAIKey)
+            }
         }
+    }
+}
+
+// MARK: - OpenAI API Key Setup View
+struct OpenAIAPIKeySetupView: View {
+    @Binding var hasOpenAIKey: Bool
+    @State private var apiKey = ""
+    @State private var showingKey = false
+    @State private var isSaving = false
+    @State private var showingSuccess = false
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section {
+                    VStack(alignment: .leading, spacing: 12) {
+                        Image(systemName: "camera.viewfinder")
+                            .font(.system(size: 50))
+                            .foregroundColor(.purple)
+                            .frame(maxWidth: .infinity)
+                            .padding(.bottom, 8)
+
+                        Text("OpenAI Vision API")
+                            .font(.title2)
+                            .bold()
+                            .frame(maxWidth: .infinity)
+
+                        Text("Enable advanced AI food recognition that accurately identifies foods from photos. OpenAI Vision can recognize specific dishes, ingredients, and portion sizes.")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                            .multilineTextAlignment(.center)
+                    }
+                    .padding(.vertical, 8)
+                }
+
+                Section("API Key") {
+                    HStack {
+                        if showingKey {
+                            TextField("sk-...", text: $apiKey)
+                                .autocapitalization(.none)
+                                .autocorrectionDisabled()
+                                .font(.system(.body, design: .monospaced))
+                        } else {
+                            SecureField("sk-...", text: $apiKey)
+                                .autocapitalization(.none)
+                                .autocorrectionDisabled()
+                        }
+
+                        Button(action: { showingKey.toggle() }) {
+                            Image(systemName: showingKey ? "eye.slash" : "eye")
+                                .foregroundColor(.secondary)
+                        }
+                    }
+
+                    if hasOpenAIKey && apiKey.isEmpty {
+                        HStack {
+                            Image(systemName: "checkmark.circle.fill")
+                                .foregroundColor(.green)
+                            Text("API key is configured")
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                }
+
+                Section {
+                    Link(destination: URL(string: "https://platform.openai.com/api-keys")!) {
+                        HStack {
+                            Image(systemName: "key.fill")
+                                .foregroundColor(.blue)
+                            Text("Get API Key from OpenAI")
+                            Spacer()
+                            Image(systemName: "arrow.up.right.square")
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                } footer: {
+                    Text("You need an OpenAI account. API usage is pay-per-use (~$0.01 per image analysis).")
+                }
+
+                Section {
+                    Button(action: saveAPIKey) {
+                        HStack {
+                            if isSaving {
+                                ProgressView()
+                                    .progressViewStyle(CircularProgressViewStyle())
+                            } else {
+                                Image(systemName: "checkmark.circle.fill")
+                            }
+                            Text(apiKey.isEmpty && hasOpenAIKey ? "Key Already Saved" : "Save API Key")
+                        }
+                        .frame(maxWidth: .infinity)
+                    }
+                    .disabled(apiKey.isEmpty || isSaving)
+
+                    if hasOpenAIKey {
+                        Button(role: .destructive, action: removeAPIKey) {
+                            HStack {
+                                Image(systemName: "trash")
+                                Text("Remove API Key")
+                            }
+                            .frame(maxWidth: .infinity)
+                        }
+                    }
+                }
+            }
+            .navigationTitle("AI Camera Setup")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Done") {
+                        dismiss()
+                    }
+                }
+            }
+            .alert("API Key Saved", isPresented: $showingSuccess) {
+                Button("OK") {
+                    dismiss()
+                }
+            } message: {
+                Text("Your OpenAI API key has been securely saved. The AI camera will now use OpenAI Vision for food recognition.")
+            }
+        }
+    }
+
+    private func saveAPIKey() {
+        guard !apiKey.isEmpty else { return }
+        isSaving = true
+
+        // Validate key format
+        if !apiKey.hasPrefix("sk-") {
+            isSaving = false
+            return
+        }
+
+        AIFoodRecognitionService.setOpenAIAPIKey(apiKey)
+        hasOpenAIKey = true
+        isSaving = false
+        showingSuccess = true
+    }
+
+    private func removeAPIKey() {
+        AIFoodRecognitionService.clearOpenAIAPIKey()
+        hasOpenAIKey = false
+        apiKey = ""
     }
 }

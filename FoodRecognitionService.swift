@@ -2,13 +2,40 @@
 //  FoodRecognitionService.swift
 //  CalTrackPro
 //
-//  AI-powered food recognition using Vision and CoreML
+//  AI-powered food recognition using OpenAI Vision API
 //
 
 import Foundation
 import Vision
 import CoreML
 import UIKit
+
+// MARK: - OpenAI Vision Response Models
+struct OpenAIVisionResponse: Codable {
+    let choices: [OpenAIChoice]
+}
+
+struct OpenAIChoice: Codable {
+    let message: OpenAIMessage
+}
+
+struct OpenAIMessage: Codable {
+    let content: String
+}
+
+struct OpenAIFoodAnalysis: Codable {
+    let foods: [DetectedFood]
+}
+
+struct DetectedFood: Codable {
+    let name: String
+    let confidence: Double
+    let estimatedCalories: Int?
+    let estimatedProtein: Double?
+    let estimatedCarbs: Double?
+    let estimatedFat: Double?
+    let servingSize: String?
+}
 
 // MARK: - Food Recognition Result
 struct FoodRecognitionResult: Identifiable {
@@ -49,19 +76,88 @@ enum FoodRecognitionError: Error, LocalizedError {
 // MARK: - Food Recognition Service
 @MainActor
 class FoodRecognitionService: ObservableObject {
-    
+
     // MARK: - Published Properties
     @Published var isProcessing = false
     @Published var lastResults: [FoodRecognitionResult] = []
     @Published var errorMessage: String?
-    
+
     // MARK: - Private Properties
     private var visionModel: VNCoreMLModel?
     private let nutritionService = NutritionAPIService()
-    
+
+    // OpenAI Configuration
+    private let openAIEndpoint = "https://api.openai.com/v1/chat/completions"
+    private var openAIAPIKey: String {
+        // Try to get from Keychain first, then environment, then use demo key
+        if let key = KeychainManager.shared.get(key: "openai_api_key"), !key.isEmpty {
+            return key
+        }
+        return ProcessInfo.processInfo.environment["OPENAI_API_KEY"] ?? ""
+    }
+
+    private var useOpenAI: Bool {
+        !openAIAPIKey.isEmpty
+    }
+
+    // MARK: - Food Vocabulary (for filtering non-food results)
+    private let foodKeywords: Set<String> = [
+        // Proteins
+        "chicken", "beef", "pork", "fish", "salmon", "tuna", "shrimp", "lobster", "crab",
+        "steak", "meat", "bacon", "sausage", "ham", "turkey", "duck", "lamb", "egg", "eggs",
+        // Dairy
+        "cheese", "milk", "yogurt", "butter", "cream", "ice cream",
+        // Grains & Breads
+        "bread", "rice", "pasta", "noodle", "cereal", "oatmeal", "pancake", "waffle",
+        "toast", "bagel", "muffin", "croissant", "biscuit", "cracker", "pretzel",
+        // Fruits
+        "apple", "banana", "orange", "grape", "strawberry", "blueberry", "raspberry",
+        "watermelon", "melon", "pineapple", "mango", "peach", "pear", "cherry", "lemon",
+        "lime", "kiwi", "coconut", "avocado", "tomato", "fruit",
+        // Vegetables
+        "carrot", "broccoli", "spinach", "lettuce", "salad", "potato", "corn", "pea",
+        "bean", "onion", "garlic", "pepper", "cucumber", "celery", "cabbage", "cauliflower",
+        "asparagus", "mushroom", "vegetable", "zucchini", "squash", "eggplant",
+        // Snacks & Desserts
+        "cookie", "cake", "pie", "donut", "doughnut", "candy", "chocolate", "brownie",
+        "cupcake", "pastry", "chips", "popcorn", "nuts", "peanut", "almond",
+        // Meals
+        "pizza", "burger", "hamburger", "sandwich", "taco", "burrito", "sushi", "soup",
+        "salad", "stew", "curry", "casserole", "lasagna", "wrap", "hot dog", "hotdog",
+        // Beverages
+        "coffee", "tea", "juice", "soda", "smoothie", "shake", "wine", "beer",
+        // Other foods
+        "sauce", "dressing", "syrup", "honey", "jam", "jelly", "peanut butter",
+        "hummus", "guacamole", "salsa", "dip", "spread", "condiment",
+        "protein bar", "granola", "snack", "food", "meal", "dish", "plate"
+    ]
+
     // MARK: - Initialization
     init() {
         loadModel()
+    }
+
+    // MARK: - API Key Configuration
+    static func setOpenAIAPIKey(_ key: String) {
+        KeychainManager.shared.set(value: key, forKey: "openai_api_key")
+    }
+
+    static func getOpenAIAPIKey() -> String? {
+        KeychainManager.shared.get(key: "openai_api_key")
+    }
+
+    static func hasOpenAIAPIKey() -> Bool {
+        if let key = getOpenAIAPIKey(), !key.isEmpty {
+            return true
+        }
+        if let envKey = ProcessInfo.processInfo.environment["OPENAI_API_KEY"], !envKey.isEmpty {
+            return true
+        }
+        return false
+    }
+
+    static func clearOpenAIAPIKey() {
+        KeychainManager.shared.delete(key: "openai_api_key")
     }
     
     // MARK: - Model Loading
@@ -87,16 +183,26 @@ class FoodRecognitionService: ObservableObject {
     func recognizeFood(from image: UIImage) async throws -> [FoodRecognitionResult] {
         isProcessing = true
         errorMessage = nil
-        
+
         defer { isProcessing = false }
-        
+
+        // Use OpenAI Vision if API key is available
+        if useOpenAI {
+            print("🤖 Using OpenAI Vision API for food recognition")
+            let results = try await performOpenAIVisionRecognition(image: image)
+            lastResults = results
+            return results
+        }
+
+        // Fallback to Apple Vision framework
+        print("📱 Using Apple Vision framework (no OpenAI API key configured)")
         guard let cgImage = image.cgImage else {
             throw FoodRecognitionError.imageProcessingFailed
         }
-        
+
         // Use Vision framework for classification
         let results = try await performVisionClassification(on: cgImage)
-        
+
         // Enrich results with nutrition data
         var enrichedResults: [FoodRecognitionResult] = []
         for result in results {
@@ -114,9 +220,165 @@ class FoodRecognitionService: ObservableObject {
                 enrichedResults.append(result)
             }
         }
-        
+
         lastResults = enrichedResults
         return enrichedResults
+    }
+
+    // MARK: - OpenAI Vision Recognition
+    private func performOpenAIVisionRecognition(image: UIImage) async throws -> [FoodRecognitionResult] {
+        // Resize image to reduce API costs (max 512px on longest side)
+        let resizedImage = resizeImage(image, maxDimension: 512)
+
+        // Convert to base64
+        guard let imageData = resizedImage.jpegData(compressionQuality: 0.8) else {
+            throw FoodRecognitionError.imageProcessingFailed
+        }
+        let base64Image = imageData.base64EncodedString()
+
+        // Create request
+        guard let url = URL(string: openAIEndpoint) else {
+            throw FoodRecognitionError.networkError("Invalid URL")
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("Bearer \(openAIAPIKey)", forHTTPHeaderField: "Authorization")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        // Create the prompt for food analysis
+        let prompt = """
+        Analyze this image and identify all food items visible. For each food item, provide:
+        1. The food name (be specific, e.g., "chocolate chip cookie" not just "cookie")
+        2. Your confidence level (0.0 to 1.0)
+        3. Estimated calories per serving
+        4. Estimated protein in grams
+        5. Estimated carbs in grams
+        6. Estimated fat in grams
+        7. Typical serving size
+
+        Respond ONLY with valid JSON in this exact format (no markdown, no explanation):
+        {"foods": [{"name": "food name", "confidence": 0.95, "estimatedCalories": 150, "estimatedProtein": 5.0, "estimatedCarbs": 20.0, "estimatedFat": 6.0, "servingSize": "1 cookie (30g)"}]}
+
+        If no food is detected, respond with: {"foods": []}
+        """
+
+        let requestBody: [String: Any] = [
+            "model": "gpt-4o",
+            "messages": [
+                [
+                    "role": "user",
+                    "content": [
+                        [
+                            "type": "text",
+                            "text": prompt
+                        ],
+                        [
+                            "type": "image_url",
+                            "image_url": [
+                                "url": "data:image/jpeg;base64,\(base64Image)",
+                                "detail": "low"  // Use low detail to reduce costs
+                            ]
+                        ]
+                    ]
+                ]
+            ],
+            "max_tokens": 500
+        ]
+
+        request.httpBody = try JSONSerialization.data(withJSONObject: requestBody)
+
+        // Make the request
+        let (data, response) = try await URLSession.shared.data(for: request)
+
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw FoodRecognitionError.networkError("Invalid response")
+        }
+
+        if httpResponse.statusCode != 200 {
+            if let errorString = String(data: data, encoding: .utf8) {
+                print("❌ OpenAI API Error: \(errorString)")
+            }
+            throw FoodRecognitionError.networkError("API returned status \(httpResponse.statusCode)")
+        }
+
+        // Parse the response
+        let openAIResponse = try JSONDecoder().decode(OpenAIVisionResponse.self, from: data)
+
+        guard let content = openAIResponse.choices.first?.message.content else {
+            throw FoodRecognitionError.noResultsFound
+        }
+
+        print("📝 OpenAI Response: \(content)")
+
+        // Parse the JSON content from the response
+        // Clean up the response in case it has markdown formatting
+        var cleanedContent = content
+            .replacingOccurrences(of: "```json", with: "")
+            .replacingOccurrences(of: "```", with: "")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+
+        guard let jsonData = cleanedContent.data(using: .utf8) else {
+            throw FoodRecognitionError.invalidResponse
+        }
+
+        let foodAnalysis = try JSONDecoder().decode(OpenAIFoodAnalysis.self, from: jsonData)
+
+        if foodAnalysis.foods.isEmpty {
+            throw FoodRecognitionError.noResultsFound
+        }
+
+        // Convert to FoodRecognitionResult
+        var results: [FoodRecognitionResult] = []
+        for food in foodAnalysis.foods {
+            // Try to get more accurate nutrition from our nutrition API
+            var calories = food.estimatedCalories
+            var protein = food.estimatedProtein
+            var carbs = food.estimatedCarbs
+            var fat = food.estimatedFat
+            var servingSize = food.servingSize
+
+            if let nutritionData = try? await nutritionService.fetchNutrition(for: food.name) {
+                calories = nutritionData.calories
+                protein = nutritionData.protein
+                carbs = nutritionData.carbs
+                fat = nutritionData.fat
+                servingSize = nutritionData.servingSize
+            }
+
+            results.append(FoodRecognitionResult(
+                name: food.name,
+                confidence: Float(food.confidence),
+                calories: calories,
+                protein: protein,
+                carbs: carbs,
+                fat: fat,
+                servingSize: servingSize
+            ))
+
+            print("✅ Detected: \(food.name) (\(Int(food.confidence * 100))% confidence)")
+        }
+
+        return results
+    }
+
+    // MARK: - Image Resizing Helper
+    private func resizeImage(_ image: UIImage, maxDimension: CGFloat) -> UIImage {
+        let size = image.size
+        let ratio = max(size.width, size.height) / maxDimension
+
+        if ratio <= 1 {
+            return image
+        }
+
+        let newSize = CGSize(width: size.width / ratio, height: size.height / ratio)
+
+        UIGraphicsBeginImageContextWithOptions(newSize, false, 1.0)
+        image.draw(in: CGRect(origin: .zero, size: newSize))
+        let resizedImage = UIGraphicsGetImageFromCurrentImageContext() ?? image
+        UIGraphicsEndImageContext()
+
+        return resizedImage
     }
     
     // MARK: - Vision Classification
@@ -160,19 +422,27 @@ class FoodRecognitionService: ObservableObject {
             continuation.resume(throwing: error)
             return
         }
-        
+
         guard let observations = request.results as? [VNClassificationObservation] else {
             continuation.resume(throwing: FoodRecognitionError.noResultsFound)
             return
         }
-        
-        // Filter for food-related results with decent confidence
+
+        // Filter for food-related results only
         let foodResults = observations
-            .filter { $0.confidence > 0.1 }
+            .filter { observation in
+                let identifier = observation.identifier.lowercased()
+                // Check if any food keyword is contained in the identifier
+                return observation.confidence > 0.05 && foodKeywords.contains(where: { keyword in
+                    identifier.contains(keyword) || keyword.contains(identifier)
+                })
+            }
             .prefix(5)
             .map { observation in
-                FoodRecognitionResult(
-                    name: observation.identifier.capitalized,
+                // Clean up the identifier for display
+                let cleanName = cleanFoodName(observation.identifier)
+                return FoodRecognitionResult(
+                    name: cleanName,
                     confidence: observation.confidence,
                     calories: nil,
                     protein: nil,
@@ -181,12 +451,30 @@ class FoodRecognitionService: ObservableObject {
                     servingSize: nil
                 )
             }
-        
+
         if foodResults.isEmpty {
+            // If no food detected, provide helpful feedback
+            print("⚠️ No food items detected. Top classifications were:")
+            for obs in observations.prefix(5) {
+                print("   - \(obs.identifier): \(Int(obs.confidence * 100))%")
+            }
             continuation.resume(throwing: FoodRecognitionError.noResultsFound)
         } else {
+            print("✅ Food items detected:")
+            for result in foodResults {
+                print("   - \(result.name): \(Int(result.confidence * 100))%")
+            }
             continuation.resume(returning: Array(foodResults))
         }
+    }
+
+    /// Clean up Vision identifier for display
+    private func cleanFoodName(_ identifier: String) -> String {
+        // Vision returns identifiers like "chocolate_chip_cookie" or "granny_smith"
+        return identifier
+            .replacingOccurrences(of: "_", with: " ")
+            .replacingOccurrences(of: "-", with: " ")
+            .capitalized
     }
     
     // MARK: - Portion Size Estimation (using depth data if available)

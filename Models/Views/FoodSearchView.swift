@@ -38,7 +38,7 @@ struct FoodSearchView: View {
                         .onSubmit {
                             searchFoods()
                         }
-                        .onChange(of: searchText) { _ in
+                        .onChange(of: searchText) { _, _ in
                             error = nil // Clear error when typing
                         }
                     

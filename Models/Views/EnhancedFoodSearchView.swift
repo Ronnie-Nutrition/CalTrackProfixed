@@ -301,7 +301,7 @@ struct EnhancedFoodSearchView: View {
         saveRecentSearch(searchText)
         
         Task {
-            await foodDatabase.searchFood(query: searchText, filters: selectedFilters)
+            _ = await foodDatabase.searchFood(query: searchText, filters: selectedFilters)
             isSearching = false
         }
     }

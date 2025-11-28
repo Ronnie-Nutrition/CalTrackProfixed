@@ -63,7 +63,7 @@ struct ProfileView: View {
                         }
                         .buttonStyle(PlainButtonStyle())
                         
-                        Button(action: {}) {
+                        Button(action: { showingSettings = true }) {
                             SettingsRow(title: "Settings", icon: "gearshape.fill", color: .gray)
                         }
                     }
@@ -87,6 +87,9 @@ struct ProfileView: View {
             .navigationBarTitleDisplayMode(.inline)
             .sheet(isPresented: $isEditing) {
                 Text("Edit Profile Coming Soon")
+            }
+            .sheet(isPresented: $showingSettings) {
+                SettingsView()
             }
         }
         .applyAdaptiveTheme()

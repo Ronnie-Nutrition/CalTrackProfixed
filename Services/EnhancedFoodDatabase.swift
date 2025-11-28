@@ -376,7 +376,7 @@ class EnhancedFoodDatabase: ObservableObject {
 // MARK: - Enhanced Food Item
 
 struct EnhancedFoodItem: Identifiable, Codable, Hashable {
-    let id = UUID()
+    var id = UUID()
     let foodId: String
     let name: String
     let brand: String?
@@ -391,7 +391,13 @@ struct EnhancedFoodItem: Identifiable, Codable, Hashable {
     let allergens: [String]?
     let certifications: [String]?
     let lastUpdated: Date
-    
+
+    private enum CodingKeys: String, CodingKey {
+        case foodId, name, brand, category, source, qualityScore
+        case basicNutrition, hasDetailedNutrition, imageURL, barcode
+        case ingredients, allergens, certifications, lastUpdated
+    }
+
     var normalizedName: String {
         name.lowercased()
             .replacingOccurrences(of: "[^a-z0-9\\s]", with: "", options: .regularExpression)

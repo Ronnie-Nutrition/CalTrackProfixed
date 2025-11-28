@@ -143,11 +143,54 @@ final class KeychainManager {
     }
 }
 
+// MARK: - Convenience Methods
+extension KeychainManager {
+    /// Simple get method for compatibility
+    func get(key: String) -> String? {
+        try? getString(for: key)
+    }
+
+    /// Simple set method for compatibility
+    func set(value: String, forKey key: String) {
+        try? save(value, for: key)
+    }
+
+    /// Simple delete method for compatibility
+    func removeValue(forKey key: String) {
+        try? delete(for: key)
+    }
+}
+
 // MARK: - API Key Storage Extension
 extension KeychainManager {
     private enum Keys {
         static let edamamAppId = "EDAMAM_APP_ID_SECURE"
         static let edamamAppKey = "EDAMAM_APP_KEY_SECURE"
+        static let openAIAPIKey = "OPENAI_API_KEY_SECURE"
+    }
+
+    // MARK: - OpenAI API Key Methods
+
+    func setOpenAIAPIKey(_ key: String) {
+        try? save(key, for: Keys.openAIAPIKey)
+    }
+
+    func getOpenAIAPIKey() -> String? {
+        try? getString(for: Keys.openAIAPIKey)
+    }
+
+    func deleteOpenAIAPIKey() {
+        try? delete(for: Keys.openAIAPIKey)
+    }
+
+    var hasOpenAIAPIKey: Bool {
+        if let key = getOpenAIAPIKey(), !key.isEmpty {
+            return true
+        }
+        if let envKey = ProcessInfo.processInfo.environment["OPENAI_API_KEY"], !envKey.isEmpty {
+            return true
+        }
+        return false
     }
     
     /// Stores API credentials securely

@@ -175,8 +175,8 @@ struct ManualEntryView: View {
         
         modelContext.insert(entry)
         
-        // Cache the food for offline access
-        let foodItem = FoodItem(
+        // Cache the food for offline access (placeholder for future implementation)
+        _ = FoodItem(
             foodId: UUID().uuidString,
             label: name,
             nutrients: Nutrients(
@@ -189,7 +189,6 @@ struct ManualEntryView: View {
             categoryLabel: brand.isEmpty ? nil : brand,
             image: nil
         )
-        // Note: Offline cache will be implemented later
         
         do {
             try modelContext.save()

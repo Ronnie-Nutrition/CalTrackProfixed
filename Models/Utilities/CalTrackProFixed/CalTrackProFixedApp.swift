@@ -12,13 +12,9 @@ struct CalTrackProFixedApp: App {
                 Recipe.self,
                 UserProfile.self
             ])
-            
-            let modelConfiguration = ModelConfiguration(
-                schema: schema,
-                isStoredInMemoryOnly: false,
-                allowsSave: true
-            )
-            
+
+            let modelConfiguration = ModelConfiguration(isStoredInMemoryOnly: true) // TODO: Change back to false after fixing schema
+
             self.modelContainer = try ModelContainer(
                 for: schema,
                 configurations: [modelConfiguration]

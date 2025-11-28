@@ -632,7 +632,7 @@ struct WeeklyMealPlan: Codable, Identifiable {
 }
 
 struct DailyMealPlan: Codable, Identifiable {
-    let id = UUID()
+    var id = UUID()
     let date: Date
     let meals: [PlannedMeal]
     let totalCalories: Double
@@ -642,7 +642,7 @@ struct DailyMealPlan: Codable, Identifiable {
 }
 
 struct PlannedMeal: Codable, Identifiable {
-    let id = UUID()
+    var id = UUID()
     let mealType: MealType
     let foods: [PlannedFood]
     let totalCalories: Double
@@ -654,7 +654,7 @@ struct PlannedMeal: Codable, Identifiable {
 }
 
 struct PlannedFood: Codable, Identifiable {
-    let id = UUID()
+    var id = UUID()
     let name: String
     let brand: String?
     let quantity: Double

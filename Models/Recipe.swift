@@ -41,8 +41,7 @@ final class Recipe {
         let fat: Double
     }
     
-    struct SimpleFoodItem: Codable, Identifiable {
-        let id: UUID
+    struct SimpleFoodItem: Codable, Hashable {
         let name: String
         let brand: String?
         let barcode: String?
@@ -56,7 +55,6 @@ final class Recipe {
         init(name: String, brand: String? = nil, barcode: String? = nil,
              calories: Double, protein: Double, carbs: Double, fat: Double,
              servingSize: Double, servingUnit: String) {
-            self.id = UUID()
             self.name = name
             self.brand = brand
             self.barcode = barcode
@@ -69,27 +67,30 @@ final class Recipe {
         }
     }
     
-    struct RecipeIngredient: Codable, Identifiable {
-        let id = UUID()
+    struct RecipeIngredient: Codable, Hashable {
         let foodItem: SimpleFoodItem
         var quantity: Double
-        
+
+        private enum CodingKeys: String, CodingKey {
+            case foodItem, quantity
+        }
+
         var calories: Double {
             (foodItem.calories * quantity) / foodItem.servingSize
         }
-        
+
         var protein: Double {
             (foodItem.protein * quantity) / foodItem.servingSize
         }
-        
+
         var carbs: Double {
             (foodItem.carbs * quantity) / foodItem.servingSize
         }
-        
+
         var fat: Double {
             (foodItem.fat * quantity) / foodItem.servingSize
         }
-        
+
         init(foodItem: SimpleFoodItem, quantity: Double) {
             self.foodItem = foodItem
             self.quantity = quantity

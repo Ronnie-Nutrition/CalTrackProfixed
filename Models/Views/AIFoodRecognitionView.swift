@@ -332,7 +332,7 @@ struct AIFoodRecognitionView: View {
     private func processImage(_ image: UIImage) {
         Task {
             do {
-                let result = try await recognitionService.recognizeFood(from: image)
+                _ = try await recognitionService.recognizeFood(from: image)
                 await MainActor.run {
                     showingResultsView = true
                 }

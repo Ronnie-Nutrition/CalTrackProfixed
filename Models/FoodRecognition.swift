@@ -3,17 +3,75 @@ import Combine
 import SwiftUI
 import Vision
 import CoreML
+import Security
+
+// MARK: - Simple Keychain Helper for OpenAI API Key
+private struct OpenAIKeychain {
+    private static let service = "com.caltrackpro.openai"
+    private static let account = "api_key"
+
+    static func save(_ key: String) {
+        guard let data = key.data(using: .utf8) else { return }
+
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: service,
+            kSecAttrAccount as String: account
+        ]
+        SecItemDelete(query as CFDictionary)
+
+        var addQuery = query
+        addQuery[kSecValueData as String] = data
+        SecItemAdd(addQuery as CFDictionary, nil)
+    }
+
+    static func get() -> String? {
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: service,
+            kSecAttrAccount as String: account,
+            kSecReturnData as String: true,
+            kSecMatchLimit as String: kSecMatchLimitOne
+        ]
+
+        var result: AnyObject?
+        if SecItemCopyMatching(query as CFDictionary, &result) == errSecSuccess,
+           let data = result as? Data {
+            return String(data: data, encoding: .utf8)
+        }
+        return nil
+    }
+
+    static func delete() {
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: service,
+            kSecAttrAccount as String: account
+        ]
+        SecItemDelete(query as CFDictionary)
+    }
+
+    static var hasKey: Bool {
+        if let key = get(), !key.isEmpty { return true }
+        if let envKey = ProcessInfo.processInfo.environment["OPENAI_API_KEY"], !envKey.isEmpty { return true }
+        return false
+    }
+}
 
 // MARK: - Food Recognition Models
 
 struct RecognizedFood: Identifiable, Codable {
-    let id = UUID()
+    var id = UUID()
     let name: String
     let confidence: Double
     let boundingBox: CGRect?
     let nutritionInfo: NutritionInfo?
     let estimatedWeight: Double? // in grams
     let category: FoodCategory
+
+    private enum CodingKeys: String, CodingKey {
+        case name, confidence, boundingBox, nutritionInfo, estimatedWeight, category
+    }
     
     struct NutritionInfo: Codable {
         let calories: Double
@@ -101,6 +159,34 @@ struct FoodRecognitionResult {
     }
 }
 
+// MARK: - OpenAI Vision Response Models
+private struct OpenAIVisionResponse: Codable {
+    let choices: [OpenAIChoice]
+}
+
+private struct OpenAIChoice: Codable {
+    let message: OpenAIMessage
+}
+
+private struct OpenAIMessage: Codable {
+    let content: String
+}
+
+private struct OpenAIFoodAnalysis: Codable {
+    let foods: [OpenAIDetectedFood]
+}
+
+private struct OpenAIDetectedFood: Codable {
+    let name: String
+    let confidence: Double
+    let estimatedCalories: Int?
+    let estimatedProtein: Double?
+    let estimatedCarbs: Double?
+    let estimatedFat: Double?
+    let servingSize: String?
+    let category: String?
+}
+
 // MARK: - AI Food Recognition Service
 
 @MainActor
@@ -108,68 +194,119 @@ class AIFoodRecognitionService: ObservableObject {
     @Published var isProcessing = false
     @Published var lastResult: FoodRecognitionResult?
     @Published var error: FoodRecognitionError?
-    
+
+    // OpenAI Configuration
+    private let openAIEndpoint = "https://api.openai.com/v1/chat/completions"
+
+    private var openAIAPIKey: String? {
+        if let key = OpenAIKeychain.get(), !key.isEmpty {
+            return key
+        }
+        if let envKey = ProcessInfo.processInfo.environment["OPENAI_API_KEY"], !envKey.isEmpty {
+            return envKey
+        }
+        return nil
+    }
+
+    private var useOpenAI: Bool {
+        openAIAPIKey != nil
+    }
+
+    // MARK: - Static API Key Methods
+    static func setOpenAIAPIKey(_ key: String) {
+        OpenAIKeychain.save(key)
+    }
+
+    static func getOpenAIAPIKey() -> String? {
+        OpenAIKeychain.get()
+    }
+
+    static func hasOpenAIAPIKey() -> Bool {
+        OpenAIKeychain.hasKey
+    }
+
+    static func clearOpenAIAPIKey() {
+        OpenAIKeychain.delete()
+    }
+
     enum FoodRecognitionError: LocalizedError {
         case imageProcessingFailed
         case modelNotAvailable
-        case networkError
+        case networkError(String)
         case lowConfidence
         case noFoodDetected
-        
+        case invalidResponse
+
         var errorDescription: String? {
             switch self {
             case .imageProcessingFailed:
                 return "Failed to process the image. Please try again."
             case .modelNotAvailable:
                 return "Food recognition model is not available."
-            case .networkError:
-                return "Network error. Please check your connection."
+            case .networkError(let message):
+                return "Network error: \(message)"
             case .lowConfidence:
                 return "Could not confidently identify the food. Try a clearer photo."
             case .noFoodDetected:
                 return "No food items detected in the image."
+            case .invalidResponse:
+                return "Invalid response from AI service."
             }
         }
     }
     
     // MARK: - Main Recognition Method
-    
+
     func recognizeFood(from image: UIImage) async throws -> FoodRecognitionResult {
         isProcessing = true
         error = nil
-        
+
         let startTime = Date()
-        
+
         defer {
             isProcessing = false
         }
-        
+
         do {
             // Step 1: Preprocess image
             guard let processedImage = preprocessImage(image) else {
                 throw FoodRecognitionError.imageProcessingFailed
             }
-            
+
             // Step 2: Run food detection
-            let detectedFoods = try await detectFoods(in: processedImage)
-            
-            // Step 3: Get nutrition information
-            let recognizedFoods = await withTaskGroup(of: RecognizedFood?.self) { group in
-                for food in detectedFoods {
-                    group.addTask {
-                        return await self.enhanceWithNutrition(food)
-                    }
-                }
-                
-                var results: [RecognizedFood] = []
-                for await result in group {
-                    if let food = result {
-                        results.append(food)
-                    }
-                }
-                return results
+            let detectedFoods: [RecognizedFood]
+
+            if useOpenAI {
+                print("🤖 Using OpenAI Vision API for food recognition")
+                detectedFoods = try await detectFoodsWithOpenAI(in: processedImage)
+            } else {
+                print("📱 Using mock detection (no OpenAI API key configured)")
+                detectedFoods = try await detectFoods(in: processedImage)
             }
-            
+
+            // Step 3: Get nutrition information (for mock results)
+            let recognizedFoods: [RecognizedFood]
+            if useOpenAI {
+                // OpenAI results already have nutrition estimates
+                recognizedFoods = detectedFoods
+            } else {
+                recognizedFoods = await withTaskGroup(of: RecognizedFood?.self) { group in
+                    for food in detectedFoods {
+                        group.addTask {
+                            return await self.enhanceWithNutrition(food)
+                        }
+                    }
+
+                    var results: [RecognizedFood] = []
+                    for await result in group {
+                        if let food = result {
+                            results.append(food)
+                        }
+                    }
+                    return results
+                }
+            }
+
             let processingTime = Date().timeIntervalSince(startTime)
             let result = FoodRecognitionResult(
                 image: image,
@@ -177,13 +314,144 @@ class AIFoodRecognitionService: ObservableObject {
                 processingTime: processingTime,
                 confidence: recognizedFoods.isEmpty ? 0 : recognizedFoods.reduce(0) { $0 + $1.confidence } / Double(recognizedFoods.count)
             )
-            
+
             lastResult = result
             return result
-            
+
         } catch {
             self.error = error as? FoodRecognitionError ?? .imageProcessingFailed
             throw error
+        }
+    }
+
+    // MARK: - OpenAI Vision Detection
+
+    private func detectFoodsWithOpenAI(in image: UIImage) async throws -> [RecognizedFood] {
+        guard let apiKey = openAIAPIKey else {
+            throw FoodRecognitionError.modelNotAvailable
+        }
+
+        // Convert to base64
+        guard let imageData = image.jpegData(compressionQuality: 0.8) else {
+            throw FoodRecognitionError.imageProcessingFailed
+        }
+        let base64Image = imageData.base64EncodedString()
+
+        // Create request
+        guard let url = URL(string: openAIEndpoint) else {
+            throw FoodRecognitionError.networkError("Invalid URL")
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        // Create the prompt for food analysis
+        let prompt = """
+        Analyze this image and identify all food items visible. For each food item, provide:
+        1. The food name (be specific, e.g., "chocolate chip cookie" not just "cookie")
+        2. Your confidence level (0.0 to 1.0)
+        3. Estimated calories per serving
+        4. Estimated protein in grams
+        5. Estimated carbs in grams
+        6. Estimated fat in grams
+        7. Typical serving size
+        8. Food category (one of: Fruits, Vegetables, Grains, Protein, Dairy, Nuts & Seeds, Beverages, Sweets, Prepared Foods, Unknown)
+
+        Respond ONLY with valid JSON in this exact format (no markdown, no explanation):
+        {"foods": [{"name": "food name", "confidence": 0.95, "estimatedCalories": 150, "estimatedProtein": 5.0, "estimatedCarbs": 20.0, "estimatedFat": 6.0, "servingSize": "1 cookie (30g)", "category": "Sweets"}]}
+
+        If no food is detected, respond with: {"foods": []}
+        """
+
+        let requestBody: [String: Any] = [
+            "model": "gpt-4o",
+            "messages": [
+                [
+                    "role": "user",
+                    "content": [
+                        [
+                            "type": "text",
+                            "text": prompt
+                        ],
+                        [
+                            "type": "image_url",
+                            "image_url": [
+                                "url": "data:image/jpeg;base64,\(base64Image)",
+                                "detail": "low"
+                            ]
+                        ]
+                    ]
+                ]
+            ],
+            "max_tokens": 500
+        ]
+
+        request.httpBody = try JSONSerialization.data(withJSONObject: requestBody)
+
+        // Make the request
+        let (data, response) = try await URLSession.shared.data(for: request)
+
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw FoodRecognitionError.networkError("Invalid response")
+        }
+
+        if httpResponse.statusCode != 200 {
+            if let errorString = String(data: data, encoding: .utf8) {
+                print("❌ OpenAI API Error: \(errorString)")
+            }
+            throw FoodRecognitionError.networkError("API returned status \(httpResponse.statusCode)")
+        }
+
+        // Parse the response
+        let openAIResponse = try JSONDecoder().decode(OpenAIVisionResponse.self, from: data)
+
+        guard let content = openAIResponse.choices.first?.message.content else {
+            throw FoodRecognitionError.noFoodDetected
+        }
+
+        print("📝 OpenAI Response: \(content)")
+
+        // Clean up the response in case it has markdown formatting
+        let cleanedContent = content
+            .replacingOccurrences(of: "```json", with: "")
+            .replacingOccurrences(of: "```", with: "")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+
+        guard let jsonData = cleanedContent.data(using: .utf8) else {
+            throw FoodRecognitionError.invalidResponse
+        }
+
+        let foodAnalysis = try JSONDecoder().decode(OpenAIFoodAnalysis.self, from: jsonData)
+
+        if foodAnalysis.foods.isEmpty {
+            throw FoodRecognitionError.noFoodDetected
+        }
+
+        // Convert to RecognizedFood
+        return foodAnalysis.foods.map { food in
+            let category = RecognizedFood.FoodCategory(rawValue: food.category ?? "Unknown") ?? .unknown
+
+            let nutrition = RecognizedFood.NutritionInfo(
+                calories: Double(food.estimatedCalories ?? 100),
+                protein: food.estimatedProtein ?? 5.0,
+                carbs: food.estimatedCarbs ?? 15.0,
+                fat: food.estimatedFat ?? 2.0,
+                fiber: nil,
+                sugar: nil
+            )
+
+            print("✅ Detected: \(food.name) (\(Int(food.confidence * 100))% confidence)")
+
+            return RecognizedFood(
+                name: food.name,
+                confidence: food.confidence,
+                boundingBox: nil,
+                nutritionInfo: nutrition,
+                estimatedWeight: 100, // Default serving
+                category: category
+            )
         }
     }
     

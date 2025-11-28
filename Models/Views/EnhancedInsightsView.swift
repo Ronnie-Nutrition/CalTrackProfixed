@@ -222,7 +222,7 @@ struct EnhancedInsightsView: View {
                             .frame(height: 250)
                             .chartXAxis {
                                 AxisMarks(values: .stride(by: .day)) { value in
-                                    if let date = value.as(Date.self) {
+                                    if value.as(Date.self) != nil {
                                         AxisGridLine()
                                         AxisValueLabel(
                                             format: .dateTime.weekday(.abbreviated),
@@ -243,7 +243,7 @@ struct EnhancedInsightsView: View {
                                         .fill(Color.clear)
                                         .contentShape(Rectangle())
                                         .onTapGesture { location in
-                                            let plotFrame = geometry.frame(in: .local)
+                                            _ = geometry.frame(in: .local)
                                             if let date = proxy.value(atX: location.x, as: Date.self) {
                                                 if let closestPoint = chartData.min(by: { abs($0.date.timeIntervalSince(date)) < abs($1.date.timeIntervalSince(date)) }) {
                                                     withAnimation(FluidSpring.snappy) {

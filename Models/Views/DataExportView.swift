@@ -874,7 +874,7 @@ struct ExportDocument: FileDocument {
     }
     
     init(configuration: ReadConfiguration) throws {
-        guard let data = configuration.file.regularFileContents else {
+        guard configuration.file.regularFileContents != nil else {
             throw CocoaError(.fileReadCorruptFile)
         }
         // Handle reading the document if needed

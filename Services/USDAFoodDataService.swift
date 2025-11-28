@@ -256,14 +256,14 @@ class USDAFoodDataService {
             case 1079: macros = Macronutrients(protein: macros.protein, carbohydrates: macros.carbohydrates, fat: macros.fat, fiber: value, sugar: macros.sugar)
             case 2000: macros = Macronutrients(protein: macros.protein, carbohydrates: macros.carbohydrates, fat: macros.fat, fiber: macros.fiber, sugar: value)
             case 1162: vitamins["Vitamin C"] = value
-            case 1087: vitamins["Vitamin A"] = value
+            case 1106: vitamins["Vitamin A"] = value
             case 1114: vitamins["Vitamin D"] = value
             case 1124: vitamins["Vitamin E"] = value
             case 1185: vitamins["Vitamin K"] = value
             case 1089: minerals["Iron"] = value
             case 1087: minerals["Calcium"] = value
             case 1095: minerals["Zinc"] = value
-            case 1089: minerals["Magnesium"] = value
+            case 1090: minerals["Magnesium"] = value
             default: break
             }
         }

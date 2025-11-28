@@ -312,9 +312,7 @@ struct RecipeBuilderView: View {
                     .cornerRadius(12)
                 }
 
-                ForEach(Array(instructions.enumerated()), id: \.offset) { item in
-                    let index = item.offset
-                    let instruction = item.element
+                ForEach(instructions.indices, id: \.self) { index in
                     HStack(alignment: .top, spacing: 12) {
                         ZStack {
                             Circle()
@@ -578,7 +576,7 @@ struct NutritionBadge: View {
 // MARK: - Supporting Models
 
 struct RecipeIngredient: Codable, Identifiable {
-    let id = UUID()
+    var id = UUID()
     let foodItem: Recipe.SimpleFoodItem
     var quantity: Double
 }
@@ -610,7 +608,7 @@ struct FoodSearchSheet: View {
                 List {
                     if searchText.isEmpty {
                         Section("Common Ingredients") {
-                            ForEach(commonFoods) { food in
+                            ForEach(commonFoods, id: \.name) { food in
                                 FoodRowView(food: food) {
                                     onFoodSelected(food)
                                 }
@@ -626,7 +624,7 @@ struct FoodSearchSheet: View {
                         .frame(maxWidth: .infinity, alignment: .center)
                         .listRowBackground(Color.clear)
                     } else {
-                        ForEach(searchResults) { food in
+                        ForEach(searchResults, id: \.name) { food in
                             FoodRowView(food: food) {
                                 onFoodSelected(food)
                             }

@@ -249,20 +249,252 @@ class NutritionAPIService {
     
     // MARK: - Barcode Lookup
     func lookupBarcode(_ barcode: String, completion: @escaping (Result<FoodItem, Error>) -> Void) {
-        // For now, we'll use the search API
-        // Upgrade to Nutritionix or Spoonacular for better barcode support
-        searchFood(query: barcode) { result in
+        let cleanBarcode = barcode.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        // Validate barcode is numeric (real barcodes don't contain letters)
+        let numericOnly = cleanBarcode.filter { $0.isNumber }
+        guard numericOnly.count >= 8 && numericOnly == cleanBarcode else {
+            print("❌ Invalid barcode format: '\(barcode)' - must be 8+ digits, no letters")
+            print("💡 This appears to be a SKU code, not a barcode. Try scanning the barcode lines.")
+            DispatchQueue.main.async {
+                completion(.failure(APIError.invalidBarcode(barcode)))
+            }
+            return
+        }
+
+        // Generate all possible barcode formats to try
+        let barcodesToTry = generateBarcodeVariants(numericOnly)
+        print("🔍 Barcode lookup: \(numericOnly)")
+        print("📝 Will try \(barcodesToTry.count) variants: \(barcodesToTry)")
+
+        // Try Open Food Facts first, then UPC Database as fallback
+        tryOpenFoodFactsLookup(barcodes: barcodesToTry, index: 0) { [weak self] result in
             switch result {
-            case .success(let response):
-                if let firstFood = response.parsed.first?.food {
-                    completion(.success(firstFood))
-                } else {
-                    completion(.failure(APIError.foodNotFound))
-                }
-            case .failure(let error):
-                completion(.failure(error))
+            case .success(let foodItem):
+                completion(.success(foodItem))
+            case .failure:
+                // Fallback to UPC Database
+                print("🔄 Open Food Facts failed, trying UPC Database...")
+                self?.tryUPCDatabaseLookup(barcode: numericOnly, completion: completion)
             }
         }
+    }
+
+    /// Generate all possible barcode format variants (UPC-A, EAN-13, etc.)
+    private func generateBarcodeVariants(_ barcode: String) -> [String] {
+        var variants: [String] = []
+        let cleanBarcode = barcode.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        // Add original barcode
+        variants.append(cleanBarcode)
+
+        // Pad to 12 digits (UPC-A format)
+        if cleanBarcode.count < 12 {
+            let upcA = String(repeating: "0", count: 12 - cleanBarcode.count) + cleanBarcode
+            if !variants.contains(upcA) {
+                variants.append(upcA)
+            }
+        }
+
+        // Pad to 13 digits (EAN-13 format)
+        if cleanBarcode.count < 13 {
+            let ean13 = String(repeating: "0", count: 13 - cleanBarcode.count) + cleanBarcode
+            if !variants.contains(ean13) {
+                variants.append(ean13)
+            }
+        }
+
+        // Try with single leading zero
+        let withZero = "0" + cleanBarcode
+        if !variants.contains(withZero) && withZero.count <= 14 {
+            variants.append(withZero)
+        }
+
+        // Try removing leading zeros if present
+        let withoutLeadingZeros = cleanBarcode.drop(while: { $0 == "0" })
+        if !withoutLeadingZeros.isEmpty {
+            let trimmed = String(withoutLeadingZeros)
+            if !variants.contains(trimmed) {
+                variants.append(trimmed)
+            }
+        }
+
+        return variants
+    }
+
+    /// Recursively try each barcode variant on Open Food Facts until one succeeds
+    private func tryOpenFoodFactsLookup(barcodes: [String], index: Int, completion: @escaping (Result<FoodItem, Error>) -> Void) {
+        guard index < barcodes.count else {
+            print("❌ All barcode variants exhausted, product not found")
+            DispatchQueue.main.async {
+                completion(.failure(APIError.foodNotFound))
+            }
+            return
+        }
+
+        let barcode = barcodes[index]
+        let urlString = "https://world.openfoodfacts.org/api/v0/product/\(barcode).json"
+        print("🔄 Trying variant \(index + 1)/\(barcodes.count): \(barcode)")
+
+        guard let url = URL(string: urlString) else {
+            // Try next variant
+            tryOpenFoodFactsLookup(barcodes: barcodes, index: index + 1, completion: completion)
+            return
+        }
+
+        var request = URLRequest(url: url)
+        request.setValue("CalTrackPro-iOS/1.0", forHTTPHeaderField: "User-Agent")
+        request.timeoutInterval = 10
+
+        URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
+            if let error = error {
+                print("⚠️ Network error for \(barcode): \(error.localizedDescription)")
+                // Try next variant on error
+                self?.tryOpenFoodFactsLookup(barcodes: barcodes, index: index + 1, completion: completion)
+                return
+            }
+
+            guard let data = data else {
+                // Try next variant
+                self?.tryOpenFoodFactsLookup(barcodes: barcodes, index: index + 1, completion: completion)
+                return
+            }
+
+            do {
+                if let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+                   let status = json["status"] as? Int {
+
+                    if status == 1, let product = json["product"] as? [String: Any] {
+                        let productName = product["product_name"] as? String ?? "Unknown Product"
+                        let brands = product["brands"] as? String
+                        let nutriments = product["nutriments"] as? [String: Any] ?? [:]
+
+                        print("✅ Found with barcode \(barcode): \(productName)")
+
+                        let calories = nutriments["energy-kcal_100g"] as? Double ?? nutriments["energy-kcal"] as? Double ?? 0
+                        let protein = nutriments["proteins_100g"] as? Double ?? nutriments["proteins"] as? Double ?? 0
+                        let fat = nutriments["fat_100g"] as? Double ?? nutriments["fat"] as? Double ?? 0
+                        let carbs = nutriments["carbohydrates_100g"] as? Double ?? nutriments["carbohydrates"] as? Double ?? 0
+                        let fiber = nutriments["fiber_100g"] as? Double ?? nutriments["fiber"] as? Double
+
+                        let displayName = brands != nil ? "\(productName) (\(brands!))" : productName
+
+                        let foodItem = FoodItem(
+                            foodId: barcode,
+                            label: displayName,
+                            nutrients: Nutrients(
+                                ENERC_KCAL: calories,
+                                PROCNT: protein,
+                                FAT: fat,
+                                CHOCDF: carbs,
+                                FIBTG: fiber
+                            ),
+                            category: product["categories"] as? String,
+                            categoryLabel: brands,
+                            image: product["image_url"] as? String
+                        )
+
+                        DispatchQueue.main.async {
+                            completion(.success(foodItem))
+                        }
+                        return
+                    } else {
+                        print("⚠️ Not found with \(barcode), trying next variant...")
+                        // Try next variant
+                        self?.tryOpenFoodFactsLookup(barcodes: barcodes, index: index + 1, completion: completion)
+                    }
+                } else {
+                    // Try next variant
+                    self?.tryOpenFoodFactsLookup(barcodes: barcodes, index: index + 1, completion: completion)
+                }
+            } catch {
+                // Try next variant
+                self?.tryOpenFoodFactsLookup(barcodes: barcodes, index: index + 1, completion: completion)
+            }
+        }.resume()
+    }
+
+    /// Fallback lookup using UPC Database API (free tier: 100/day)
+    private func tryUPCDatabaseLookup(barcode: String, completion: @escaping (Result<FoodItem, Error>) -> Void) {
+        let urlString = "https://api.upcitemdb.com/prod/trial/lookup?upc=\(barcode)"
+        print("🔄 Trying UPC Database: \(barcode)")
+
+        guard let url = URL(string: urlString) else {
+            DispatchQueue.main.async {
+                completion(.failure(APIError.foodNotFound))
+            }
+            return
+        }
+
+        var request = URLRequest(url: url)
+        request.setValue("CalTrackPro-iOS/1.0", forHTTPHeaderField: "User-Agent")
+        request.timeoutInterval = 10
+
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                print("❌ UPC Database error: \(error.localizedDescription)")
+                DispatchQueue.main.async {
+                    completion(.failure(APIError.foodNotFound))
+                }
+                return
+            }
+
+            guard let data = data else {
+                DispatchQueue.main.async {
+                    completion(.failure(APIError.foodNotFound))
+                }
+                return
+            }
+
+            // Debug response
+            if let jsonString = String(data: data, encoding: .utf8) {
+                print("📦 UPC Database response: \(String(jsonString.prefix(500)))")
+            }
+
+            do {
+                if let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+                   let items = json["items"] as? [[String: Any]],
+                   let firstItem = items.first {
+
+                    let title = firstItem["title"] as? String ?? "Unknown Product"
+                    let brand = firstItem["brand"] as? String
+
+                    print("✅ UPC Database found: \(title)")
+
+                    // UPC Database doesn't have nutrition, so we create with placeholder
+                    let displayName = brand != nil ? "\(title) (\(brand!))" : title
+
+                    let foodItem = FoodItem(
+                        foodId: barcode,
+                        label: displayName,
+                        nutrients: Nutrients(
+                            ENERC_KCAL: 0, // No nutrition data from UPC Database
+                            PROCNT: 0,
+                            FAT: 0,
+                            CHOCDF: 0,
+                            FIBTG: nil
+                        ),
+                        category: firstItem["category"] as? String,
+                        categoryLabel: brand,
+                        image: (firstItem["images"] as? [String])?.first
+                    )
+
+                    DispatchQueue.main.async {
+                        completion(.success(foodItem))
+                    }
+                } else {
+                    print("❌ Product not found in UPC Database")
+                    DispatchQueue.main.async {
+                        completion(.failure(APIError.foodNotFound))
+                    }
+                }
+            } catch {
+                print("❌ UPC Database JSON error: \(error)")
+                DispatchQueue.main.async {
+                    completion(.failure(APIError.foodNotFound))
+                }
+            }
+        }.resume()
     }
     
     // MARK: - Offline Search
@@ -313,6 +545,7 @@ enum APIError: LocalizedError {
     case invalidURL
     case noData
     case foodNotFound
+    case invalidBarcode(String)
     case unauthorized
     case rateLimitExceeded
     case timeout
@@ -333,6 +566,8 @@ enum APIError: LocalizedError {
             return "No data received from server"
         case .foodNotFound:
             return "Food item not found"
+        case .invalidBarcode(let code):
+            return "Invalid barcode: '\(code)'. Barcodes must be numbers only. This looks like a SKU code - try scanning the actual barcode lines."
         case .unauthorized:
             return "Invalid API credentials. Please check your configuration."
         case .rateLimitExceeded:
@@ -364,6 +599,10 @@ enum APIError: LocalizedError {
             return "Contact support if this persists."
         case .rateLimitExceeded:
             return "Wait a few minutes before searching again."
+        case .invalidBarcode:
+            return "Point your camera at the black and white barcode lines, not the SKU text."
+        case .foodNotFound:
+            return "Try searching for the product by name instead."
         default:
             return nil
         }

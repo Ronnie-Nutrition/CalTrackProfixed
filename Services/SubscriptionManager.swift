@@ -264,12 +264,13 @@ class SubscriptionManager: NSObject, ObservableObject {
     private func listenForTransactions() -> Task<Void, Error> {
         return Task.detached { [weak self] in
             for await result in Transaction.updates {
+                guard let strongSelf = self else { continue }
                 do {
-                    let transaction = try await MainActor.run {
-                        try self?.checkVerified(result)
+                    let transaction = try await MainActor.run { [strongSelf] in
+                        try strongSelf.checkVerified(result)
                     }
-                    await transaction?.finish()
-                    await self?.checkSubscriptionStatus()
+                    await transaction.finish()
+                    await strongSelf.checkSubscriptionStatus()
                 } catch {
                     print("Transaction failed verification: \(error)")
                 }
