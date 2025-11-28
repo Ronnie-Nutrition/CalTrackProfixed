@@ -172,12 +172,10 @@ struct SettingsView: View {
                 }
             }
             .sheet(isPresented: $showingHealthIntegration) {
-                Text("Health integration feature coming soon!")
-                    .padding()
+                HealthIntegrationView()
             }
             .sheet(isPresented: $showingPremiumUpgrade) {
-                Text("Premium upgrade feature coming soon!")
-                    .padding()
+                PremiumUpgradeView()
             }
             .sheet(isPresented: $showingAPIKeySetup) {
                 OpenAIAPIKeySetupView(hasOpenAIKey: $hasOpenAIKey)

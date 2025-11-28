@@ -129,46 +129,47 @@ struct DailyNutritionSummary: View {
     }
     
     var body: some View {
-        VStack(spacing: 16) {
-            HStack {
-                Text("Daily Total")
-                    .font(.headline)
-                Spacer()
-                Text("\(Int(totalCalories)) cal")
-                    .font(.title3)
-                    .fontWeight(.semibold)
-                    .foregroundColor(.blue)
+        LiquidGlassCard {
+            VStack(spacing: 16) {
+                HStack {
+                    Text("Daily Total")
+                        .font(.headline)
+                        .foregroundColor(AppColors.primaryText)
+                    Spacer()
+                    Text("\(Int(totalCalories)) cal")
+                        .font(.title3)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.blue)
+                }
+
+                VStack(spacing: 12) {
+                    LiquidMacroProgressBar(
+                        label: "Protein",
+                        value: totalProtein,
+                        target: appState.currentUser?.dailyProteinTarget ?? 150,
+                        unit: "g",
+                        color: .red
+                    )
+
+                    LiquidMacroProgressBar(
+                        label: "Carbs",
+                        value: totalCarbs,
+                        target: appState.currentUser?.dailyCarbTarget ?? 250,
+                        unit: "g",
+                        color: .orange
+                    )
+
+                    LiquidMacroProgressBar(
+                        label: "Fat",
+                        value: totalFat,
+                        target: appState.currentUser?.dailyFatTarget ?? 65,
+                        unit: "g",
+                        color: .yellow
+                    )
+                }
             }
-            
-            VStack(spacing: 12) {
-                MacroProgressBar(
-                    label: "Protein",
-                    value: totalProtein,
-                    target: appState.currentUser?.dailyProteinTarget ?? 150,
-                    unit: "g",
-                    color: .red
-                )
-                
-                MacroProgressBar(
-                    label: "Carbs",
-                    value: totalCarbs,
-                    target: appState.currentUser?.dailyCarbTarget ?? 250,
-                    unit: "g",
-                    color: .orange
-                )
-                
-                MacroProgressBar(
-                    label: "Fat",
-                    value: totalFat,
-                    target: appState.currentUser?.dailyFatTarget ?? 65,
-                    unit: "g",
-                    color: .yellow
-                )
-            }
+            .padding()
         }
-        .padding()
-        .background(Color(.systemGray6))
-        .cornerRadius(12)
     }
 }
 
@@ -276,41 +277,43 @@ struct MealSection: View {
 
 struct FoodEntryRow: View {
     let entry: FoodEntry
-    
+    @ObservedObject private var themeManager = ThemeManager.shared
+
     var body: some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 4) {
-                Text(entry.name)
-                    .font(.subheadline)
-                    .lineLimit(1)
-                
-                HStack(spacing: 8) {
-                    Text("\(entry.quantity, specifier: "%.0f") \(entry.servingUnit)")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                    
-                    Text("•")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                    
-                    HStack(spacing: 4) {
-                        MacroBadge(value: entry.totalProtein, label: "P", color: .red)
-                        MacroBadge(value: entry.totalCarbs, label: "C", color: .orange)
-                        MacroBadge(value: entry.totalFat, label: "F", color: .yellow)
+        LiquidGlassRow(cornerRadius: 10) {
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(entry.name)
+                        .font(AppFonts.subheadline(weight: .medium))
+                        .foregroundColor(AppColors.primaryText)
+                        .lineLimit(1)
+
+                    HStack(spacing: 8) {
+                        Text("\(entry.quantity, specifier: "%.0f") \(entry.servingUnit)")
+                            .font(AppFonts.caption())
+                            .foregroundColor(AppColors.secondaryText)
+
+                        Text("•")
+                            .font(AppFonts.caption())
+                            .foregroundColor(AppColors.tertiaryText)
+
+                        HStack(spacing: 4) {
+                            LiquidMacroBadge(value: entry.totalProtein, label: "P", color: .red)
+                            LiquidMacroBadge(value: entry.totalCarbs, label: "C", color: .orange)
+                            LiquidMacroBadge(value: entry.totalFat, label: "F", color: .yellow)
+                        }
                     }
                 }
+
+                Spacer()
+
+                Text("\(Int(entry.totalCalories))")
+                    .font(AppFonts.subheadline(weight: .semibold))
+                    .foregroundColor(themeManager.currentAccentColor)
             }
-            
-            Spacer()
-            
-            Text("\(Int(entry.totalCalories))")
-                .font(.subheadline)
-                .fontWeight(.medium)
+            .padding(.vertical, 10)
+            .padding(.horizontal, 14)
         }
-        .padding(.vertical, 8)
-        .padding(.horizontal, 12)
-        .background(Color(.secondarySystemBackground))
-        .cornerRadius(8)
     }
 }
 

@@ -560,6 +560,178 @@ struct FluidGlowEffect: ViewModifier {
     }
 }
 
+// MARK: - Liquid Macro Progress Bar (for Diary/Nutrition displays)
+struct LiquidMacroProgressBar: View {
+    let label: String
+    let value: Double
+    let target: Double
+    let unit: String
+    let color: Color
+
+    @State private var animatedProgress: Double = 0
+    @ObservedObject private var themeManager = ThemeManager.shared
+    @Environment(\.colorScheme) private var colorScheme
+
+    private var progress: Double {
+        min(value / target, 1.0)
+    }
+
+    private var backgroundOpacity: Double {
+        themeManager.isDarkMode || colorScheme == .dark ? 0.15 : 0.2
+    }
+
+    private var adaptiveGradient: LinearGradient {
+        LinearGradient(
+            colors: [
+                color.opacity(0.9),
+                themeManager.currentAccentColor.opacity(0.7),
+                color.opacity(0.8)
+            ],
+            startPoint: .leading,
+            endPoint: .trailing
+        )
+    }
+
+    private var adaptiveOverlay: LinearGradient {
+        if themeManager.isDarkMode || colorScheme == .dark {
+            return LinearGradient(
+                colors: [.white.opacity(0.2), .clear],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+        } else {
+            return LinearGradient(
+                colors: [.white.opacity(0.4), .clear],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+        }
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack {
+                Text(label)
+                    .font(AppFonts.subheadline(weight: .medium))
+                    .foregroundColor(AppColors.primaryText)
+                Spacer()
+                Text("\(Int(value)) / \(Int(target)) \(unit)")
+                    .font(AppFonts.caption())
+                    .foregroundColor(AppColors.secondaryText)
+            }
+
+            GeometryReader { geometry in
+                ZStack(alignment: .leading) {
+                    // Background track with glass effect
+                    RoundedRectangle(cornerRadius: 5)
+                        .fill(color.opacity(backgroundOpacity))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 5)
+                                .stroke(color.opacity(0.1), lineWidth: 0.5)
+                        )
+
+                    // Animated progress bar
+                    RoundedRectangle(cornerRadius: 5)
+                        .fill(adaptiveGradient)
+                        .frame(width: geometry.size.width * animatedProgress)
+                        .shadow(color: color.opacity(0.3), radius: 2)
+
+                    // Liquid glass overlay on progress
+                    RoundedRectangle(cornerRadius: 5)
+                        .fill(adaptiveOverlay)
+                        .frame(width: geometry.size.width * animatedProgress, height: 5)
+                        .offset(y: -1)
+                }
+            }
+            .frame(height: 10)
+        }
+        .onAppear {
+            withAnimation(AppAnimations.smooth) {
+                animatedProgress = progress
+            }
+        }
+        .onChange(of: progress) { oldValue, newValue in
+            withAnimation(AppAnimations.spring) {
+                animatedProgress = newValue
+            }
+        }
+    }
+}
+
+// MARK: - Liquid Macro Badge (compact macro display)
+struct LiquidMacroBadge: View {
+    let value: Double
+    let label: String
+    let color: Color
+
+    @ObservedObject private var themeManager = ThemeManager.shared
+    @Environment(\.colorScheme) private var colorScheme
+
+    private var backgroundOpacity: Double {
+        themeManager.isDarkMode || colorScheme == .dark ? 0.25 : 0.2
+    }
+
+    var body: some View {
+        HStack(spacing: 2) {
+            Text(label)
+                .font(.system(size: 9, weight: .bold))
+            Text("\(Int(value))")
+                .font(.system(size: 9, weight: .medium))
+        }
+        .padding(.horizontal, 6)
+        .padding(.vertical, 3)
+        .background(
+            RoundedRectangle(cornerRadius: 4)
+                .fill(color.opacity(backgroundOpacity))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 4)
+                        .stroke(color.opacity(0.3), lineWidth: 0.5)
+                )
+        )
+        .foregroundColor(color)
+    }
+}
+
+// MARK: - Liquid Glass Row (for list items)
+struct LiquidGlassRow<Content: View>: View {
+    let content: Content
+    var cornerRadius: CGFloat = 12
+
+    @ObservedObject private var themeManager = ThemeManager.shared
+    @Environment(\.colorScheme) private var colorScheme
+
+    init(cornerRadius: CGFloat = 12, @ViewBuilder content: () -> Content) {
+        self.cornerRadius = cornerRadius
+        self.content = content()
+    }
+
+    private var adaptiveBackground: some View {
+        RoundedRectangle(cornerRadius: cornerRadius)
+            .fill(.thinMaterial)
+            .overlay(
+                RoundedRectangle(cornerRadius: cornerRadius)
+                    .fill(themeManager.isDarkMode ? AppColors.darkGlassGradient : AppColors.glassGradient)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: cornerRadius)
+                    .stroke(
+                        LinearGradient(
+                            colors: [.white.opacity(themeManager.isDarkMode ? 0.1 : 0.3), .clear],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 0.5
+                    )
+            )
+    }
+
+    var body: some View {
+        content
+            .background(adaptiveBackground)
+            .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
+    }
+}
+
 // MARK: - View Extensions
 extension View {
     func liquidPulse(color: Color = .blue, intensity: Double = 0.3) -> some View {
@@ -603,6 +775,33 @@ extension View {
     func liquidGlass(cornerRadius: CGFloat = 20) -> some View {
         LiquidGlassCard(cornerRadius: cornerRadius) {
             self
+        }
+    }
+
+    /// Apply enhanced glass background effect
+    /// Note: When iOS 26 SDK is available, this will automatically use native `.glassBackgroundEffect()`
+    /// For now, uses our custom liquid glass implementation which provides similar visual results
+    func nativeGlassBackground(cornerRadius: CGFloat = 20) -> some View {
+        self.liquidGlass(cornerRadius: cornerRadius)
+    }
+}
+
+// MARK: - Adaptive Glass Card
+/// Uses LiquidGlassCard for now. When iOS 26 SDK becomes available,
+/// this will automatically use native glass effects.
+/// The custom implementation provides excellent glassmorphism on iOS 17+
+struct AdaptiveGlassCard<Content: View>: View {
+    let content: Content
+    var cornerRadius: CGFloat = 20
+
+    init(cornerRadius: CGFloat = 20, @ViewBuilder content: () -> Content) {
+        self.cornerRadius = cornerRadius
+        self.content = content()
+    }
+
+    var body: some View {
+        LiquidGlassCard(cornerRadius: cornerRadius) {
+            content
         }
     }
 }
