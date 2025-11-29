@@ -666,7 +666,9 @@
 				INFOPLIST_KEY_CFBundleDisplayName = CalTrackPro;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.health-fitness";
 				INFOPLIST_KEY_NSCameraUsageDescription = "CalTrackPro needs camera access to scan barcodes and take photos of your meals for nutrition tracking.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "CalTrackPro needs microphone access to recognize your voice when logging food entries.";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "CalTrackPro needs photo library access to let you select photos of your meals for nutrition tracking.";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "CalTrackPro uses speech recognition to log food entries when you say things like 'I ate a turkey sandwich'.";
 				INFOPLIST_KEY_NSPrivacyAccessedAPICategoryFileTimestamp = YES;
 				INFOPLIST_KEY_NSPrivacyAccessedAPICategoryUserDefaults = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -706,7 +708,9 @@
 				INFOPLIST_KEY_CFBundleDisplayName = CalTrackPro;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.health-fitness";
 				INFOPLIST_KEY_NSCameraUsageDescription = "CalTrackPro needs camera access to scan barcodes and take photos of your meals for nutrition tracking.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "CalTrackPro needs microphone access to recognize your voice when logging food entries.";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "CalTrackPro needs photo library access to let you select photos of your meals for nutrition tracking.";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "CalTrackPro uses speech recognition to log food entries when you say things like 'I ate a turkey sandwich'.";
 				INFOPLIST_KEY_NSPrivacyAccessedAPICategoryFileTimestamp = YES;
 				INFOPLIST_KEY_NSPrivacyAccessedAPICategoryUserDefaults = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;

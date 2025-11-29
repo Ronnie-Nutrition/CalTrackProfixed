@@ -18,7 +18,8 @@ struct VoiceInputView: View {
     @State private var isAuthorized = false
     @State private var recordingTimer: Timer?
     @State private var simulatorDemoTimer: Timer?
-    
+    @State private var isProcessingResult = false
+
     struct DetectedFood {
         let name: String
         let quantity: String?
@@ -269,7 +270,8 @@ struct VoiceInputView: View {
         // Reset previous session
         speechText = ""
         errorMessage = nil
-        
+        isProcessingResult = false
+
         // Clean up any previous recording state
         if audioEngine.isRunning {
             audioEngine.stop()
@@ -311,27 +313,45 @@ struct VoiceInputView: View {
         
         recognitionTask = speechRecognizer.recognitionTask(with: recognitionRequest) { result, error in
             DispatchQueue.main.async {
-                
+                // Skip if we're already processing a result
+                guard !self.isProcessingResult else { return }
+
                 var isFinal = false
-                
+
                 if let result = result {
-                    speechText = result.bestTranscription.formattedString
+                    self.speechText = result.bestTranscription.formattedString
                     isFinal = result.isFinal
                 }
-                
+
                 if let error = error {
+                    let nsError = error as NSError
+                    // Ignore cancellation errors if we have speech text (user stopped recording)
+                    if nsError.domain == "kAFAssistantErrorDomain" && nsError.code == 216 {
+                        // This is "request was canceled" - only show error if we have no text
+                        if self.speechText.isEmpty {
+                            self.errorMessage = "No speech detected. Tap the microphone and try again."
+                        } else {
+                            // We have text, process it
+                            self.isProcessingResult = true
+                            self.finishRecording()
+                            self.processSpokenText()
+                        }
+                        return
+                    }
+                    // For other errors, show the message
                     print("Speech recognition error: \(error)")
-                    errorMessage = "Recognition error: \(error.localizedDescription)"
-                    stopRecording()
+                    self.errorMessage = "Recognition error: \(error.localizedDescription)"
+                    self.finishRecording()
                     return
                 }
-                
+
                 if isFinal {
-                    stopRecording()
-                    if !speechText.isEmpty {
-                        processSpokenText()
+                    self.isProcessingResult = true
+                    self.finishRecording()
+                    if !self.speechText.isEmpty {
+                        self.processSpokenText()
                     } else {
-                        errorMessage = "No speech detected. Please try again."
+                        self.errorMessage = "No speech detected. Please try again."
                     }
                 }
             }
@@ -370,21 +390,40 @@ struct VoiceInputView: View {
         // Cancel timer
         recordingTimer?.invalidate()
         recordingTimer = nil
-        
+
+        // Stop the audio engine first
         if audioEngine.isRunning {
             audioEngine.stop()
             audioEngine.inputNode.removeTap(onBus: 0)
         }
-        
+
+        // End audio on request - this triggers the final result
         recognitionRequest?.endAudio()
-        recognitionRequest = nil
-        recognitionTask?.cancel()
-        recognitionTask = nil
-        
+
         DispatchQueue.main.async {
             isRecording = false
         }
-        
+    }
+
+    private func finishRecording() {
+        // Cancel timer
+        recordingTimer?.invalidate()
+        recordingTimer = nil
+
+        // Stop audio engine if still running
+        if audioEngine.isRunning {
+            audioEngine.stop()
+            audioEngine.inputNode.removeTap(onBus: 0)
+        }
+
+        // Clean up recognition objects
+        recognitionRequest = nil
+        recognitionTask = nil
+
+        DispatchQueue.main.async {
+            isRecording = false
+        }
+
         // Deactivate audio session
         do {
             try AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
@@ -483,6 +522,24 @@ struct VoiceInputView: View {
             // Beverages
             "coffee": (5, 0.3, 1, 0),
             "tea": (2, 0, 0.5, 0),
+            "dr pepper": (150, 0, 40, 0),
+            "dr. pepper": (150, 0, 40, 0),
+            "coke": (140, 0, 39, 0),
+            "coca cola": (140, 0, 39, 0),
+            "pepsi": (150, 0, 41, 0),
+            "sprite": (140, 0, 38, 0),
+            "mountain dew": (170, 0, 46, 0),
+            "lemonade": (100, 0, 26, 0),
+            "iced tea": (90, 0, 22, 0),
+            "energy drink": (110, 0, 28, 0),
+            "red bull": (110, 0, 28, 0),
+            "monster": (110, 0, 27, 0),
+            "gatorade": (80, 0, 21, 0),
+            "smoothie": (200, 4, 40, 2),
+            "milkshake": (400, 10, 60, 14),
+            "latte": (190, 10, 19, 7),
+            "cappuccino": (120, 6, 10, 6),
+            "espresso": (5, 0.3, 1, 0),
             "soda": (140, 0, 39, 0),
             "juice": (110, 0.5, 26, 0.3),
             "orange juice": (110, 1.7, 26, 0.5),
@@ -514,7 +571,14 @@ struct VoiceInputView: View {
             "a": 1, "an": 1, "some": 1, "few": 2, "couple": 2, "pair": 2,
             "bowl": 1, "cup": 1, "glass": 1, "plate": 1, "serving": 1,
             "small": 0.75, "medium": 1, "large": 1.5, "big": 1.5, "huge": 2,
-            "half": 0.5, "quarter": 0.25, "piece": 1, "slice": 1, "scoop": 1
+            "half": 0.5, "quarter": 0.25, "piece": 1, "slice": 1, "scoop": 1,
+            // Ounce-based quantities (based on 12oz standard serving)
+            "8 ounce": 0.67, "8 oz": 0.67, "eight ounce": 0.67,
+            "12 ounce": 1.0, "12 oz": 1.0, "twelve ounce": 1.0,
+            "16 ounce": 1.33, "16 oz": 1.33, "sixteen ounce": 1.33,
+            "20 ounce": 1.67, "20 oz": 1.67, "twenty ounce": 1.67,
+            "24 ounce": 2.0, "24 oz": 2.0, "twenty four ounce": 2.0,
+            "32 ounce": 2.67, "32 oz": 2.67, "thirty two ounce": 2.67
         ]
         
         // Clean up the text for better parsing

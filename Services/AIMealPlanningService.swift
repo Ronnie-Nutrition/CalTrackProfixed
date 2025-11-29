@@ -19,13 +19,56 @@ class AIMealPlanningService: ObservableObject {
             nutritionService.searchFood(query: query) { result in
                 switch result {
                 case .success(let response):
-                    // Extract FoodItems from parsed results
-                    let foods = response.parsed.map { $0.food }
-                    continuation.resume(returning: foods)
+                    // Extract FoodItems from both parsed AND hints
+                    var foods = response.parsed.map { $0.food }
+                    // Also get foods from hints (this is where most results are)
+                    if let hints = response.hints {
+                        foods.append(contentsOf: hints.map { $0.food })
+                    }
+                    continuation.resume(returning: foods.isEmpty ? nil : foods)
                 case .failure:
                     continuation.resume(returning: nil)
                 }
             }
+        }
+    }
+
+    // Built-in food database for offline use
+    private func getBuiltInFoods(for mealType: MealType) -> [FoodOption] {
+        switch mealType {
+        case .breakfast:
+            return [
+                FoodOption(name: "Scrambled Eggs", brand: nil, calories: 140, protein: 12, carbs: 1.2, fat: 10, fiber: 0, standardServing: 100, unit: "g", estimatedCost: 2.0, preparationTime: 10, preparationNotes: "Whisk eggs and cook in pan"),
+                FoodOption(name: "Oatmeal", brand: nil, calories: 150, protein: 5, carbs: 27, fat: 3, fiber: 4, standardServing: 150, unit: "g", estimatedCost: 1.0, preparationTime: 5, preparationNotes: "Cook with water or milk"),
+                FoodOption(name: "Greek Yogurt", brand: nil, calories: 100, protein: 17, carbs: 6, fat: 0.7, fiber: 0, standardServing: 170, unit: "g", estimatedCost: 2.5, preparationTime: 0, preparationNotes: "Ready to eat"),
+                FoodOption(name: "Whole Wheat Toast", brand: nil, calories: 80, protein: 4, carbs: 15, fat: 1, fiber: 2, standardServing: 30, unit: "g", estimatedCost: 0.5, preparationTime: 2, preparationNotes: "Toast until golden"),
+                FoodOption(name: "Banana", brand: nil, calories: 105, protein: 1.3, carbs: 27, fat: 0.4, fiber: 3, standardServing: 120, unit: "g", estimatedCost: 0.5, preparationTime: 0, preparationNotes: "Ready to eat"),
+                FoodOption(name: "Bacon", brand: nil, calories: 180, protein: 12, carbs: 0.5, fat: 14, fiber: 0, standardServing: 40, unit: "g", estimatedCost: 3.0, preparationTime: 10, preparationNotes: "Pan fry until crispy")
+            ]
+        case .morningSnack, .afternoonSnack:
+            return [
+                FoodOption(name: "Apple", brand: nil, calories: 95, protein: 0.5, carbs: 25, fat: 0.3, fiber: 4, standardServing: 180, unit: "g", estimatedCost: 1.0, preparationTime: 0, preparationNotes: "Ready to eat"),
+                FoodOption(name: "Almonds", brand: nil, calories: 160, protein: 6, carbs: 6, fat: 14, fiber: 3.5, standardServing: 28, unit: "g", estimatedCost: 2.0, preparationTime: 0, preparationNotes: "Ready to eat"),
+                FoodOption(name: "Protein Bar", brand: nil, calories: 200, protein: 20, carbs: 22, fat: 7, fiber: 3, standardServing: 60, unit: "g", estimatedCost: 3.0, preparationTime: 0, preparationNotes: "Ready to eat"),
+                FoodOption(name: "Cheese Stick", brand: nil, calories: 80, protein: 7, carbs: 0, fat: 6, fiber: 0, standardServing: 28, unit: "g", estimatedCost: 1.0, preparationTime: 0, preparationNotes: "Ready to eat")
+            ]
+        case .lunch:
+            return [
+                FoodOption(name: "Grilled Chicken Breast", brand: nil, calories: 165, protein: 31, carbs: 0, fat: 3.6, fiber: 0, standardServing: 100, unit: "g", estimatedCost: 4.0, preparationTime: 20, preparationNotes: "Season and grill 6-8 min per side"),
+                FoodOption(name: "Turkey Sandwich", brand: nil, calories: 300, protein: 24, carbs: 30, fat: 10, fiber: 3, standardServing: 200, unit: "g", estimatedCost: 5.0, preparationTime: 5, preparationNotes: "Layer turkey, lettuce, tomato on bread"),
+                FoodOption(name: "Garden Salad", brand: nil, calories: 50, protein: 3, carbs: 10, fat: 0.5, fiber: 4, standardServing: 150, unit: "g", estimatedCost: 3.0, preparationTime: 5, preparationNotes: "Mix greens and vegetables"),
+                FoodOption(name: "Brown Rice", brand: nil, calories: 110, protein: 2.6, carbs: 22, fat: 0.9, fiber: 2, standardServing: 100, unit: "g", estimatedCost: 1.0, preparationTime: 25, preparationNotes: "Cook in water until tender"),
+                FoodOption(name: "Tuna Salad", brand: nil, calories: 180, protein: 25, carbs: 2, fat: 8, fiber: 0, standardServing: 100, unit: "g", estimatedCost: 4.0, preparationTime: 10, preparationNotes: "Mix tuna with mayo and seasonings")
+            ]
+        case .dinner:
+            return [
+                FoodOption(name: "Grilled Salmon", brand: nil, calories: 180, protein: 25, carbs: 0, fat: 8, fiber: 0, standardServing: 100, unit: "g", estimatedCost: 8.0, preparationTime: 15, preparationNotes: "Season and bake at 400°F for 12-15 min"),
+                FoodOption(name: "Lean Beef Steak", brand: nil, calories: 250, protein: 26, carbs: 0, fat: 15, fiber: 0, standardServing: 100, unit: "g", estimatedCost: 10.0, preparationTime: 15, preparationNotes: "Grill to desired doneness"),
+                FoodOption(name: "Steamed Broccoli", brand: nil, calories: 35, protein: 2.4, carbs: 7, fat: 0.4, fiber: 2.6, standardServing: 100, unit: "g", estimatedCost: 2.0, preparationTime: 8, preparationNotes: "Steam until tender"),
+                FoodOption(name: "Baked Potato", brand: nil, calories: 160, protein: 4, carbs: 37, fat: 0.2, fiber: 4, standardServing: 150, unit: "g", estimatedCost: 1.0, preparationTime: 45, preparationNotes: "Bake at 400°F for 45 min"),
+                FoodOption(name: "Pasta with Marinara", brand: nil, calories: 280, protein: 10, carbs: 52, fat: 4, fiber: 4, standardServing: 200, unit: "g", estimatedCost: 3.0, preparationTime: 15, preparationNotes: "Cook pasta and top with sauce"),
+                FoodOption(name: "Grilled Chicken Breast", brand: nil, calories: 165, protein: 31, carbs: 0, fat: 3.6, fiber: 0, standardServing: 100, unit: "g", estimatedCost: 4.0, preparationTime: 20, preparationNotes: "Season and grill 6-8 min per side")
+            ]
         }
     }
     
@@ -467,7 +510,12 @@ class AIMealPlanningService: ObservableObject {
             }
             allOptions.append(contentsOf: appropriateFavorites)
         }
-        
+
+        // FALLBACK: If no options from API, use built-in foods
+        if allOptions.isEmpty {
+            allOptions = getBuiltInFoods(for: mealType)
+        }
+
         return allOptions
     }
     

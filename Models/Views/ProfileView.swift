@@ -86,7 +86,7 @@ struct ProfileView: View {
             .navigationTitle("Profile")
             .navigationBarTitleDisplayMode(.inline)
             .sheet(isPresented: $isEditing) {
-                Text("Edit Profile Coming Soon")
+                EditProfileView(profile: currentProfile)
             }
             .sheet(isPresented: $showingSettings) {
                 SettingsView()
@@ -106,20 +106,20 @@ struct SettingsRow: View {
     let title: String
     let icon: String
     let color: Color
-    
+
     var body: some View {
         HStack {
             Image(systemName: icon)
                 .font(.body)
                 .foregroundColor(color)
                 .frame(width: 30)
-            
+
             Text(title)
                 .font(.subheadline)
                 .foregroundColor(AppColors.primaryText)
-            
+
             Spacer()
-            
+
             Image(systemName: "chevron.right")
                 .font(.caption)
                 .foregroundColor(AppColors.tertiaryText)
