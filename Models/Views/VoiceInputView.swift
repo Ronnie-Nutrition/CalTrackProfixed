@@ -19,6 +19,7 @@ struct VoiceInputView: View {
     @State private var recordingTimer: Timer?
     @State private var simulatorDemoTimer: Timer?
     @State private var isProcessingResult = false
+    @State private var foodWasAdded = false
 
     struct DetectedFood {
         let name: String
@@ -188,8 +189,13 @@ struct VoiceInputView: View {
                     #endif
                 }
             }
-            .sheet(isPresented: $showingResults) {
-                FoodResultsView(detectedFoods: detectedFoods, speechText: speechText)
+            .sheet(isPresented: $showingResults, onDismiss: {
+                // If food was added, dismiss the whole VoiceInputView
+                if foodWasAdded {
+                    dismiss()
+                }
+            }) {
+                FoodResultsView(detectedFoods: detectedFoods, speechText: speechText, foodWasAdded: $foodWasAdded)
             }
         }
     }
@@ -754,6 +760,7 @@ struct VoiceInputView: View {
 struct FoodResultsView: View {
     let detectedFoods: [VoiceInputView.DetectedFood]
     let speechText: String
+    @Binding var foodWasAdded: Bool
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
     @State private var selectedMeal = FoodEntry.MealType.snack
@@ -904,6 +911,7 @@ struct FoodResultsView: View {
         
         do {
             try modelContext.save()
+            foodWasAdded = true
             dismiss()
         } catch {
             print("Error saving: \(error)")
