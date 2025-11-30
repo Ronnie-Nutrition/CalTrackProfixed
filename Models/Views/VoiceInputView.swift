@@ -457,8 +457,7 @@ struct VoiceInputView: View {
             "tuna sandwich": (280, 25, 25, 10),
             "chicken sandwich": (380, 28, 32, 16),
             "wrap": (250, 15, 30, 8),
-            "burrito": (450, 20, 50, 18),
-            
+
             // Proteins
             "chicken": (165, 31, 0, 4),
             "chicken breast": (165, 31, 0, 4),
