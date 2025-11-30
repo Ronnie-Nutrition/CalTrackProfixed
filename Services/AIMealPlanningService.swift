@@ -460,49 +460,10 @@ class AIMealPlanningService: ObservableObject {
         preferences: MealPlanPreferences,
         targetCalories: Double
     ) async throws -> [FoodOption] {
-        
-        var searchTerms: [String] = []
-        
-        // Build search terms based on meal type
-        switch mealType {
-        case .breakfast:
-            searchTerms = ["eggs", "oatmeal", "yogurt", "toast", "cereal", "fruit", "bacon", "smoothie"]
-        case .morningSnack, .afternoonSnack:
-            searchTerms = ["nuts", "fruit", "protein bar", "yogurt", "cheese", "crackers"]
-        case .lunch:
-            searchTerms = ["sandwich", "salad", "soup", "chicken", "fish", "rice", "vegetables"]
-        case .dinner:
-            searchTerms = ["chicken", "beef", "fish", "pasta", "rice", "vegetables", "salad"]
-        }
-        
-        // Filter based on dietary restrictions
-        searchTerms = filterSearchTermsForDiet(searchTerms, preferences: preferences)
-        
-        var allOptions: [FoodOption] = []
-        
-        // Fetch foods for each search term
-        for term in searchTerms.prefix(5) { // Limit API calls
-            if let foods = await searchFoodAsync(query: term) {
-                let options = foods.prefix(3).map { food in
-                    FoodOption(
-                        name: food.label,
-                        brand: food.category,
-                        calories: food.nutrients.calories,
-                        protein: food.nutrients.protein,
-                        carbs: food.nutrients.carbs,
-                        fat: food.nutrients.fat,
-                        fiber: food.nutrients.fiber,
-                        standardServing: 100,
-                        unit: "g",
-                        estimatedCost: estimateFoodCost(food.label),
-                        preparationTime: estimatePreparationTime(food.label),
-                        preparationNotes: generatePreparationNotes(food.label, mealType: mealType)
-                    )
-                }
-                allOptions.append(contentsOf: options)
-            }
-        }
-        
+
+        // Use built-in foods for instant generation (no API delays)
+        var allOptions = getBuiltInFoods(for: mealType)
+
         // Add user's favorite foods if appropriate
         if let cachedFavorites = getCachedFavoriteFoods() {
             let appropriateFavorites = cachedFavorites.filter { food in
@@ -511,9 +472,11 @@ class AIMealPlanningService: ObservableObject {
             allOptions.append(contentsOf: appropriateFavorites)
         }
 
-        // FALLBACK: If no options from API, use built-in foods
-        if allOptions.isEmpty {
-            allOptions = getBuiltInFoods(for: mealType)
+        // Filter based on dietary preferences
+        if preferences.dietType == .vegan {
+            allOptions = allOptions.filter { food in
+                !["Bacon", "Eggs", "Chicken", "Beef", "Fish", "Salmon", "Tuna", "Steak", "Turkey", "Cheese"].contains { food.name.contains($0) }
+            }
         }
 
         return allOptions
