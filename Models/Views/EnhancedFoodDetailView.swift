@@ -2,16 +2,17 @@ import SwiftUI
 
 struct EnhancedFoodDetailView: View {
     let food: EnhancedFoodItem
-    let onAddToLog: (FoodItem) -> Void
-    
+    let onAddToLog: (FoodItem, FoodEntry.MealType) -> Void
+
     @StateObject private var foodDatabase = EnhancedFoodDatabase.shared
     @Environment(\.dismiss) private var dismiss
-    
+
     @State private var detailedNutrition: DetailedNutrition?
     @State private var isLoadingDetails = false
     @State private var servingQuantity: Double = 1.0
     @State private var selectedTab = 0
     @State private var showingServingSizeOptions = false
+    @State private var selectedMealType: FoodEntry.MealType = .breakfast
     
     private let tabs = ["Nutrition", "Details", "Ingredients"]
     
@@ -29,16 +30,17 @@ struct EnhancedFoodDetailView: View {
                         TabView(selection: $selectedTab) {
                             nutritionTabContent
                                 .tag(0)
-                            
+
                             detailsTabContent
                                 .tag(1)
-                            
+
                             ingredientsTabContent
                                 .tag(2)
                         }
                         .frame(height: 500)
                         .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
-                        
+
+                        mealTypeSelector
                         addToLogButton
                     }
                     .padding()
@@ -448,8 +450,73 @@ struct EnhancedFoodDetailView: View {
         }
     }
     
+    // MARK: - Meal Type Selector
+
+    private var mealTypeSelector: some View {
+        LiquidGlassCard {
+            VStack(alignment: .leading, spacing: 12) {
+                Text("Add to Meal")
+                    .font(.headline)
+                    .fontWeight(.semibold)
+
+                HStack(spacing: 8) {
+                    ForEach(FoodEntry.MealType.allCases, id: \.self) { mealType in
+                        Button(action: {
+                            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                                selectedMealType = mealType
+                            }
+                        }) {
+                            VStack(spacing: 6) {
+                                Image(systemName: mealTypeIcon(mealType))
+                                    .font(.title3)
+                                Text(mealType.rawValue)
+                                    .font(.caption)
+                                    .fontWeight(.medium)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 12)
+                            .background(
+                                selectedMealType == mealType
+                                    ? LinearGradient(
+                                        colors: [.blue, .purple],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    )
+                                    : LinearGradient(
+                                        colors: [Color.clear],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    )
+                            )
+                            .foregroundColor(selectedMealType == mealType ? .white : .primary)
+                            .cornerRadius(10)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 10)
+                                    .stroke(
+                                        selectedMealType == mealType ? Color.clear : Color.secondary.opacity(0.3),
+                                        lineWidth: 1
+                                    )
+                            )
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                    }
+                }
+            }
+            .padding()
+        }
+    }
+
+    private func mealTypeIcon(_ mealType: FoodEntry.MealType) -> String {
+        switch mealType {
+        case .breakfast: return "sunrise.fill"
+        case .lunch: return "sun.max.fill"
+        case .dinner: return "moon.stars.fill"
+        case .snack: return "carrot.fill"
+        }
+    }
+
     // MARK: - Add to Log Button
-    
+
     private var addToLogButton: some View {
         Button(action: addToFoodLog) {
             HStack {
@@ -573,8 +640,8 @@ struct EnhancedFoodDetailView: View {
             category: nil,
             categoryLabel: food.category
         )
-        
-        onAddToLog(convertedFood)
+
+        onAddToLog(convertedFood, selectedMealType)
         dismiss()
     }
 }
@@ -748,5 +815,5 @@ struct AllergenBadge: View {
             certifications: ["Organic", "Free-range"],
             lastUpdated: Date()
         )
-    ) { _ in }
+    ) { _, _ in }
 }

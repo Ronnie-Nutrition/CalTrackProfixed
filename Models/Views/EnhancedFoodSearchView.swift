@@ -9,8 +9,9 @@ struct EnhancedFoodSearchView: View {
     @State private var selectedFood: EnhancedFoodItem?
     @State private var recentSearches: [String] = []
     @State private var isSearching = false
-    
+
     @Binding var selectedFoodItem: FoodItem?
+    @Binding var selectedMealType: FoodEntry.MealType
     
     var body: some View {
         NavigationStack {
@@ -46,8 +47,9 @@ struct EnhancedFoodSearchView: View {
             }
             .sheet(isPresented: $showingFoodDetail) {
                 if let food = selectedFood {
-                    EnhancedFoodDetailView(food: food) { convertedFood in
+                    EnhancedFoodDetailView(food: food) { convertedFood, mealType in
                         selectedFoodItem = convertedFood
+                        selectedMealType = mealType
                     }
                 }
             }
@@ -543,5 +545,5 @@ struct QualityIndicator: View {
 }
 
 #Preview {
-    EnhancedFoodSearchView(selectedFoodItem: .constant(nil))
+    EnhancedFoodSearchView(selectedFoodItem: .constant(nil), selectedMealType: .constant(.breakfast))
 }

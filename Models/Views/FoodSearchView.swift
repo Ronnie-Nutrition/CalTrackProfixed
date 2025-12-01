@@ -1,4 +1,5 @@
 import SwiftUI
+import SwiftData
 import Foundation
 
 struct FoodSearchView: View {
@@ -10,7 +11,12 @@ struct FoodSearchView: View {
     @State private var error: Error?
     @Binding var selectedFood: FoodItem?
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var modelContext
     @State private var isOffline = false
+    @State private var showingFoodDetail = false
+    @State private var tappedFood: FoodItem?
+    @State private var selectedMealType: FoodEntry.MealType = .breakfast
+    @State private var servingQuantity: Double = 1.0
     
     var body: some View {
         NavigationStack {
@@ -98,8 +104,10 @@ struct FoodSearchView: View {
                 } else {
                     List(searchResults, id: \.foodId) { food in
                         FoodSearchResultRow(food: food) {
-                            selectedFood = food
-                            dismiss()
+                            tappedFood = food
+                            selectedMealType = .breakfast
+                            servingQuantity = 1.0
+                            showingFoodDetail = true
                         }
                     }
                     .listStyle(PlainListStyle())
@@ -119,7 +127,35 @@ struct FoodSearchView: View {
             } message: {
                 Text(errorMessage)
             }
+            .sheet(isPresented: $showingFoodDetail) {
+                if let food = tappedFood {
+                    FoodDetailSheet(
+                        food: food,
+                        selectedMealType: $selectedMealType,
+                        servingQuantity: $servingQuantity,
+                        onAddToLog: { addFoodToLog(food) }
+                    )
+                }
+            }
         }
+    }
+
+    private func addFoodToLog(_ food: FoodItem) {
+        let entry = FoodEntry(
+            name: food.label,
+            calories: food.nutrients.calories * servingQuantity,
+            protein: food.nutrients.protein * servingQuantity,
+            carbs: food.nutrients.carbs * servingQuantity,
+            fat: food.nutrients.fat * servingQuantity,
+            servingSize: 1.0,
+            servingUnit: "serving",
+            quantity: servingQuantity,
+            mealType: selectedMealType,
+            timestamp: Date()
+        )
+        modelContext.insert(entry)
+        showingFoodDetail = false
+        dismiss()
     }
     
     private func searchFoods() {
@@ -228,7 +264,7 @@ struct NutrientLabel: View {
     let value: Double
     let unit: String
     var label: String? = nil
-    
+
     var body: some View {
         HStack(spacing: 2) {
             Text(String(format: "%.1f", value))
@@ -239,5 +275,213 @@ struct NutrientLabel: View {
                     .foregroundColor(.secondary)
             }
         }
+    }
+}
+
+// MARK: - Food Detail Sheet
+
+struct FoodDetailSheet: View {
+    let food: FoodItem
+    @Binding var selectedMealType: FoodEntry.MealType
+    @Binding var servingQuantity: Double
+    let onAddToLog: () -> Void
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(spacing: 20) {
+                    // Food Info Card
+                    VStack(spacing: 16) {
+                        Text(food.label)
+                            .font(.title2)
+                            .fontWeight(.bold)
+                            .multilineTextAlignment(.center)
+
+                        if let category = food.categoryLabel {
+                            Text(category)
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                        }
+
+                        // Nutrition Summary
+                        HStack(spacing: 20) {
+                            NutritionCircle(
+                                value: food.nutrients.calories * servingQuantity,
+                                label: "Cal",
+                                color: .red
+                            )
+                            NutritionCircle(
+                                value: food.nutrients.protein * servingQuantity,
+                                label: "Protein",
+                                color: .blue
+                            )
+                            NutritionCircle(
+                                value: food.nutrients.carbs * servingQuantity,
+                                label: "Carbs",
+                                color: .orange
+                            )
+                            NutritionCircle(
+                                value: food.nutrients.fat * servingQuantity,
+                                label: "Fat",
+                                color: .yellow
+                            )
+                        }
+                    }
+                    .padding()
+                    .background(Color(.secondarySystemBackground))
+                    .cornerRadius(16)
+
+                    // Serving Quantity
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Serving Size")
+                            .font(.headline)
+
+                        Stepper(value: $servingQuantity, in: 0.25...10, step: 0.25) {
+                            HStack {
+                                Text("Quantity:")
+                                Spacer()
+                                Text(String(format: "%.2f", servingQuantity))
+                                    .fontWeight(.semibold)
+                            }
+                        }
+                    }
+                    .padding()
+                    .background(Color(.secondarySystemBackground))
+                    .cornerRadius(16)
+
+                    // Meal Type Selector
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Add to Meal")
+                            .font(.headline)
+
+                        HStack(spacing: 8) {
+                            ForEach(FoodEntry.MealType.allCases, id: \.self) { mealType in
+                                MealTypeButton(
+                                    mealType: mealType,
+                                    isSelected: selectedMealType == mealType
+                                ) {
+                                    withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                                        selectedMealType = mealType
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    .padding()
+                    .background(Color(.secondarySystemBackground))
+                    .cornerRadius(16)
+
+                    // Add Button
+                    Button(action: onAddToLog) {
+                        HStack {
+                            Image(systemName: "plus.circle.fill")
+                                .font(.title2)
+                            Text("Add to Food Diary")
+                                .font(.headline)
+                                .fontWeight(.semibold)
+                        }
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(
+                            LinearGradient(
+                                colors: [.blue, .purple],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
+                        .cornerRadius(12)
+                    }
+                }
+                .padding()
+            }
+            .navigationTitle("Food Details")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") {
+                        dismiss()
+                    }
+                }
+            }
+        }
+    }
+}
+
+struct NutritionCircle: View {
+    let value: Double
+    let label: String
+    let color: Color
+
+    var body: some View {
+        VStack(spacing: 8) {
+            ZStack {
+                Circle()
+                    .fill(color.opacity(0.15))
+                    .frame(width: 60, height: 60)
+
+                Text(String(format: "%.0f", value))
+                    .font(.system(.headline, design: .rounded))
+                    .fontWeight(.bold)
+                    .foregroundColor(color)
+            }
+
+            Text(label)
+                .font(.caption)
+                .foregroundColor(.secondary)
+        }
+    }
+}
+
+struct MealTypeButton: View {
+    let mealType: FoodEntry.MealType
+    let isSelected: Bool
+    let action: () -> Void
+
+    private var icon: String {
+        switch mealType {
+        case .breakfast: return "sunrise.fill"
+        case .lunch: return "sun.max.fill"
+        case .dinner: return "moon.stars.fill"
+        case .snack: return "carrot.fill"
+        }
+    }
+
+    var body: some View {
+        Button(action: action) {
+            VStack(spacing: 6) {
+                Image(systemName: icon)
+                    .font(.title3)
+                Text(mealType.rawValue)
+                    .font(.caption)
+                    .fontWeight(.medium)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 12)
+            .background(
+                isSelected
+                    ? LinearGradient(
+                        colors: [.blue, .purple],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                    : LinearGradient(
+                        colors: [Color.clear],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+            )
+            .foregroundColor(isSelected ? .white : .primary)
+            .cornerRadius(10)
+            .overlay(
+                RoundedRectangle(cornerRadius: 10)
+                    .stroke(
+                        isSelected ? Color.clear : Color.secondary.opacity(0.3),
+                        lineWidth: 1
+                    )
+            )
+        }
+        .buttonStyle(PlainButtonStyle())
     }
 }
