@@ -223,8 +223,8 @@ struct DiaryView: View {
         }
         try? modelContext.save()
 
-        // Refresh widgets after clearing entries
-        WidgetCenter.shared.reloadAllTimelines()
+        // Sync nutrition data to widget
+        WidgetDataProvider.shared.syncFromDatabase(modelContext: modelContext)
     }
 }
 
@@ -404,8 +404,8 @@ struct MealSection: View {
     private func deleteEntry(_ entry: FoodEntry) {
         modelContext.delete(entry)
 
-        // Refresh widgets after deleting entry
-        WidgetCenter.shared.reloadAllTimelines()
+        // Sync nutrition data to widget
+        WidgetDataProvider.shared.syncFromDatabase(modelContext: modelContext)
     }
 }
 

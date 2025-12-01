@@ -1,5 +1,6 @@
 import Foundation
 import WidgetKit
+import SwiftData
 
 /// Service to share data between main app and widgets via App Groups
 class WidgetDataProvider {
@@ -11,6 +12,46 @@ class WidgetDataProvider {
     }
 
     private init() {}
+
+    // MARK: - Sync from Database
+
+    /// Syncs today's nutrition data from SwiftData to the widget
+    func syncFromDatabase(modelContext: ModelContext, calorieGoal: Int = 2000, proteinGoal: Int = 150, carbsGoal: Int = 250, fatGoal: Int = 65) {
+        // Query today's food entries
+        let calendar = Calendar.current
+        let startOfToday = calendar.startOfDay(for: Date())
+        let endOfToday = calendar.date(byAdding: .day, value: 1, to: startOfToday) ?? Date()
+
+        let descriptor = FetchDescriptor<FoodEntry>(
+            predicate: #Predicate<FoodEntry> { entry in
+                entry.timestamp >= startOfToday && entry.timestamp < endOfToday
+            }
+        )
+
+        do {
+            let todayEntries = try modelContext.fetch(descriptor)
+
+            // Calculate totals
+            let totalCalories = todayEntries.reduce(0) { $0 + $1.totalCalories }
+            let totalProtein = todayEntries.reduce(0) { $0 + $1.totalProtein }
+            let totalCarbs = todayEntries.reduce(0) { $0 + $1.totalCarbs }
+            let totalFat = todayEntries.reduce(0) { $0 + $1.totalFat }
+
+            // Update shared UserDefaults
+            updateNutritionData(
+                calories: Int(totalCalories),
+                calorieGoal: calorieGoal,
+                protein: Int(totalProtein),
+                proteinGoal: proteinGoal,
+                carbs: Int(totalCarbs),
+                carbsGoal: carbsGoal,
+                fat: Int(totalFat),
+                fatGoal: fatGoal
+            )
+        } catch {
+            print("WidgetDataProvider: Error fetching food entries: \(error)")
+        }
+    }
 
     // MARK: - Calorie Data
 

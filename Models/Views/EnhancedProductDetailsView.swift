@@ -336,8 +336,8 @@ struct EnhancedProductDetailsView: View {
         do {
             try modelContext.save()
 
-            // Refresh widgets with new data
-            WidgetCenter.shared.reloadAllTimelines()
+            // Sync nutrition data to widget
+            WidgetDataProvider.shared.syncFromDatabase(modelContext: modelContext)
 
             // Haptic feedback
             let impactFeedback = UIImpactFeedbackGenerator(style: .medium)

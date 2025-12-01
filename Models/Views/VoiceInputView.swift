@@ -913,8 +913,8 @@ struct FoodResultsView: View {
         do {
             try modelContext.save()
 
-            // Refresh widgets with new data
-            WidgetCenter.shared.reloadAllTimelines()
+            // Sync nutrition data to widget
+            WidgetDataProvider.shared.syncFromDatabase(modelContext: modelContext)
 
             foodWasAdded = true
             dismiss()
