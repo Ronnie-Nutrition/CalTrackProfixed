@@ -1,6 +1,7 @@
 import SwiftUI
 import SwiftData
 import Foundation
+import WidgetKit
 
 struct ManualEntryView: View {
     let mealType: FoodEntry.MealType
@@ -192,10 +193,13 @@ struct ManualEntryView: View {
         
         do {
             try modelContext.save()
-            
+
+            // Refresh widgets with new data
+            WidgetCenter.shared.reloadAllTimelines()
+
             // Auto-sync to HealthKit if user has premium and enabled sync
             entry.syncToHealthKit()
-            
+
             dismiss()
         } catch {
             print("Error saving entry: \(error)")

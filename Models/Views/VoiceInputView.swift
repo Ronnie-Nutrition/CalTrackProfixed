@@ -2,6 +2,7 @@ import SwiftUI
 import Speech
 import AVFoundation
 import SwiftData
+import WidgetKit
 
 struct VoiceInputView: View {
     @Environment(\.dismiss) private var dismiss
@@ -911,6 +912,10 @@ struct FoodResultsView: View {
         
         do {
             try modelContext.save()
+
+            // Refresh widgets with new data
+            WidgetCenter.shared.reloadAllTimelines()
+
             foodWasAdded = true
             dismiss()
         } catch {

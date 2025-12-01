@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import WidgetKit
 
 struct FoodDetailsView: View {
     let detectedFood: DetectedFood
@@ -170,6 +171,10 @@ struct FoodDetailsView: View {
         
         do {
             try modelContext.save()
+
+            // Refresh widgets with new data
+            WidgetCenter.shared.reloadAllTimelines()
+
             dismiss()
         } catch {
             print("Error saving food entry: \(error)")

@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import WidgetKit
 
 // Local struct to represent food product details from API
 struct ProductDetails {
@@ -326,19 +327,22 @@ struct EnhancedProductDetailsView: View {
             quantity: quantity,
             mealType: selectedMealType
         )
-        
+
         entry.barcode = barcode
         entry.brand = details.brand
-        
+
         modelContext.insert(entry)
-        
+
         do {
             try modelContext.save()
-            
+
+            // Refresh widgets with new data
+            WidgetCenter.shared.reloadAllTimelines()
+
             // Haptic feedback
             let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
             impactFeedback.impactOccurred()
-            
+
             dismiss()
         } catch {
             print("Error saving food entry: \(error)")

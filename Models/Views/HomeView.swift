@@ -146,33 +146,49 @@ struct HomeView: View {
 struct DailySummaryCard: View {
     @EnvironmentObject var appState: AppState
     @Query(sort: \FoodEntry.timestamp) private var allEntries: [FoodEntry]
-    
+
     private var todayEntries: [FoodEntry] {
         let calendar = Calendar.current
         let startOfToday = calendar.startOfDay(for: Date())
         let endOfToday = calendar.date(byAdding: .day, value: 1, to: startOfToday) ?? Date()
-        
+
         return allEntries.filter { entry in
             entry.timestamp >= startOfToday && entry.timestamp < endOfToday
         }
     }
-    
+
     private var totalCalories: Double {
         todayEntries.reduce(0) { $0 + $1.totalCalories }
     }
-    
+
     private var totalProtein: Double {
         todayEntries.reduce(0) { $0 + $1.totalProtein }
     }
-    
+
     private var totalCarbs: Double {
         todayEntries.reduce(0) { $0 + $1.totalCarbs }
     }
-    
+
     private var totalFat: Double {
         todayEntries.reduce(0) { $0 + $1.totalFat }
     }
-    
+
+    private var calorieGoal: Double {
+        appState.currentUser?.dailyCalorieTarget ?? 2000
+    }
+
+    private var proteinGoal: Double {
+        appState.currentUser?.dailyProteinTarget ?? 150
+    }
+
+    private var carbsGoal: Double {
+        appState.currentUser?.dailyCarbTarget ?? 250
+    }
+
+    private var fatGoal: Double {
+        appState.currentUser?.dailyFatTarget ?? 65
+    }
+
     var body: some View {
         LiquidGlassCard {
             VStack(spacing: 16) {
@@ -180,17 +196,17 @@ struct DailySummaryCard: View {
                 ZStack {
                     LiquidProgressRing(
                         progress: totalCalories,
-                        total: appState.currentUser?.dailyCalorieTarget ?? 2000,
+                        total: calorieGoal,
                         color: .blue,
                         size: 120,
                         lineWidth: 12
                     )
-                    
+
                     VStack {
                         Text("\(Int(totalCalories))")
                             .font(.title2)
                             .fontWeight(.bold)
-                        Text("of \(Int(appState.currentUser?.dailyCalorieTarget ?? 2000))")
+                        Text("of \(Int(calorieGoal))")
                             .font(.caption)
                             .foregroundColor(.secondary)
                         Text("calories")
@@ -198,20 +214,39 @@ struct DailySummaryCard: View {
                             .foregroundColor(.secondary)
                     }
                 }
-                
+
                 // Liquid Glass Macros
                 HStack(spacing: 20) {
-                    LiquidMacroView(value: totalProtein, target: appState.currentUser?.dailyProteinTarget ?? 150, 
+                    LiquidMacroView(value: totalProtein, target: proteinGoal,
                                    unit: "g", label: "Protein 💪", color: .red)
-                    LiquidMacroView(value: totalCarbs, target: appState.currentUser?.dailyCarbTarget ?? 250, 
+                    LiquidMacroView(value: totalCarbs, target: carbsGoal,
                                    unit: "g", label: "Carbs", color: .orange)
-                    LiquidMacroView(value: totalFat, target: appState.currentUser?.dailyFatTarget ?? 65, 
+                    LiquidMacroView(value: totalFat, target: fatGoal,
                                    unit: "g", label: "Fat", color: .yellow)
                 }
             }
             .padding()
         }
         .fluidGlow(color: .blue.opacity(0.3))
+        .onAppear {
+            syncWidgetData()
+        }
+        .onChange(of: allEntries.count) { _, _ in
+            syncWidgetData()
+        }
+    }
+
+    private func syncWidgetData() {
+        WidgetDataProvider.shared.updateNutritionData(
+            calories: Int(totalCalories),
+            calorieGoal: Int(calorieGoal),
+            protein: Int(totalProtein),
+            proteinGoal: Int(proteinGoal),
+            carbs: Int(totalCarbs),
+            carbsGoal: Int(carbsGoal),
+            fat: Int(totalFat),
+            fatGoal: Int(fatGoal)
+        )
     }
 }
 

@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import WidgetKit
 
 struct DiaryView: View {
     @Environment(\.modelContext) private var modelContext
@@ -221,6 +222,9 @@ struct DiaryView: View {
             modelContext.delete(entry)
         }
         try? modelContext.save()
+
+        // Refresh widgets after clearing entries
+        WidgetCenter.shared.reloadAllTimelines()
     }
 }
 
@@ -399,6 +403,9 @@ struct MealSection: View {
     
     private func deleteEntry(_ entry: FoodEntry) {
         modelContext.delete(entry)
+
+        // Refresh widgets after deleting entry
+        WidgetCenter.shared.reloadAllTimelines()
     }
 }
 
