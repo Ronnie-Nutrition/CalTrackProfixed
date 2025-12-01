@@ -76,148 +76,130 @@ struct NutritionSummaryWidgetEntryView: View {
     }
 
     private var mediumView: some View {
-        ZStack {
-            ContainerRelativeShape()
-                .fill(LinearGradient(
-                    colors: [Color.green.opacity(0.3), Color.teal.opacity(0.3)],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                ))
-
-            VStack(spacing: 12) {
-                HStack {
-                    Text("Today's Nutrition")
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor(.secondary)
-                    Spacer()
-                    Text("\(entry.calories)/\(entry.calorieGoal) cal")
-                        .font(.system(size: 14, weight: .bold))
-                        .foregroundColor(.primary)
-                }
-
-                HStack(spacing: 16) {
-                    macroColumn(
-                        name: "Protein",
-                        value: entry.protein,
-                        goal: entry.proteinGoal,
-                        unit: "g",
-                        color: .red
-                    )
-
-                    macroColumn(
-                        name: "Carbs",
-                        value: entry.carbs,
-                        goal: entry.carbsGoal,
-                        unit: "g",
-                        color: .blue
-                    )
-
-                    macroColumn(
-                        name: "Fat",
-                        value: entry.fat,
-                        goal: entry.fatGoal,
-                        unit: "g",
-                        color: .yellow
-                    )
-                }
+        VStack(spacing: 12) {
+            HStack {
+                Text("Today's Nutrition")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(.secondary)
+                Spacer()
+                Text("\(entry.calories)/\(entry.calorieGoal) cal")
+                    .font(.system(size: 14, weight: .bold))
+                    .foregroundColor(.primary)
             }
-            .padding()
+
+            HStack(spacing: 16) {
+                macroColumn(
+                    name: "Protein",
+                    value: entry.protein,
+                    goal: entry.proteinGoal,
+                    unit: "g",
+                    color: .red
+                )
+
+                macroColumn(
+                    name: "Carbs",
+                    value: entry.carbs,
+                    goal: entry.carbsGoal,
+                    unit: "g",
+                    color: .blue
+                )
+
+                macroColumn(
+                    name: "Fat",
+                    value: entry.fat,
+                    goal: entry.fatGoal,
+                    unit: "g",
+                    color: .yellow
+                )
+            }
         }
+        .padding()
     }
 
     private var largeView: some View {
-        ZStack {
-            ContainerRelativeShape()
-                .fill(LinearGradient(
-                    colors: [Color.green.opacity(0.3), Color.teal.opacity(0.3)],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                ))
+        VStack(spacing: 16) {
+            // Header
+            HStack {
+                VStack(alignment: .leading) {
+                    Text("Today's Nutrition")
+                        .font(.system(size: 18, weight: .bold))
+                    Text(entry.date, style: .date)
+                        .font(.system(size: 12))
+                        .foregroundColor(.secondary)
+                }
+                Spacer()
+            }
 
-            VStack(spacing: 16) {
-                // Header
-                HStack {
-                    VStack(alignment: .leading) {
-                        Text("Today's Nutrition")
-                            .font(.system(size: 18, weight: .bold))
-                        Text(entry.date, style: .date)
+            // Calorie Ring
+            HStack(spacing: 20) {
+                ZStack {
+                    Circle()
+                        .stroke(Color.gray.opacity(0.3), lineWidth: 12)
+
+                    Circle()
+                        .trim(from: 0, to: min(Double(entry.calories) / Double(entry.calorieGoal), 1.0))
+                        .stroke(
+                            LinearGradient(
+                                colors: [.green, .mint],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            style: StrokeStyle(lineWidth: 12, lineCap: .round)
+                        )
+                        .rotationEffect(.degrees(-90))
+
+                    VStack(spacing: 2) {
+                        Text("\(entry.calories)")
+                            .font(.system(size: 24, weight: .bold, design: .rounded))
+                        Text("/ \(entry.calorieGoal)")
                             .font(.system(size: 12))
                             .foregroundColor(.secondary)
                     }
-                    Spacer()
                 }
+                .frame(width: 100, height: 100)
 
-                // Calorie Ring
-                HStack(spacing: 20) {
-                    ZStack {
-                        Circle()
-                            .stroke(Color.gray.opacity(0.3), lineWidth: 12)
+                VStack(alignment: .leading, spacing: 8) {
+                    let remaining = max(0, entry.calorieGoal - entry.calories)
+                    Text("\(remaining) cal remaining")
+                        .font(.system(size: 16, weight: .semibold))
 
-                        Circle()
-                            .trim(from: 0, to: min(Double(entry.calories) / Double(entry.calorieGoal), 1.0))
-                            .stroke(
-                                LinearGradient(
-                                    colors: [.green, .mint],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                ),
-                                style: StrokeStyle(lineWidth: 12, lineCap: .round)
-                            )
-                            .rotationEffect(.degrees(-90))
-
-                        VStack(spacing: 2) {
-                            Text("\(entry.calories)")
-                                .font(.system(size: 24, weight: .bold, design: .rounded))
-                            Text("/ \(entry.calorieGoal)")
-                                .font(.system(size: 12))
-                                .foregroundColor(.secondary)
-                        }
-                    }
-                    .frame(width: 100, height: 100)
-
-                    VStack(alignment: .leading, spacing: 8) {
-                        let remaining = max(0, entry.calorieGoal - entry.calories)
-                        Text("\(remaining) cal remaining")
-                            .font(.system(size: 16, weight: .semibold))
-
-                        let percentage = entry.calorieGoal > 0 ? Int((Double(entry.calories) / Double(entry.calorieGoal)) * 100) : 0
-                        Text("\(percentage)% of daily goal")
-                            .font(.system(size: 14))
-                            .foregroundColor(.secondary)
-                    }
-                }
-
-                Divider()
-
-                // Macros
-                HStack(spacing: 24) {
-                    macroRow(
-                        name: "Protein",
-                        value: entry.protein,
-                        goal: entry.proteinGoal,
-                        unit: "g",
-                        color: .red
-                    )
-
-                    macroRow(
-                        name: "Carbs",
-                        value: entry.carbs,
-                        goal: entry.carbsGoal,
-                        unit: "g",
-                        color: .blue
-                    )
-
-                    macroRow(
-                        name: "Fat",
-                        value: entry.fat,
-                        goal: entry.fatGoal,
-                        unit: "g",
-                        color: .yellow
-                    )
+                    let percentage = entry.calorieGoal > 0 ? Int((Double(entry.calories) / Double(entry.calorieGoal)) * 100) : 0
+                    Text("\(percentage)% of daily goal")
+                        .font(.system(size: 14))
+                        .foregroundColor(.secondary)
                 }
             }
-            .padding()
+
+            Divider()
+
+            // Macros
+            HStack(spacing: 24) {
+                macroRow(
+                    name: "Protein",
+                    value: entry.protein,
+                    goal: entry.proteinGoal,
+                    unit: "g",
+                    color: .red
+                )
+
+                macroRow(
+                    name: "Carbs",
+                    value: entry.carbs,
+                    goal: entry.carbsGoal,
+                    unit: "g",
+                    color: .blue
+                )
+
+                macroRow(
+                    name: "Fat",
+                    value: entry.fat,
+                    goal: entry.fatGoal,
+                    unit: "g",
+                    color: .yellow
+                )
+            }
         }
+        .padding()
     }
 
     private func macroColumn(name: String, value: Int, goal: Int, unit: String, color: Color) -> some View {
@@ -285,6 +267,13 @@ struct NutritionSummaryWidget: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: NutritionSummaryProvider()) { entry in
             NutritionSummaryWidgetEntryView(entry: entry)
+                .containerBackground(for: .widget) {
+                    LinearGradient(
+                        colors: [Color.green.opacity(0.3), Color.teal.opacity(0.3)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                }
         }
         .configurationDisplayName("Nutrition Summary")
         .description("View your daily macros and nutrition progress.")

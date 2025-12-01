@@ -62,119 +62,101 @@ struct CalorieProgressWidgetEntryView: View {
     }
 
     private var smallView: some View {
-        ZStack {
-            ContainerRelativeShape()
-                .fill(LinearGradient(
-                    colors: [Color.blue.opacity(0.3), Color.purple.opacity(0.3)],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                ))
+        VStack(spacing: 8) {
+            ZStack {
+                Circle()
+                    .stroke(Color.gray.opacity(0.3), lineWidth: 8)
 
-            VStack(spacing: 8) {
-                ZStack {
-                    Circle()
-                        .stroke(Color.gray.opacity(0.3), lineWidth: 8)
+                Circle()
+                    .trim(from: 0, to: entry.progress)
+                    .stroke(
+                        LinearGradient(
+                            colors: [.green, .mint],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        style: StrokeStyle(lineWidth: 8, lineCap: .round)
+                    )
+                    .rotationEffect(.degrees(-90))
 
-                    Circle()
-                        .trim(from: 0, to: entry.progress)
-                        .stroke(
-                            LinearGradient(
-                                colors: [.green, .mint],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            ),
-                            style: StrokeStyle(lineWidth: 8, lineCap: .round)
-                        )
-                        .rotationEffect(.degrees(-90))
-
-                    VStack(spacing: 2) {
-                        Text("\(entry.consumed)")
-                            .font(.system(size: 20, weight: .bold, design: .rounded))
-                            .foregroundColor(.primary)
-                        Text("cal")
-                            .font(.system(size: 10))
-                            .foregroundColor(.secondary)
-                    }
+                VStack(spacing: 2) {
+                    Text("\(entry.consumed)")
+                        .font(.system(size: 20, weight: .bold, design: .rounded))
+                        .foregroundColor(.primary)
+                    Text("cal")
+                        .font(.system(size: 10))
+                        .foregroundColor(.secondary)
                 }
-                .frame(width: 80, height: 80)
-
-                Text("\(entry.remaining) left")
-                    .font(.system(size: 12, weight: .medium))
-                    .foregroundColor(.secondary)
             }
-            .padding()
+            .frame(width: 80, height: 80)
+
+            Text("\(entry.remaining) left")
+                .font(.system(size: 12, weight: .medium))
+                .foregroundColor(.secondary)
         }
+        .padding()
     }
 
     private var mediumView: some View {
-        ZStack {
-            ContainerRelativeShape()
-                .fill(LinearGradient(
-                    colors: [Color.blue.opacity(0.3), Color.purple.opacity(0.3)],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                ))
+        HStack(spacing: 20) {
+            // Progress Ring
+            ZStack {
+                Circle()
+                    .stroke(Color.gray.opacity(0.3), lineWidth: 10)
 
-            HStack(spacing: 20) {
-                // Progress Ring
-                ZStack {
-                    Circle()
-                        .stroke(Color.gray.opacity(0.3), lineWidth: 10)
+                Circle()
+                    .trim(from: 0, to: entry.progress)
+                    .stroke(
+                        LinearGradient(
+                            colors: [.green, .mint],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        style: StrokeStyle(lineWidth: 10, lineCap: .round)
+                    )
+                    .rotationEffect(.degrees(-90))
 
-                    Circle()
-                        .trim(from: 0, to: entry.progress)
-                        .stroke(
-                            LinearGradient(
-                                colors: [.green, .mint],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            ),
-                            style: StrokeStyle(lineWidth: 10, lineCap: .round)
-                        )
-                        .rotationEffect(.degrees(-90))
-
-                    VStack(spacing: 2) {
-                        Text("\(Int(entry.progress * 100))%")
-                            .font(.system(size: 22, weight: .bold, design: .rounded))
-                            .foregroundColor(.primary)
-                    }
-                }
-                .frame(width: 90, height: 90)
-
-                // Stats
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Calories Today")
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor(.secondary)
-
-                    HStack {
-                        VStack(alignment: .leading) {
-                            Text("\(entry.consumed)")
-                                .font(.system(size: 28, weight: .bold, design: .rounded))
-                            Text("consumed")
-                                .font(.system(size: 11))
-                                .foregroundColor(.secondary)
-                        }
-
-                        Spacer()
-
-                        VStack(alignment: .trailing) {
-                            Text("\(entry.remaining)")
-                                .font(.system(size: 28, weight: .bold, design: .rounded))
-                                .foregroundColor(.green)
-                            Text("remaining")
-                                .font(.system(size: 11))
-                                .foregroundColor(.secondary)
-                        }
-                    }
-
-                    Text("Goal: \(entry.goal) cal")
-                        .font(.system(size: 12))
-                        .foregroundColor(.secondary)
+                VStack(spacing: 2) {
+                    Text("\(Int(entry.progress * 100))%")
+                        .font(.system(size: 22, weight: .bold, design: .rounded))
+                        .foregroundColor(.primary)
                 }
             }
-            .padding()
+            .frame(width: 90, height: 90)
+
+            // Stats
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Calories Today")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(.secondary)
+
+                HStack {
+                    VStack(alignment: .leading) {
+                        Text("\(entry.consumed)")
+                            .font(.system(size: 28, weight: .bold, design: .rounded))
+                        Text("consumed")
+                            .font(.system(size: 11))
+                            .foregroundColor(.secondary)
+                    }
+
+                    Spacer()
+
+                    VStack(alignment: .trailing) {
+                        Text("\(entry.remaining)")
+                            .font(.system(size: 28, weight: .bold, design: .rounded))
+                            .foregroundColor(.green)
+                        Text("remaining")
+                            .font(.system(size: 11))
+                            .foregroundColor(.secondary)
+                    }
+                }
+
+                Text("Goal: \(entry.goal) cal")
+                    .font(.system(size: 12))
+                    .foregroundColor(.secondary)
+            }
         }
+        .padding()
     }
 }
 
@@ -184,6 +166,13 @@ struct CalorieProgressWidget: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: CalorieProgressProvider()) { entry in
             CalorieProgressWidgetEntryView(entry: entry)
+                .containerBackground(for: .widget) {
+                    LinearGradient(
+                        colors: [Color.blue.opacity(0.3), Color.purple.opacity(0.3)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                }
         }
         .configurationDisplayName("Calorie Progress")
         .description("Track your daily calorie intake at a glance.")
