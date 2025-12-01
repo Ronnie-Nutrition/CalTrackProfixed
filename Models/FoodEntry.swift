@@ -45,19 +45,19 @@ final class FoodEntry {
     }
     
     var totalCalories: Double {
-        return (calories / servingSize) * quantity
+        return calories * quantity
     }
-    
+
     var totalProtein: Double {
-        return (protein / servingSize) * quantity
+        return protein * quantity
     }
-    
+
     var totalCarbs: Double {
-        return (carbs / servingSize) * quantity
+        return carbs * quantity
     }
-    
+
     var totalFat: Double {
-        return (fat / servingSize) * quantity
+        return fat * quantity
     }
     
     // Auto-sync to HealthKit when entry is saved (Premium feature)
