@@ -107,7 +107,6 @@ struct AIFoodRecognitionView: View {
                                 .cornerRadius(16)
                                 .shadow(color: .green.opacity(0.3), radius: 10)
                             }
-                            .liquidPulse(color: .green, intensity: 0.3)
                             
                             // Choose from Library Button
                             Button(action: { showingPhotoLibrary = true }) {
