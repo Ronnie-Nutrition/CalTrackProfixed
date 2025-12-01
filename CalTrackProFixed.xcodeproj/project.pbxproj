@@ -68,9 +68,17 @@
 		FB0B71352EAFB890004E511A /* EnhancedBarcodeScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB0B71362EAFB890004E511A /* EnhancedBarcodeScannerView.swift */; };
 		FBDAA1332EBE635300EB31F2 /* VoiceInputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBDAA1322EBE635300EB31F2 /* VoiceInputView.swift */; };
 		FBFASTING001 /* FastingManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBFASTING002 /* FastingManager.swift */; };
+		95E8D23532384158B983EBA0 /* WidgetDataProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 084D7FDDBD134FADA957CD6F /* WidgetDataProvider.swift */; };
+		084D7FDDBD134FADA957CD6F /* WidgetDataProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Services/WidgetDataProvider.swift"; sourceTree = "<group>"; };
 		FBFASTING003 /* FastingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBFASTING004 /* FastingView.swift */; };
 		FBGROCERY001 /* GroceryListService.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBGROCERY002 /* GroceryListService.swift */; };
 		FBGROCERY003 /* GroceryListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBGROCERY004 /* GroceryListView.swift */; };
+		A2DEE72B850C4090B3F28B85 /* CalTrackWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02A8B1F4082749099ABE366B /* CalTrackWidgetBundle.swift */; };
+		4132AA1C174546A38693EEC4 /* CalorieProgressWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEF9B8F2991D459898C22E59 /* CalorieProgressWidget.swift */; };
+		334C17D692664B0FA1076F14 /* FastingTimerWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE945A3A7B52455C9B8DB752 /* FastingTimerWidget.swift */; };
+		37EC6DA5B3F245FA9F04FB7F /* NutritionSummaryWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4E5A62971B3492D980D3DB5 /* NutritionSummaryWidget.swift */; };
+		8B9FDD575B71489992E73F9C /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D3A0456B730E48398289DE51 /* WidgetKit.framework */; };
+		3646AABB93E440AD85BF5D29 /* CalTrackWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 5667B47FA10C41A996596197 /* CalTrackWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -87,6 +95,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = FB0B70882EAB9AFC004E511A;
 			remoteInfo = CalTrackProFixed;
+		};
+		FF35DACDA7A548BBA0178D73 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FB0B70812EAB9AFB004E511A /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = AF2F2C17F3D040038F729C95;
+			remoteInfo = CalTrackWidget;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -158,6 +173,12 @@
 		FBFASTING004 /* FastingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Models/Views/FastingView.swift"; sourceTree = "<group>"; };
 		FBGROCERY002 /* GroceryListService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Services/GroceryListService.swift"; sourceTree = "<group>"; };
 		FBGROCERY004 /* GroceryListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Models/Views/GroceryListView.swift"; sourceTree = "<group>"; };
+		02A8B1F4082749099ABE366B /* CalTrackWidgetBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalTrackWidgetBundle.swift; sourceTree = "<group>"; };
+		BEF9B8F2991D459898C22E59 /* CalorieProgressWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalorieProgressWidget.swift; sourceTree = "<group>"; };
+		DE945A3A7B52455C9B8DB752 /* FastingTimerWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FastingTimerWidget.swift; sourceTree = "<group>"; };
+		F4E5A62971B3492D980D3DB5 /* NutritionSummaryWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NutritionSummaryWidget.swift; sourceTree = "<group>"; };
+		5667B47FA10C41A996596197 /* CalTrackWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = CalTrackWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		D3A0456B730E48398289DE51 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -201,12 +222,21 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		E951C607412945819B206421 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8B9FDD575B71489992E73F9C /* WidgetKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
 		FB0B70802EAB9AFB004E511A = {
 			isa = PBXGroup;
 			children = (
+				EFD66A0423D0423C8B8E37C7 /* CalTrackWidget */,
 				FB0B70B82EABA3F4004E511A /* Models */,
 				FB0B709B2EAB9B09004E511A /* CalTrackProFixedTests */,
 				FB0B70A52EAB9B09004E511A /* CalTrackProFixedUITests */,
@@ -219,6 +249,7 @@
 			isa = PBXGroup;
 			children = (
 				FB0B70892EAB9AFC004E511A /* CalTrackProFixed.app */,
+				5667B47FA10C41A996596197 /* CalTrackWidget.appex */,
 				FB0B70982EAB9B09004E511A /* CalTrackProFixedTests.xctest */,
 				FB0B70A22EAB9B09004E511A /* CalTrackProFixedUITests.xctest */,
 			);
@@ -229,6 +260,7 @@
 			isa = PBXGroup;
 			children = (
 				FB0B70B62EAB9C53004E511A /* SwiftData.framework */,
+				D3A0456B730E48398289DE51 /* WidgetKit.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -304,6 +336,17 @@
 			path = Utilities;
 			sourceTree = "<group>";
 		};
+		EFD66A0423D0423C8B8E37C7 /* CalTrackWidget */ = {
+			isa = PBXGroup;
+			children = (
+				02A8B1F4082749099ABE366B /* CalTrackWidgetBundle.swift */,
+				BEF9B8F2991D459898C22E59 /* CalorieProgressWidget.swift */,
+				DE945A3A7B52455C9B8DB752 /* FastingTimerWidget.swift */,
+				F4E5A62971B3492D980D3DB5 /* NutritionSummaryWidget.swift */,
+			);
+			path = CalTrackWidget;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -314,10 +357,12 @@
 				FB0B70852EAB9AFC004E511A /* Sources */,
 				FB0B70862EAB9AFC004E511A /* Frameworks */,
 				FB0B70872EAB9AFC004E511A /* Resources */,
+				0B5B0E579946481FA039C6B1 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				C7B75C85DD2D41EA97A647AF /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				FB0B708B2EAB9AFC004E511A /* CalTrackProFixed */,
@@ -375,6 +420,25 @@
 			productReference = FB0B70A22EAB9B09004E511A /* CalTrackProFixedUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
+		AF2F2C17F3D040038F729C95 /* CalTrackWidget */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 8A43F7F3C18F4D88A6F6245C /* Build configuration list for PBXNativeTarget "CalTrackWidget" */;
+			buildPhases = (
+				EB4E8BE2BD1B44EA85047D27 /* Sources */,
+				E951C607412945819B206421 /* Frameworks */,
+				4D2A42222625450980D1F508 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = CalTrackWidget;
+			packageProductDependencies = (
+			);
+			productName = CalTrackWidget;
+			productReference = 5667B47FA10C41A996596197 /* CalTrackWidget.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -385,6 +449,9 @@
 				LastSwiftUpdateCheck = 2600;
 				LastUpgradeCheck = 2600;
 				TargetAttributes = {
+					AF2F2C17F3D040038F729C95 = {
+						CreatedOnToolsVersion = 26.0.1;
+					};
 					FB0B70882EAB9AFC004E511A = {
 						CreatedOnToolsVersion = 26.0.1;
 					};
@@ -413,11 +480,26 @@
 			projectRoot = "";
 			targets = (
 				FB0B70882EAB9AFC004E511A /* CalTrackProFixed */,
+				AF2F2C17F3D040038F729C95 /* CalTrackWidget */,
 				FB0B70972EAB9B09004E511A /* CalTrackProFixedTests */,
 				FB0B70A12EAB9B09004E511A /* CalTrackProFixedUITests */,
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		0B5B0E579946481FA039C6B1 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				3646AABB93E440AD85BF5D29 /* CalTrackWidget.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXResourcesBuildPhase section */
 		FB0B70872EAB9AFC004E511A /* Resources */ = {
@@ -435,6 +517,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		FB0B70A02EAB9B09004E511A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4D2A42222625450980D1F508 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -511,7 +600,8 @@
 				FBFASTING003 /* FastingView.swift in Sources */,
 				FBGROCERY001 /* GroceryListService.swift in Sources */,
 				FBGROCERY003 /* GroceryListView.swift in Sources */,
-			);
+							95E8D23532384158B983EBA0 /* WidgetDataProvider.swift in Sources */,
+);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		FB0B70942EAB9B09004E511A /* Sources */ = {
@@ -528,6 +618,17 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		EB4E8BE2BD1B44EA85047D27 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A2DEE72B850C4090B3F28B85 /* CalTrackWidgetBundle.swift in Sources */,
+				4132AA1C174546A38693EEC4 /* CalorieProgressWidget.swift in Sources */,
+				334C17D692664B0FA1076F14 /* FastingTimerWidget.swift in Sources */,
+				37EC6DA5B3F245FA9F04FB7F /* NutritionSummaryWidget.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -540,6 +641,11 @@
 			isa = PBXTargetDependency;
 			target = FB0B70882EAB9AFC004E511A /* CalTrackProFixed */;
 			targetProxy = FB0B70A32EAB9B09004E511A /* PBXContainerItemProxy */;
+		};
+		C7B75C85DD2D41EA97A647AF /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = AF2F2C17F3D040038F729C95 /* CalTrackWidget */;
+			targetProxy = FF35DACDA7A548BBA0178D73 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -833,6 +939,66 @@
 			};
 			name = Release;
 		};
+		009861E2C3594DA08C76D888 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = CalTrackWidget/CalTrackWidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = D66KWXXM88;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = CalTrackWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = CalTrackWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = easyaiflows.com.CalTrackProFixed.CalTrackWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		D79B33B78E5043AF94D76AE0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = CalTrackWidget/CalTrackWidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = D66KWXXM88;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = CalTrackWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = CalTrackWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = easyaiflows.com.CalTrackProFixed.CalTrackWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -868,6 +1034,15 @@
 			buildConfigurations = (
 				FB0B70B32EAB9B09004E511A /* Debug */,
 				FB0B70B42EAB9B09004E511A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		8A43F7F3C18F4D88A6F6245C /* Build configuration list for PBXNativeTarget "CalTrackWidget" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				009861E2C3594DA08C76D888 /* Debug */,
+				D79B33B78E5043AF94D76AE0 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

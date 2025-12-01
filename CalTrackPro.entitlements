@@ -51,13 +51,11 @@
     <key>aps-environment</key>
     <string>production</string>
     
-    <!-- ==================== APP GROUPS (Optional) ==================== -->
-    <!-- Enable if adding widgets or extensions -->
-    <!--
+    <!-- ==================== APP GROUPS ==================== -->
+    <!-- Required for widget data sharing -->
     <key>com.apple.security.application-groups</key>
     <array>
-        <string>group.com.ronnienutrition.CalTrackPro</string>
+        <string>group.easyaiflows.com.CalTrackProFixed</string>
     </array>
-    -->
 </dict>
 </plist>

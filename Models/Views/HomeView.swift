@@ -32,30 +32,33 @@ struct HomeView: View {
                                 .foregroundColor(AppColors.primaryText)
                                 .padding(.horizontal)
 
-                            ScrollView(.horizontal, showsIndicators: false) {
-                                HStack(spacing: 12) {
-                                    QuickAddButton(icon: "camera.viewfinder", title: "AI Photo", color: .blue) {
-                                        showingCamera = true
-                                    }
-
-                                    QuickAddButton(icon: "barcode", title: "Barcode", color: .orange) {
-                                        showingBarcodeScanner = true
-                                    }
-
-                                    QuickAddButton(icon: "square.and.pencil", title: "Manual", color: .green) {
-                                        showingManualEntry = true
-                                    }
-
-                                    QuickAddButton(icon: "photo", title: "Gallery", color: .purple) {
-                                        showingImagePicker = true
-                                    }
-
-                                    QuickAddButton(icon: "mic.fill", title: "Voice", color: .red) {
-                                        showingVoiceInput = true
-                                    }
+                            HStack(spacing: 0) {
+                                QuickAddButton(icon: "camera.viewfinder", title: "AI Photo", color: .blue) {
+                                    showingCamera = true
                                 }
-                                .padding(.horizontal)
+                                .frame(maxWidth: .infinity)
+
+                                QuickAddButton(icon: "barcode", title: "Barcode", color: .orange) {
+                                    showingBarcodeScanner = true
+                                }
+                                .frame(maxWidth: .infinity)
+
+                                QuickAddButton(icon: "square.and.pencil", title: "Manual", color: .green) {
+                                    showingManualEntry = true
+                                }
+                                .frame(maxWidth: .infinity)
+
+                                QuickAddButton(icon: "photo", title: "Gallery", color: .purple) {
+                                    showingImagePicker = true
+                                }
+                                .frame(maxWidth: .infinity)
+
+                                QuickAddButton(icon: "mic.fill", title: "Voice", color: .red) {
+                                    showingVoiceInput = true
+                                }
+                                .frame(maxWidth: .infinity)
                             }
+                            .padding(.horizontal)
                         }
 
                         // AI Meal Planner - with Liquid Glass styling
@@ -229,13 +232,12 @@ struct LiquidMacroView: View {
                     size: 50,
                     lineWidth: 6
                 )
-                
+
                 Text("\(Int(value))")
                     .font(.caption)
                     .fontWeight(.semibold)
             }
-            .liquidPulse(color: color, intensity: 0.2)
-            
+
             Text(label)
                 .font(.caption)
                 .foregroundColor(.secondary)
