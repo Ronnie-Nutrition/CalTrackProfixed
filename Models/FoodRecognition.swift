@@ -479,7 +479,7 @@ class AIFoodRecognitionService: ObservableObject {
 
         return try await withCheckedThrowingContinuation { continuation in
             let request = VNClassifyImageRequest { request, error in
-                if let error = error {
+                if error != nil {
                     continuation.resume(throwing: FoodRecognitionError.imageProcessingFailed)
                     return
                 }
