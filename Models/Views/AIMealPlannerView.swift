@@ -19,7 +19,8 @@ struct AIMealPlannerView: View {
     @State private var varietyLevel: VarietyLevel = .medium
     @State private var cuisinePreferences: Set<CuisineType> = []
     @State private var startDate = Date()
-    
+    @State private var selectedQuickStart: String? = nil
+
     @State private var showingGeneratedPlan = false
     @State private var generatedPlan: WeeklyMealPlan?
     @State private var showError = false
@@ -102,7 +103,7 @@ struct AIMealPlannerView: View {
         VStack(alignment: .leading, spacing: 16) {
             Text("Quick Start")
                 .font(.headline)
-            
+
             LazyVGrid(columns: [
                 GridItem(.flexible()),
                 GridItem(.flexible())
@@ -110,36 +111,44 @@ struct AIMealPlannerView: View {
                 quickStartOption(
                     title: "Weight Loss",
                     icon: "arrow.down.circle.fill",
-                    color: .green
+                    color: .green,
+                    isSelected: selectedQuickStart == "Weight Loss"
                 ) {
+                    selectedQuickStart = "Weight Loss"
                     dietType = .lowCarb
                     budgetOptimized = false
                     varietyLevel = .medium
                 }
-                
+
                 quickStartOption(
                     title: "Muscle Gain",
                     icon: "figure.strengthtraining.traditional",
-                    color: .orange
+                    color: .orange,
+                    isSelected: selectedQuickStart == "Muscle Gain"
                 ) {
+                    selectedQuickStart = "Muscle Gain"
                     dietType = .highProtein
                     includedMeals = [.breakfast, .morningSnack, .lunch, .afternoonSnack, .dinner]
                 }
-                
+
                 quickStartOption(
                     title: "Balanced Diet",
                     icon: "leaf.fill",
-                    color: .blue
+                    color: .blue,
+                    isSelected: selectedQuickStart == "Balanced Diet"
                 ) {
+                    selectedQuickStart = "Balanced Diet"
                     dietType = .balanced
                     varietyLevel = .high
                 }
-                
+
                 quickStartOption(
                     title: "Budget Friendly",
                     icon: "dollarsign.circle.fill",
-                    color: .purple
+                    color: .purple,
+                    isSelected: selectedQuickStart == "Budget Friendly"
                 ) {
+                    selectedQuickStart = "Budget Friendly"
                     budgetOptimized = true
                     varietyLevel = .low
                 }
@@ -151,24 +160,41 @@ struct AIMealPlannerView: View {
         title: String,
         icon: String,
         color: Color,
+        isSelected: Bool,
         action: @escaping () -> Void
     ) -> some View {
-        Button(action: action) {
+        Button(action: {
+            withAnimation(.easeInOut(duration: 0.2)) {
+                action()
+            }
+        }) {
             HStack(spacing: 12) {
                 Image(systemName: icon)
                     .font(.title2)
-                    .foregroundColor(color)
-                
+                    .foregroundColor(isSelected ? .white : color)
+
                 Text(title)
                     .font(.subheadline)
                     .fontWeight(.medium)
-                    .foregroundColor(.primary)
-                
+                    .foregroundColor(isSelected ? .white : .primary)
+
                 Spacer()
+
+                if isSelected {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.title3)
+                        .foregroundColor(.white)
+                }
             }
             .padding()
-            .background(Color(.secondarySystemBackground))
-            .cornerRadius(12)
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(isSelected ? color : Color(.secondarySystemBackground))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(isSelected ? color : Color.clear, lineWidth: 2)
+            )
         }
     }
     
