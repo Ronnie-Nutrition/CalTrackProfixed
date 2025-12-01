@@ -99,9 +99,9 @@ class NutritionAPIService {
             return
         }
         
-        // Fallback to Open Food Facts API
+        // Fallback to Open Food Facts API - use US/English endpoint with language filters
         let encodedQuery = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
-        let urlString = "https://world.openfoodfacts.org/cgi/search.pl?search_terms=\(encodedQuery)&search_simple=1&action=process&json=1&page_size=20"
+        let urlString = "https://us.openfoodfacts.org/cgi/search.pl?search_terms=\(encodedQuery)&search_simple=1&action=process&json=1&page_size=50&lc=en&cc=us&tagtype_0=countries&tag_contains_0=contains&tag_0=united-states"
         
         guard let url = URL(string: urlString),
               SecurityConfig.isSecureURL(url) else {
@@ -212,39 +212,105 @@ class NutritionAPIService {
     // MARK: - Open Food Facts Converter
     private func convertOpenFoodFactsToEdamam(products: [[String: Any]]) -> FoodSearchResponse {
         let foods = products.compactMap { product -> FoodItem? in
-            guard let name = product["product_name_en"] as? String ?? product["product_name"] as? String,
-                  !name.isEmpty else { return nil }
-            
+            // Prefer English name, then fall back to generic name
+            let englishName = product["product_name_en"] as? String
+            let genericName = product["product_name"] as? String
+
+            // Use English name if available and not empty, otherwise use generic
+            var name = englishName?.isEmpty == false ? englishName! : (genericName ?? "")
+
+            // Skip if no name or name appears to be non-English
+            guard !name.isEmpty else { return nil }
+
+            // Filter out non-English entries (check for common non-ASCII characters)
+            if !isLikelyEnglish(name) {
+                return nil
+            }
+
+            // Clean up the name - remove excessive brand info
+            name = cleanProductName(name)
+
             let nutrients = product["nutriments"] as? [String: Any] ?? [:]
             let calories = nutrients["energy-kcal_100g"] as? Double ?? 0
             let protein = nutrients["proteins_100g"] as? Double ?? 0
             let carbs = nutrients["carbohydrates_100g"] as? Double ?? 0
             let fat = nutrients["fat_100g"] as? Double ?? 0
-            
+
+            // Skip products with no nutrition data
+            if calories == 0 && protein == 0 && carbs == 0 && fat == 0 {
+                return nil
+            }
+
             let foodNutrients = FoodNutrients(
                 calories: calories,
                 protein: protein,
                 carbs: carbs,
                 fat: fat
             )
-            
+
+            // Get brand for display
+            let brand = product["brands"] as? String
+            let displayName = brand != nil && !brand!.isEmpty ? "\(name) (\(brand!))" : name
+
             return FoodItem(
-                foodId: product["id"] as? String ?? UUID().uuidString,
-                label: name,
-                categoryLabel: product["categories"] as? String,
+                foodId: product["_id"] as? String ?? product["code"] as? String ?? UUID().uuidString,
+                label: displayName,
+                categoryLabel: brand,
                 nutrients: foodNutrients
             )
         }
-        
+
         let parsedItems = foods.map { food in
             ParsedFoodItem(food: food)
         }
-        
+
         return FoodSearchResponse(
             text: "",
             parsed: parsedItems,
             hints: nil
         )
+    }
+
+    /// Check if text is likely English (filters out foreign language entries)
+    private func isLikelyEnglish(_ text: String) -> Bool {
+        // Check for common non-English/accented characters
+        let nonEnglishChars = CharacterSet(charactersIn: "éèêëàâäôöùûüçñœæøåíìîïóòõúýÿžšđ")
+        if text.lowercased().unicodeScalars.contains(where: { nonEnglishChars.contains($0) }) {
+            return false
+        }
+
+        // Check for non-Latin scripts (Cyrillic, Chinese, Japanese, Korean, Arabic, Hebrew, etc.)
+        for scalar in text.unicodeScalars {
+            let value = scalar.value
+            // Allow ASCII (0-127) and extended Latin (128-591)
+            if value > 591 {
+                return false
+            }
+        }
+
+        return true
+    }
+
+    /// Clean up product name for better display
+    private func cleanProductName(_ name: String) -> String {
+        var cleaned = name
+
+        // Remove common suffixes that add clutter
+        let suffixesToRemove = [", ", " - ", " / "]
+        for suffix in suffixesToRemove {
+            if let range = cleaned.range(of: suffix) {
+                // Only truncate if the suffix is in the latter half of the string
+                let distance = cleaned.distance(from: cleaned.startIndex, to: range.lowerBound)
+                if distance > cleaned.count / 2 {
+                    cleaned = String(cleaned[..<range.lowerBound])
+                }
+            }
+        }
+
+        // Capitalize first letter of each word
+        cleaned = cleaned.capitalized
+
+        return cleaned.trimmingCharacters(in: .whitespaces)
     }
     
     // MARK: - Barcode Lookup

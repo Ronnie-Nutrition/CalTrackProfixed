@@ -13,6 +13,9 @@ struct AIFoodRecognitionView: View {
     @State private var selectedImage: UIImage?
     @State private var showingResultsView = false
     @State private var showingHowItWorks = false
+    @State private var showingError = false
+    @State private var errorMessage = ""
+    @State private var isProcessing = false
     
     var body: some View {
         NavigationStack {
@@ -240,6 +243,36 @@ struct AIFoodRecognitionView: View {
                     FoodRecognitionResultView(result: result)
                 }
             }
+            .alert("Food Recognition", isPresented: $showingError) {
+                Button("OK", role: .cancel) { }
+            } message: {
+                Text(errorMessage)
+            }
+            .overlay {
+                if isProcessing {
+                    ZStack {
+                        Color.black.opacity(0.5)
+                            .ignoresSafeArea()
+
+                        VStack(spacing: 16) {
+                            ProgressView()
+                                .scaleEffect(1.5)
+                                .tint(.white)
+
+                            Text("Analyzing food...")
+                                .font(.headline)
+                                .foregroundColor(.white)
+
+                            Text("Using Apple Vision AI")
+                                .font(.caption)
+                                .foregroundColor(.white.opacity(0.7))
+                        }
+                        .padding(30)
+                        .background(.ultraThinMaterial)
+                        .cornerRadius(20)
+                    }
+                }
+            }
             .onAppear {
                 permissionManager.checkCameraPermission()
             }
@@ -249,8 +282,11 @@ struct AIFoodRecognitionView: View {
                 }
             }
             .onChange(of: selectedImage) { _, newImage in
+                print("📸 Gallery image selected: \(newImage != nil ? "YES" : "NO")")
                 if let image = newImage {
+                    print("📸 Image size: \(image.size)")
                     processImage(image)
+                    selectedImage = nil // Reset to allow re-selection
                 }
             }
         }
@@ -328,17 +364,46 @@ struct AIFoodRecognitionView: View {
     }
     
     // MARK: - Process Image
-    
+
     private func processImage(_ image: UIImage) {
+        print("🍎 processImage called - starting recognition")
+        isProcessing = true
+
         Task {
             do {
-                _ = try await recognitionService.recognizeFood(from: image)
+                print("🍎 Calling recognitionService.recognizeFood...")
+                let result = try await recognitionService.recognizeFood(from: image)
+                print("🍎 Recognition complete! Found \(result.recognizedFoods.count) foods")
                 await MainActor.run {
+                    isProcessing = false
                     showingResultsView = true
+                    print("🍎 Showing results view")
+                }
+            } catch let error as AIFoodRecognitionService.FoodRecognitionError {
+                print("🍎 FoodRecognitionError: \(error)")
+                await MainActor.run {
+                    isProcessing = false
+                    switch error {
+                    case .noFoodDetected:
+                        errorMessage = "No food was detected in this image. Try a photo with clearer food items like fruits, vegetables, or prepared meals."
+                    case .imageProcessingFailed:
+                        errorMessage = "Failed to process the image. Please try a different photo."
+                    case .lowConfidence:
+                        errorMessage = "Could not confidently identify the food. Try a clearer, well-lit photo."
+                    default:
+                        errorMessage = error.localizedDescription
+                    }
+                    showingError = true
+                    print("🍎 Showing error: \(errorMessage)")
                 }
             } catch {
-                print("Food recognition failed: \(error)")
-                // Handle error - could show an alert
+                print("🍎 Unexpected error: \(error)")
+                await MainActor.run {
+                    isProcessing = false
+                    errorMessage = "An unexpected error occurred: \(error.localizedDescription)"
+                    showingError = true
+                    print("🍎 Showing error: \(errorMessage)")
+                }
             }
         }
     }

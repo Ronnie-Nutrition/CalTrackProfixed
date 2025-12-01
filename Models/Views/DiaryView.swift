@@ -2,6 +2,7 @@ import SwiftUI
 import SwiftData
 
 struct DiaryView: View {
+    @Environment(\.modelContext) private var modelContext
     @Query(sort: \FoodEntry.timestamp, order: .reverse) private var allEntries: [FoodEntry]
     @State private var selectedDate = Date()
     @State private var editingEntry: FoodEntry?
@@ -12,6 +13,9 @@ struct DiaryView: View {
     @State private var showingCamera = false
     @State private var selectedMealType: FoodEntry.MealType = .breakfast
     @State private var selectedFood: FoodItem?
+    @State private var showingClearConfirmation = false
+    @State private var showingExportSheet = false
+    @State private var exportText = ""
     
     private var entriesForSelectedDate: [FoodEntry] {
         let calendar = Calendar.current
@@ -105,12 +109,15 @@ struct DiaryView: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Menu {
-                        Button(action: { exportDiary() }) {
+                        Button(action: { prepareExport() }) {
                             Label("Export Day", systemImage: "square.and.arrow.up")
                         }
-                        Button(role: .destructive, action: { clearDay() }) {
+                        .disabled(entriesForSelectedDate.isEmpty)
+
+                        Button(role: .destructive, action: { showingClearConfirmation = true }) {
                             Label("Clear Day", systemImage: "trash")
                         }
+                        .disabled(entriesForSelectedDate.isEmpty)
                     } label: {
                         Image(systemName: "ellipsis.circle")
                     }
@@ -150,16 +157,82 @@ struct DiaryView: View {
             .sheet(isPresented: $showingCamera) {
                 EnhancedBarcodeScannerView()
             }
+            .alert("Clear Day", isPresented: $showingClearConfirmation) {
+                Button("Cancel", role: .cancel) { }
+                Button("Clear All", role: .destructive) {
+                    clearDay()
+                }
+            } message: {
+                Text("Are you sure you want to delete all \(entriesForSelectedDate.count) food entries for this day? This cannot be undone.")
+            }
+            .sheet(isPresented: $showingExportSheet) {
+                ShareSheet(items: [exportText])
+            }
         }
     }
-    
-    private func exportDiary() {
-        // Export functionality
+
+    private func prepareExport() {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateStyle = .long
+
+        var text = "CalTrackPro Food Diary\n"
+        text += "\(dateFormatter.string(from: selectedDate))\n"
+        text += String(repeating: "=", count: 40) + "\n\n"
+
+        // Calculate totals
+        let totalCalories = entriesForSelectedDate.reduce(0) { $0 + $1.totalCalories }
+        let totalProtein = entriesForSelectedDate.reduce(0) { $0 + $1.totalProtein }
+        let totalCarbs = entriesForSelectedDate.reduce(0) { $0 + $1.totalCarbs }
+        let totalFat = entriesForSelectedDate.reduce(0) { $0 + $1.totalFat }
+
+        text += "DAILY TOTALS\n"
+        text += "Calories: \(Int(totalCalories)) kcal\n"
+        text += "Protein: \(Int(totalProtein))g\n"
+        text += "Carbs: \(Int(totalCarbs))g\n"
+        text += "Fat: \(Int(totalFat))g\n\n"
+        text += String(repeating: "-", count: 40) + "\n\n"
+
+        // Group by meal type
+        let grouped = Dictionary(grouping: entriesForSelectedDate) { $0.mealType }
+
+        for mealType in FoodEntry.MealType.allCases {
+            if let entries = grouped[mealType], !entries.isEmpty {
+                let mealCalories = entries.reduce(0) { $0 + $1.totalCalories }
+                text += "\(mealType.rawValue.uppercased()) (\(Int(mealCalories)) cal)\n"
+
+                for entry in entries {
+                    text += "  • \(entry.name)\n"
+                    text += "    \(Int(entry.quantity)) \(entry.servingUnit) - \(Int(entry.totalCalories)) cal\n"
+                    text += "    P: \(Int(entry.totalProtein))g | C: \(Int(entry.totalCarbs))g | F: \(Int(entry.totalFat))g\n"
+                }
+                text += "\n"
+            }
+        }
+
+        text += String(repeating: "-", count: 40) + "\n"
+        text += "Exported from CalTrackPro"
+
+        exportText = text
+        showingExportSheet = true
     }
-    
+
     private func clearDay() {
-        // Clear day functionality
+        for entry in entriesForSelectedDate {
+            modelContext.delete(entry)
+        }
+        try? modelContext.save()
     }
+}
+
+// MARK: - Share Sheet
+struct ShareSheet: UIViewControllerRepresentable {
+    let items: [Any]
+
+    func makeUIViewController(context: Context) -> UIActivityViewController {
+        UIActivityViewController(activityItems: items, applicationActivities: nil)
+    }
+
+    func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) { }
 }
 
 struct DailyNutritionSummary: View {

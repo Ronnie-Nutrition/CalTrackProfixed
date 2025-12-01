@@ -119,7 +119,9 @@ struct SecurityConfig {
         let allowedDomains = [
             "api.edamam.com",
             "world.openfoodfacts.org",
-            "api.openfoodfacts.org"
+            "us.openfoodfacts.org",
+            "api.openfoodfacts.org",
+            "api.upcitemdb.com"
         ]
         
         guard let host = url.host else {
