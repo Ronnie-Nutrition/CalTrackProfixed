@@ -14,43 +14,43 @@ struct FoodSearchView: View {
     
     var body: some View {
         NavigationStack {
-            ZStack {
-                VStack(spacing: 0) {
-                    // Offline Banner  
-                    if isOffline {
-                        HStack {
-                            Image(systemName: "wifi.slash")
-                            Text("Offline - showing cached results")
-                        }
-                        .padding()
-                        .background(Color.orange)
-                        .foregroundColor(.white)
+            VStack(spacing: 0) {
+                // Offline Banner
+                if isOffline {
+                    HStack {
+                        Image(systemName: "wifi.slash")
+                        Text("Offline - showing cached results")
                     }
-                    
-                    VStack {
+                    .padding()
+                    .frame(maxWidth: .infinity)
+                    .background(Color.orange)
+                    .foregroundColor(.white)
+                }
+
                 // Search Bar
                 HStack {
                     Image(systemName: "magnifyingglass")
                         .foregroundColor(.secondary)
-                    
+
                     TextField("Search foods...", text: $searchText)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .onSubmit {
                             searchFoods()
                         }
                         .onChange(of: searchText) { _, _ in
-                            error = nil // Clear error when typing
+                            error = nil
                         }
-                    
+
                     if isSearching {
                         ProgressView()
                             .scaleEffect(0.8)
                     }
                 }
                 .padding()
-                
+
                 // Search Results
                 if let error = error {
+                    Spacer()
                     VStack(spacing: 16) {
                         Image(systemName: "exclamationmark.triangle")
                             .font(.system(size: 50))
@@ -68,6 +68,7 @@ struct FoodSearchView: View {
                     .padding()
                     Spacer()
                 } else if searchResults.isEmpty && !searchText.isEmpty && !isSearching {
+                    Spacer()
                     VStack(spacing: 20) {
                         Image(systemName: isOffline ? "wifi.slash" : "magnifyingglass")
                             .font(.system(size: 50))
@@ -79,7 +80,20 @@ struct FoodSearchView: View {
                             .multilineTextAlignment(.center)
                             .padding(.horizontal)
                     }
-                    .padding(.top, 50)
+                    Spacer()
+                } else if searchResults.isEmpty {
+                    Spacer()
+                    VStack(spacing: 16) {
+                        Image(systemName: "magnifyingglass")
+                            .font(.system(size: 50))
+                            .foregroundColor(.secondary)
+                        Text("Search for foods")
+                            .font(.headline)
+                            .foregroundColor(.secondary)
+                        Text("Type a food name and press Search")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
                     Spacer()
                 } else {
                     List(searchResults, id: \.foodId) { food in
@@ -91,12 +105,10 @@ struct FoodSearchView: View {
                     .listStyle(PlainListStyle())
                 }
             }
-            }
-            }
             .navigationTitle("Search Foods")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
+                ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") {
                         dismiss()
                     }
@@ -149,20 +161,55 @@ struct FoodSearchView: View {
 struct FoodSearchResultRow: View {
     let food: FoodItem
     let onSelect: () -> Void
-    
+
+    // Check if text is likely English (basic heuristic)
+    private func isLikelyEnglish(_ text: String) -> Bool {
+        // Check for common non-English characters/patterns
+        let nonEnglishPatterns = ["é", "è", "ê", "ë", "à", "â", "ô", "û", "ù", "ç", "œ", "ñ", "ü", "ö", "ä"]
+        for pattern in nonEnglishPatterns {
+            if text.lowercased().contains(pattern) {
+                return false
+            }
+        }
+        // Also filter out if it looks like a category code
+        if text.count < 3 || text.uppercased() == text {
+            return false
+        }
+        return true
+    }
+
+    // Get a clean category label
+    private var cleanCategoryLabel: String? {
+        guard let category = food.categoryLabel else { return nil }
+        // Only show if it's likely English and not a generic code
+        if isLikelyEnglish(category) && !category.contains("food") {
+            return category
+        }
+        // Fall back to showing a simple food type based on category
+        if let cat = food.category {
+            switch cat {
+            case "Generic foods": return "Generic Food"
+            case "Packaged foods": return "Packaged Food"
+            case "Fast foods": return "Fast Food"
+            default: return nil
+            }
+        }
+        return nil
+    }
+
     var body: some View {
         Button(action: onSelect) {
             VStack(alignment: .leading, spacing: 4) {
                 Text(food.label)
                     .font(.headline)
                     .foregroundColor(.primary)
-                
-                if let category = food.categoryLabel {
+
+                if let category = cleanCategoryLabel {
                     Text(category)
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
-                
+
                 HStack {
                     NutrientLabel(value: food.nutrients.calories, unit: "cal")
                     NutrientLabel(value: food.nutrients.protein, unit: "g", label: "protein")

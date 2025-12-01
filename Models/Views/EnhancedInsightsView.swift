@@ -221,11 +221,11 @@ struct EnhancedInsightsView: View {
                             }
                             .frame(height: 250)
                             .chartXAxis {
-                                AxisMarks(values: .stride(by: .day)) { value in
+                                AxisMarks(values: xAxisValues) { value in
                                     if value.as(Date.self) != nil {
                                         AxisGridLine()
                                         AxisValueLabel(
-                                            format: .dateTime.weekday(.abbreviated),
+                                            format: xAxisLabelFormat,
                                             centered: true
                                         )
                                     }
@@ -449,7 +449,35 @@ struct EnhancedInsightsView: View {
             ("Fat", totalFat, (totalFat / totalMacros) * 100, .yellow)
         ]
     }
-    
+
+    // Dynamic X-axis values based on time range
+    private var xAxisValues: AxisMarkValues {
+        switch timeRange {
+        case .week:
+            return .stride(by: .day, count: 1)  // Show every day
+        case .month:
+            return .stride(by: .day, count: 5)  // Show every 5 days
+        case .threeMonths:
+            return .stride(by: .day, count: 14) // Show every 2 weeks
+        case .year:
+            return .stride(by: .month, count: 1) // Show every month
+        }
+    }
+
+    // Dynamic date format based on time range
+    private var xAxisLabelFormat: Date.FormatStyle {
+        switch timeRange {
+        case .week:
+            return .dateTime.weekday(.abbreviated) // Mon, Tue, etc.
+        case .month:
+            return .dateTime.month(.abbreviated).day() // Jan 5
+        case .threeMonths:
+            return .dateTime.month(.abbreviated).day() // Jan 15
+        case .year:
+            return .dateTime.month(.abbreviated) // Jan, Feb, etc.
+        }
+    }
+
     private func getGoalValue() -> Double? {
         guard let user = appState.currentUser else { return nil }
         

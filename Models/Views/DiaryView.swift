@@ -6,6 +6,12 @@ struct DiaryView: View {
     @State private var selectedDate = Date()
     @State private var editingEntry: FoodEntry?
     @State private var isOffline = false
+    @State private var showingAddOptions = false
+    @State private var showingManualEntry = false
+    @State private var showingFoodSearch = false
+    @State private var showingCamera = false
+    @State private var selectedMealType: FoodEntry.MealType = .breakfast
+    @State private var selectedFood: FoodItem?
     
     private var entriesForSelectedDate: [FoodEntry] {
         let calendar = Calendar.current
@@ -56,9 +62,26 @@ struct DiaryView: View {
                         Text("No meals logged for this day")
                             .font(.headline)
                             .foregroundColor(.gray)
-                        Text("Tap + to add your first meal")
+                        Text("Tap the + button above to add food")
                             .font(.subheadline)
                             .foregroundColor(.secondary)
+
+                        Button(action: { showingAddOptions = true }) {
+                            Label("Add Food", systemImage: "plus.circle.fill")
+                                .font(.headline)
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 24)
+                                .padding(.vertical, 12)
+                                .background(
+                                    LinearGradient(
+                                        colors: [.blue, .cyan],
+                                        startPoint: .leading,
+                                        endPoint: .trailing
+                                    )
+                                )
+                                .cornerRadius(25)
+                        }
+                        .padding(.top, 8)
                     }
                     Spacer()
                 } else {
@@ -80,21 +103,52 @@ struct DiaryView: View {
             .navigationTitle("Food Diary")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
+                ToolbarItem(placement: .navigationBarLeading) {
                     Menu {
                         Button(action: { exportDiary() }) {
                             Label("Export Day", systemImage: "square.and.arrow.up")
                         }
-                        Button(action: { clearDay() }) {
+                        Button(role: .destructive, action: { clearDay() }) {
                             Label("Clear Day", systemImage: "trash")
                         }
                     } label: {
                         Image(systemName: "ellipsis.circle")
                     }
                 }
+
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: { showingAddOptions = true }) {
+                        Image(systemName: "plus.circle.fill")
+                            .font(.title3)
+                            .foregroundStyle(
+                                LinearGradient(
+                                    colors: [.blue, .cyan],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            )
+                    }
+                }
             }
             .sheet(item: $editingEntry) { entry in
                 EditFoodEntryView(entry: entry)
+            }
+            .sheet(isPresented: $showingAddOptions) {
+                AddFoodOptionsSheet(
+                    showingManualEntry: $showingManualEntry,
+                    showingFoodSearch: $showingFoodSearch,
+                    showingCamera: $showingCamera
+                )
+                .presentationDetents([.height(280)])
+            }
+            .sheet(isPresented: $showingManualEntry) {
+                ManualEntryView(mealType: selectedMealType)
+            }
+            .sheet(isPresented: $showingFoodSearch) {
+                FoodSearchView(selectedFood: $selectedFood)
+            }
+            .sheet(isPresented: $showingCamera) {
+                EnhancedBarcodeScannerView()
             }
         }
     }
@@ -321,7 +375,7 @@ struct MacroBadge: View {
     let value: Double
     let label: String
     let color: Color
-    
+
     var body: some View {
         HStack(spacing: 2) {
             Text(label)
@@ -335,5 +389,112 @@ struct MacroBadge: View {
         .background(color.opacity(0.2))
         .foregroundColor(color)
         .cornerRadius(4)
+    }
+}
+
+// MARK: - Add Food Options Sheet
+struct AddFoodOptionsSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    @Binding var showingManualEntry: Bool
+    @Binding var showingFoodSearch: Bool
+    @Binding var showingCamera: Bool
+
+    var body: some View {
+        NavigationStack {
+            VStack(spacing: 16) {
+                Text("Add Food")
+                    .font(.headline)
+                    .padding(.top)
+
+                VStack(spacing: 12) {
+                    AddFoodOptionButton(
+                        icon: "magnifyingglass",
+                        title: "Search Food",
+                        subtitle: "Find foods in our database",
+                        color: .blue
+                    ) {
+                        dismiss()
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                            showingFoodSearch = true
+                        }
+                    }
+
+                    AddFoodOptionButton(
+                        icon: "barcode.viewfinder",
+                        title: "Scan Barcode",
+                        subtitle: "Scan a product's barcode",
+                        color: .green
+                    ) {
+                        dismiss()
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                            showingCamera = true
+                        }
+                    }
+
+                    AddFoodOptionButton(
+                        icon: "square.and.pencil",
+                        title: "Manual Entry",
+                        subtitle: "Enter nutrition info manually",
+                        color: .orange
+                    ) {
+                        dismiss()
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                            showingManualEntry = true
+                        }
+                    }
+                }
+                .padding(.horizontal)
+
+                Spacer()
+            }
+        }
+    }
+}
+
+struct AddFoodOptionButton: View {
+    let icon: String
+    let title: String
+    let subtitle: String
+    let color: Color
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 16) {
+                Image(systemName: icon)
+                    .font(.title2)
+                    .foregroundColor(.white)
+                    .frame(width: 44, height: 44)
+                    .background(
+                        LinearGradient(
+                            colors: [color, color.opacity(0.7)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .cornerRadius(10)
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(title)
+                        .font(.headline)
+                        .foregroundColor(.primary)
+                    Text(subtitle)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+
+                Spacer()
+
+                Image(systemName: "chevron.right")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+            .padding()
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color(.secondarySystemBackground))
+            )
+        }
+        .buttonStyle(PlainButtonStyle())
     }
 }

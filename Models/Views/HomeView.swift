@@ -15,98 +15,109 @@ struct HomeView: View {
     
     var body: some View {
         NavigationStack {
-            VStack(spacing: 20) {
-                // Daily Summary Card
-                DailySummaryCard()
-                    .padding(.horizontal)
-                
-                // Quick Add Section
-                VStack(alignment: .leading, spacing: 16) {
-                    Text("Quick Add")
-                        .font(.headline)
-                        .padding(.horizontal)
-                    
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 12) {
-                            QuickAddButton(icon: "camera.viewfinder", title: "AI Photo", color: .blue) {
-                                showingCamera = true
-                            }
-                            
-                            QuickAddButton(icon: "barcode", title: "Barcode", color: .orange) {
-                                showingBarcodeScanner = true
-                            }
-                            
-                            QuickAddButton(icon: "square.and.pencil", title: "Manual", color: .green) {
-                                showingManualEntry = true
-                            }
-                            
-                            QuickAddButton(icon: "photo", title: "Gallery", color: .purple) {
-                                showingImagePicker = true
-                            }
-                            
-                            QuickAddButton(icon: "mic.fill", title: "Voice", color: .red) {
-                                showingVoiceInput = true
-                            }
-                        }
-                        .padding(.horizontal)
-                    }
-                }
-                
-                // AI Meal Planner
-                NavigationLink(destination: AIMealPlannerView()) {
-                    HStack {
-                        Image(systemName: "wand.and.stars")
-                            .font(.title2)
-                            .foregroundStyle(.linearGradient(
-                                colors: [.purple, .blue],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            ))
-                        
-                        VStack(alignment: .leading) {
-                            Text("AI Meal Planner")
+            ZStack {
+                // Liquid Glass Background
+                GlassmorphismBackground(colors: [.blue.opacity(0.3), .cyan.opacity(0.2), .purple.opacity(0.2)])
+
+                ScrollView {
+                    VStack(spacing: 24) {
+                        // Daily Summary Card
+                        DailySummaryCard()
+                            .padding(.horizontal)
+
+                        // Quick Add Section
+                        VStack(alignment: .leading, spacing: 16) {
+                            Text("Quick Add")
                                 .font(.headline)
-                                .foregroundColor(.primary)
-                            
-                            Text("Generate personalized weekly meal plans")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
+                                .foregroundColor(AppColors.primaryText)
+                                .padding(.horizontal)
+
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(spacing: 12) {
+                                    QuickAddButton(icon: "camera.viewfinder", title: "AI Photo", color: .blue) {
+                                        showingCamera = true
+                                    }
+
+                                    QuickAddButton(icon: "barcode", title: "Barcode", color: .orange) {
+                                        showingBarcodeScanner = true
+                                    }
+
+                                    QuickAddButton(icon: "square.and.pencil", title: "Manual", color: .green) {
+                                        showingManualEntry = true
+                                    }
+
+                                    QuickAddButton(icon: "photo", title: "Gallery", color: .purple) {
+                                        showingImagePicker = true
+                                    }
+
+                                    QuickAddButton(icon: "mic.fill", title: "Voice", color: .red) {
+                                        showingVoiceInput = true
+                                    }
+                                }
+                                .padding(.horizontal)
+                            }
                         }
-                        
+
+                        // AI Meal Planner - with Liquid Glass styling
+                        NavigationLink(destination: AIMealPlannerView()) {
+                            LiquidGlassCard(cornerRadius: 16) {
+                                HStack {
+                                    ZStack {
+                                        Circle()
+                                            .fill(
+                                                LinearGradient(
+                                                    colors: [.purple.opacity(0.3), .blue.opacity(0.2)],
+                                                    startPoint: .topLeading,
+                                                    endPoint: .bottomTrailing
+                                                )
+                                            )
+                                            .frame(width: 44, height: 44)
+
+                                        Image(systemName: "wand.and.stars")
+                                            .font(.title2)
+                                            .foregroundStyle(.linearGradient(
+                                                colors: [.purple, .blue],
+                                                startPoint: .topLeading,
+                                                endPoint: .bottomTrailing
+                                            ))
+                                    }
+
+                                    VStack(alignment: .leading, spacing: 4) {
+                                        Text("AI Meal Planner")
+                                            .font(.headline)
+                                            .foregroundColor(AppColors.primaryText)
+
+                                        Text("Generate personalized weekly meal plans")
+                                            .font(.caption)
+                                            .foregroundColor(AppColors.secondaryText)
+                                    }
+
+                                    Spacer()
+
+                                    Image(systemName: "chevron.right")
+                                        .font(.caption)
+                                        .foregroundColor(AppColors.tertiaryText)
+                                }
+                                .padding()
+                            }
+                        }
+                        .padding(.horizontal)
+                        .buttonStyle(PlainButtonStyle())
+
+                        // Fasting Timer Widget
+                        FastingWidgetCard()
+                            .padding(.horizontal)
+
+                        // Recent Meals
+                        RecentMealsView()
+
+                        // Bottom padding for comfortable scrolling
                         Spacer()
-                        
-                        Image(systemName: "chevron.right")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
+                            .frame(height: 30)
                     }
-                    .padding()
-                    .background(
-                        LinearGradient(
-                            colors: [.purple.opacity(0.1), .blue.opacity(0.1)],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                        .cornerRadius(12)
-                    )
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(
-                                LinearGradient(
-                                    colors: [.purple.opacity(0.3), .blue.opacity(0.3)],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                ),
-                                lineWidth: 1
-                            )
-                    )
+                    .padding(.top, 12)
                 }
-                .padding(.horizontal)
-                .buttonStyle(PlainButtonStyle())
-                
-                // Recent Meals
-                RecentMealsView()
-                
-                Spacer()
+                .scrollIndicators(.hidden)
             }
             .navigationTitle("Track")
             .navigationBarTitleDisplayMode(.large)
@@ -273,11 +284,18 @@ struct QuickAddButton: View {
     let title: String
     let color: Color
     let action: () -> Void
-    
+
     @State private var isPressed = false
-    
+    @ObservedObject private var themeManager = ThemeManager.shared
+    @Environment(\.colorScheme) private var colorScheme
+
+    private var isDark: Bool {
+        themeManager.isDarkMode || colorScheme == .dark
+    }
+
     var body: some View {
         Button(action: {
+            AppHaptics.light()
             withAnimation(FluidSpring.snappy) {
                 isPressed = true
             }
@@ -288,44 +306,51 @@ struct QuickAddButton: View {
             }
             action()
         }) {
-            VStack(spacing: 8) {
-                Image(systemName: icon)
-                    .font(.title2)
-                    .foregroundColor(.white)
-                    .frame(width: 60, height: 60)
-                    .background(
-                        ZStack {
-                            RoundedRectangle(cornerRadius: 16)
-                                .fill(color)
-                            
-                            RoundedRectangle(cornerRadius: 16)
-                                .fill(
+            VStack(spacing: 10) {
+                ZStack {
+                    // Clean glass background - no blur material
+                    RoundedRectangle(cornerRadius: 18)
+                        .fill(
+                            LinearGradient(
+                                colors: [
+                                    color.opacity(isDark ? 0.35 : 0.25),
+                                    color.opacity(isDark ? 0.2 : 0.1)
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                        .overlay(
+                            // Inner highlight for glass effect
+                            RoundedRectangle(cornerRadius: 18)
+                                .stroke(
                                     LinearGradient(
-                                        colors: [.white.opacity(0.3), .clear],
+                                        colors: [
+                                            .white.opacity(isDark ? 0.25 : 0.5),
+                                            .white.opacity(0.1),
+                                            .clear
+                                        ],
                                         startPoint: .topLeading,
                                         endPoint: .bottomTrailing
-                                    )
+                                    ),
+                                    lineWidth: 1.5
                                 )
-                        }
-                    )
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 16)
-                            .stroke(
-                                LinearGradient(
-                                    colors: [.white.opacity(0.4), .clear],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                ),
-                                lineWidth: 1
-                            )
-                    )
-                    .scaleEffect(isPressed ? 0.95 : 1.0)
-                    .shadow(color: color.opacity(0.4), radius: isPressed ? 5 : 10)
-                
+                        )
+                        .frame(width: 64, height: 64)
+
+                    // Crisp icon
+                    Image(systemName: icon)
+                        .font(.title2)
+                        .fontWeight(.semibold)
+                        .foregroundColor(color)
+                }
+                .scaleEffect(isPressed ? 0.92 : 1.0)
+                .shadow(color: color.opacity(isDark ? 0.4 : 0.3), radius: isPressed ? 4 : 8, y: isPressed ? 2 : 4)
+
                 Text(title)
                     .font(.caption)
                     .fontWeight(.medium)
-                    .foregroundColor(.primary)
+                    .foregroundColor(AppColors.primaryText)
             }
         }
         .buttonStyle(PlainButtonStyle())
@@ -334,24 +359,55 @@ struct QuickAddButton: View {
 
 struct RecentMealsView: View {
     @Query(sort: \FoodEntry.timestamp, order: .reverse) private var recentEntries: [FoodEntry]
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 Text("Recent")
                     .font(.headline)
-                
+                    .foregroundColor(AppColors.primaryText)
+
                 Spacer()
-                
+
                 NavigationLink("See All") {
                     DiaryView()
                 }
                 .font(.caption)
+                .foregroundColor(ThemeManager.shared.currentAccentColor)
             }
             .padding(.horizontal)
-            
-            ScrollView {
-                VStack(spacing: 8) {
+
+            if recentEntries.isEmpty {
+                LiquidGlassCard(cornerRadius: 16) {
+                    VStack(spacing: 16) {
+                        Image(systemName: "fork.knife.circle")
+                            .font(.system(size: 44))
+                            .foregroundStyle(
+                                LinearGradient(
+                                    colors: [.blue.opacity(0.6), .cyan.opacity(0.4)],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            )
+
+                        VStack(spacing: 6) {
+                            Text("No recent meals")
+                                .font(.subheadline)
+                                .fontWeight(.medium)
+                                .foregroundColor(AppColors.primaryText)
+                            Text("Add your first meal using Quick Add above")
+                                .font(.caption)
+                                .foregroundColor(AppColors.secondaryText)
+                                .multilineTextAlignment(.center)
+                        }
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 24)
+                    .padding(.horizontal)
+                }
+                .padding(.horizontal)
+            } else {
+                VStack(spacing: 10) {
                     ForEach(recentEntries.prefix(5)) { entry in
                         RecentMealRow(entry: entry)
                     }
@@ -364,42 +420,123 @@ struct RecentMealsView: View {
 
 struct RecentMealRow: View {
     let entry: FoodEntry
-    
+    @ObservedObject private var themeManager = ThemeManager.shared
+
     var body: some View {
-        HStack {
-            VStack(alignment: .leading) {
-                Text(entry.name)
+        LiquidGlassRow(cornerRadius: 12) {
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(entry.name)
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                        .foregroundColor(AppColors.primaryText)
+                        .lineLimit(1)
+
+                    HStack(spacing: 6) {
+                        Text(entry.mealType.rawValue)
+                            .font(.caption)
+                            .foregroundColor(themeManager.currentAccentColor)
+
+                        Text("•")
+                            .font(.caption)
+                            .foregroundColor(AppColors.tertiaryText)
+
+                        Text(entry.timestamp.formatted(date: .omitted, time: .shortened))
+                            .font(.caption)
+                            .foregroundColor(AppColors.secondaryText)
+                    }
+                }
+
+                Spacer()
+
+                Text("\(Int(entry.totalCalories))")
                     .font(.subheadline)
-                    .fontWeight(.medium)
-                Text("\(entry.mealType.rawValue) • \(entry.timestamp.formatted(date: .omitted, time: .shortened))")
+                    .fontWeight(.semibold)
+                    .foregroundColor(themeManager.currentAccentColor)
+                +
+                Text(" cal")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(AppColors.secondaryText)
             }
-            
-            Spacer()
-            
-            Text("\(Int(entry.totalCalories)) cal")
-                .font(.subheadline)
-                .fontWeight(.medium)
-                .foregroundColor(.blue)
+            .padding(.vertical, 12)
+            .padding(.horizontal, 14)
         }
-        .padding(.vertical, 8)
-        .padding(.horizontal, 12)
-        .background(
-            RoundedRectangle(cornerRadius: 10)
-                .fill(.regularMaterial)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 10)
-                        .stroke(
-                            LinearGradient(
-                                colors: [.white.opacity(0.2), .clear],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            ),
-                            lineWidth: 0.5
-                        )
-                )
-        )
         .liquidTransition()
+    }
+}
+
+// MARK: - Fasting Widget Card
+struct FastingWidgetCard: View {
+    @StateObject private var fastingManager = FastingManager.shared
+    @State private var showingFastingView = false
+
+    private var stateColor: Color {
+        fastingManager.currentState == .fasting ? .green : .orange
+    }
+
+    var body: some View {
+        Button(action: { showingFastingView = true }) {
+            LiquidGlassCard(cornerRadius: 16) {
+                HStack(spacing: 16) {
+                    // Liquid Glass Timer Ring
+                    LiquidProgressRing(
+                        progress: fastingManager.elapsedTime,
+                        total: fastingManager.targetDuration > 0 ? fastingManager.targetDuration : 1,
+                        color: stateColor,
+                        size: 56,
+                        lineWidth: 6
+                    )
+                    .overlay(
+                        Image(systemName: fastingManager.currentState == .fasting ? "flame.fill" : "fork.knife")
+                            .font(.title3)
+                            .foregroundColor(stateColor)
+                    )
+
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Intermittent Fasting")
+                            .font(.headline)
+                            .foregroundColor(AppColors.primaryText)
+
+                        if fastingManager.currentState == .fasting {
+                            Text(fastingManager.formattedElapsedTime)
+                                .font(.subheadline)
+                                .fontWeight(.medium)
+                                .foregroundColor(.green)
+                                .monospacedDigit()
+                        } else if fastingManager.currentState == .eating {
+                            Text("Eating Window")
+                                .font(.subheadline)
+                                .foregroundColor(.orange)
+                        } else {
+                            Text("Tap to start fasting")
+                                .font(.caption)
+                                .foregroundColor(AppColors.secondaryText)
+                        }
+
+                        if fastingManager.currentStreak > 0 {
+                            HStack(spacing: 4) {
+                                Image(systemName: "flame.fill")
+                                    .font(.caption2)
+                                    .foregroundColor(.orange)
+                                Text("\(fastingManager.currentStreak) day streak")
+                                    .font(.caption2)
+                                    .foregroundColor(AppColors.secondaryText)
+                            }
+                        }
+                    }
+
+                    Spacer()
+
+                    Image(systemName: "chevron.right")
+                        .font(.caption)
+                        .foregroundColor(AppColors.tertiaryText)
+                }
+                .padding()
+            }
+        }
+        .buttonStyle(PlainButtonStyle())
+        .sheet(isPresented: $showingFastingView) {
+            FastingView()
+        }
     }
 }

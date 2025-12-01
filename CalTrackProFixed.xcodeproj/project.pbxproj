@@ -67,6 +67,10 @@
 		FB0B71332EAFB880004E511A /* EnhancedProductDetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB0B71342EAFB880004E511A /* EnhancedProductDetailsView.swift */; };
 		FB0B71352EAFB890004E511A /* EnhancedBarcodeScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB0B71362EAFB890004E511A /* EnhancedBarcodeScannerView.swift */; };
 		FBDAA1332EBE635300EB31F2 /* VoiceInputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBDAA1322EBE635300EB31F2 /* VoiceInputView.swift */; };
+		FBFASTING001 /* FastingManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBFASTING002 /* FastingManager.swift */; };
+		FBFASTING003 /* FastingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBFASTING004 /* FastingView.swift */; };
+		FBGROCERY001 /* GroceryListService.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBGROCERY002 /* GroceryListService.swift */; };
+		FBGROCERY003 /* GroceryListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBGROCERY004 /* GroceryListView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -150,6 +154,10 @@
 		FB0B71342EAFB880004E511A /* EnhancedProductDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnhancedProductDetailsView.swift; sourceTree = "<group>"; };
 		FB0B71362EAFB890004E511A /* EnhancedBarcodeScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnhancedBarcodeScannerView.swift; sourceTree = "<group>"; };
 		FBDAA1322EBE635300EB31F2 /* VoiceInputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceInputView.swift; sourceTree = "<group>"; };
+		FBFASTING002 /* FastingManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Services/FastingManager.swift"; sourceTree = "<group>"; };
+		FBFASTING004 /* FastingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Models/Views/FastingView.swift"; sourceTree = "<group>"; };
+		FBGROCERY002 /* GroceryListService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Services/GroceryListService.swift"; sourceTree = "<group>"; };
+		FBGROCERY004 /* GroceryListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Models/Views/GroceryListView.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -499,6 +507,10 @@
 				4BDF6395DD84E9995D787A1 /* RecipeLibraryView.swift in Sources */,
 				F7918A6E341471E96592DB4 /* EnhancedInsightsView.swift in Sources */,
 				7ACF8AA0784475D88719417 /* LiquidGlassComponents.swift in Sources */,
+				FBFASTING001 /* FastingManager.swift in Sources */,
+				FBFASTING003 /* FastingView.swift in Sources */,
+				FBGROCERY001 /* GroceryListService.swift in Sources */,
+				FBGROCERY003 /* GroceryListView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
