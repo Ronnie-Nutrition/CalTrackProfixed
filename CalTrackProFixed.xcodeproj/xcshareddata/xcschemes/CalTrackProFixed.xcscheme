@@ -15,7 +15,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "CalTrackProFixed"
+               BlueprintIdentifier = "FB0B70882EAB9AFC004E511A"
                BuildableName = "CalTrackProFixed.app"
                BlueprintName = "CalTrackProFixed"
                ReferencedContainer = "container:CalTrackProFixed.xcodeproj">
@@ -35,7 +35,7 @@
             parallelizable = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "CalTrackProFixedTests"
+               BlueprintIdentifier = "FB0B70972EAB9B09004E511A"
                BuildableName = "CalTrackProFixedTests.xctest"
                BlueprintName = "CalTrackProFixedTests"
                ReferencedContainer = "container:CalTrackProFixed.xcodeproj">
@@ -46,7 +46,7 @@
             parallelizable = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "CalTrackProFixedUITests"
+               BlueprintIdentifier = "FB0B70A12EAB9B09004E511A"
                BuildableName = "CalTrackProFixedUITests.xctest"
                BlueprintName = "CalTrackProFixedUITests"
                ReferencedContainer = "container:CalTrackProFixed.xcodeproj">
@@ -68,7 +68,7 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "CalTrackProFixed"
+            BlueprintIdentifier = "FB0B70882EAB9AFC004E511A"
             BuildableName = "CalTrackProFixed.app"
             BlueprintName = "CalTrackProFixed"
             ReferencedContainer = "container:CalTrackProFixed.xcodeproj">
@@ -85,7 +85,7 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "CalTrackProFixed"
+            BlueprintIdentifier = "FB0B70882EAB9AFC004E511A"
             BuildableName = "CalTrackProFixed.app"
             BlueprintName = "CalTrackProFixed"
             ReferencedContainer = "container:CalTrackProFixed.xcodeproj">
