@@ -30,11 +30,19 @@ struct CalorieProgressProvider: TimelineProvider {
     }
 
     private func loadCalorieData() -> CalorieEntry {
-        let userDefaults = UserDefaults(suiteName: "group.easyaiflows.com.CalTrackProFixed")
+        let appGroupID = "group.easyaiflows.com.CalTrackProFixed"
+        let userDefaults = UserDefaults(suiteName: appGroupID)
+
+        if userDefaults == nil {
+            print("❌ CalorieWidget: Failed to access App Group: \(appGroupID)")
+        }
+
         let consumed = userDefaults?.integer(forKey: "todayCalories") ?? 0
         let goal = userDefaults?.integer(forKey: "calorieGoal") ?? 2000
         let remaining = max(0, goal - consumed)
         let progress = goal > 0 ? min(Double(consumed) / Double(goal), 1.0) : 0
+
+        print("📊 CalorieWidget: Loading data - Consumed: \(consumed), Goal: \(goal)")
 
         return CalorieEntry(
             date: Date(),

@@ -44,17 +44,29 @@ struct NutritionSummaryProvider: TimelineProvider {
     }
 
     private func loadNutritionData() -> NutritionEntry {
-        let userDefaults = UserDefaults(suiteName: "group.easyaiflows.com.CalTrackProFixed")
+        let appGroupID = "group.easyaiflows.com.CalTrackProFixed"
+        let userDefaults = UserDefaults(suiteName: appGroupID)
+
+        if userDefaults == nil {
+            print("❌ NutritionWidget: Failed to access App Group: \(appGroupID)")
+        }
+
+        let calories = userDefaults?.integer(forKey: "todayCalories") ?? 0
+        let protein = userDefaults?.integer(forKey: "todayProtein") ?? 0
+        let carbs = userDefaults?.integer(forKey: "todayCarbs") ?? 0
+        let fat = userDefaults?.integer(forKey: "todayFat") ?? 0
+
+        print("📊 NutritionWidget: Loading - Cal: \(calories), P: \(protein)g, C: \(carbs)g, F: \(fat)g")
 
         return NutritionEntry(
             date: Date(),
-            calories: userDefaults?.integer(forKey: "todayCalories") ?? 0,
+            calories: calories,
             calorieGoal: userDefaults?.integer(forKey: "calorieGoal") ?? 2000,
-            protein: userDefaults?.integer(forKey: "todayProtein") ?? 0,
+            protein: protein,
             proteinGoal: userDefaults?.integer(forKey: "proteinGoal") ?? 120,
-            carbs: userDefaults?.integer(forKey: "todayCarbs") ?? 0,
+            carbs: carbs,
             carbsGoal: userDefaults?.integer(forKey: "carbsGoal") ?? 200,
-            fat: userDefaults?.integer(forKey: "todayFat") ?? 0,
+            fat: fat,
             fatGoal: userDefaults?.integer(forKey: "fatGoal") ?? 65
         )
     }

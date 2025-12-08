@@ -7,11 +7,22 @@ class WidgetDataProvider {
     static let shared = WidgetDataProvider()
 
     private let appGroupIdentifier = "group.easyaiflows.com.CalTrackProFixed"
-    private var sharedDefaults: UserDefaults? {
-        UserDefaults(suiteName: appGroupIdentifier)
-    }
 
-    private init() {}
+    // Cache the UserDefaults instance
+    private lazy var sharedDefaults: UserDefaults? = {
+        let defaults = UserDefaults(suiteName: appGroupIdentifier)
+        if defaults == nil {
+            print("⚠️ WidgetDataProvider: Failed to create UserDefaults for App Group: \(appGroupIdentifier)")
+        } else {
+            print("✅ WidgetDataProvider: Successfully connected to App Group: \(appGroupIdentifier)")
+        }
+        return defaults
+    }()
+
+    private init() {
+        // Verify connection on init
+        _ = sharedDefaults
+    }
 
     // MARK: - Sync from Database
 
@@ -71,14 +82,25 @@ class WidgetDataProvider {
         fat: Int,
         fatGoal: Int
     ) {
-        sharedDefaults?.set(calories, forKey: "todayCalories")
-        sharedDefaults?.set(calorieGoal, forKey: "calorieGoal")
-        sharedDefaults?.set(protein, forKey: "todayProtein")
-        sharedDefaults?.set(proteinGoal, forKey: "proteinGoal")
-        sharedDefaults?.set(carbs, forKey: "todayCarbs")
-        sharedDefaults?.set(carbsGoal, forKey: "carbsGoal")
-        sharedDefaults?.set(fat, forKey: "todayFat")
-        sharedDefaults?.set(fatGoal, forKey: "fatGoal")
+        guard let defaults = sharedDefaults else {
+            print("❌ WidgetDataProvider: Cannot update - sharedDefaults is nil")
+            return
+        }
+
+        defaults.set(calories, forKey: "todayCalories")
+        defaults.set(calorieGoal, forKey: "calorieGoal")
+        defaults.set(protein, forKey: "todayProtein")
+        defaults.set(proteinGoal, forKey: "proteinGoal")
+        defaults.set(carbs, forKey: "todayCarbs")
+        defaults.set(carbsGoal, forKey: "carbsGoal")
+        defaults.set(fat, forKey: "todayFat")
+        defaults.set(fatGoal, forKey: "fatGoal")
+
+        // Force immediate sync
+        defaults.synchronize()
+
+        print("📊 WidgetDataProvider: Updated nutrition - Cal: \(calories)/\(calorieGoal), P: \(protein)g, C: \(carbs)g, F: \(fat)g")
+
         reloadWidgets()
     }
 

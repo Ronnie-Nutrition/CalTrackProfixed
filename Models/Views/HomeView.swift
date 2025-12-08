@@ -9,7 +9,9 @@ struct HomeView: View {
     @State private var showingBarcodeScanner = false
     @State private var showingManualEntry = false
     @State private var showingVoiceInput = false
+    @State private var showingGalleryRecognition = false
     @State private var selectedImage: UIImage?
+    @State private var galleryImage: UIImage?
     @State private var selectedMealType: FoodEntry.MealType = .breakfast
     @EnvironmentObject var appState: AppState
     
@@ -128,7 +130,15 @@ struct HomeView: View {
                 AIFoodRecognitionView()
             }
             .sheet(isPresented: $showingImagePicker) {
-                ImagePicker(selectedImage: $selectedImage)
+                PhotoLibraryPicker(selectedImage: $galleryImage, isPresented: $showingImagePicker)
+            }
+            .sheet(isPresented: $showingGalleryRecognition) {
+                GalleryFoodRecognitionView(image: galleryImage)
+            }
+            .onChange(of: galleryImage) { _, newImage in
+                if newImage != nil {
+                    showingGalleryRecognition = true
+                }
             }
             .sheet(isPresented: $showingBarcodeScanner) {
                 EnhancedBarcodeScannerView()
@@ -574,6 +584,114 @@ struct FastingWidgetCard: View {
         .buttonStyle(PlainButtonStyle())
         .sheet(isPresented: $showingFastingView) {
             FastingView()
+        }
+    }
+}
+
+// MARK: - Gallery Food Recognition View
+struct GalleryFoodRecognitionView: View {
+    let image: UIImage?
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var modelContext
+    @StateObject private var recognitionService = AIFoodRecognitionService()
+
+    @State private var isProcessing = true
+    @State private var showingError = false
+    @State private var errorMessage = ""
+    @State private var showingResultsView = false
+
+    var body: some View {
+        NavigationStack {
+            ZStack {
+                GlassmorphismBackground(colors: [.green, .blue, .purple])
+
+                if isProcessing {
+                    VStack(spacing: 16) {
+                        if let image = image {
+                            Image(uiImage: image)
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .frame(maxHeight: 200)
+                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                                .shadow(radius: 10)
+                        }
+
+                        ProgressView()
+                            .scaleEffect(1.5)
+                            .tint(.white)
+
+                        Text("Analyzing food...")
+                            .font(.headline)
+                            .foregroundColor(.primary)
+
+                        Text("Using Apple Vision AI")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    .padding(30)
+                    .background(.ultraThinMaterial)
+                    .cornerRadius(20)
+                } else if let result = recognitionService.lastResult {
+                    FoodRecognitionResultView(result: result)
+                }
+            }
+            .navigationTitle("Food Recognition")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button("Cancel") {
+                        dismiss()
+                    }
+                }
+            }
+            .alert("Food Recognition", isPresented: $showingError) {
+                Button("OK", role: .cancel) {
+                    dismiss()
+                }
+            } message: {
+                Text(errorMessage)
+            }
+            .onAppear {
+                processImage()
+            }
+        }
+    }
+
+    private func processImage() {
+        guard let image = image else {
+            errorMessage = "No image provided"
+            showingError = true
+            return
+        }
+
+        Task {
+            do {
+                let _ = try await recognitionService.recognizeFood(from: image)
+                await MainActor.run {
+                    isProcessing = false
+                }
+            } catch let error as AIFoodRecognitionService.FoodRecognitionError {
+                await MainActor.run {
+                    isProcessing = false
+                    switch error {
+                    case .noFoodDetected:
+                        errorMessage = "No food was detected in this image. Try a photo with clearer food items."
+                    case .imageProcessingFailed:
+                        errorMessage = "Failed to process the image. Please try a different photo."
+                    case .lowConfidence:
+                        errorMessage = "Could not confidently identify the food. Try a clearer, well-lit photo."
+                    default:
+                        errorMessage = error.localizedDescription
+                    }
+                    showingError = true
+                }
+            } catch {
+                await MainActor.run {
+                    isProcessing = false
+                    errorMessage = "An unexpected error occurred: \(error.localizedDescription)"
+                    showingError = true
+                }
+            }
         }
     }
 }
