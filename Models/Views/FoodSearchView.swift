@@ -154,8 +154,12 @@ struct FoodSearchView: View {
             timestamp: Date()
         )
         modelContext.insert(entry)
+
+        // Just close the detail sheet - stay on search to add more foods
         showingFoodDetail = false
-        dismiss()
+
+        // Optional: Show success feedback
+        // You could add a toast or success message here
     }
     
     private func searchFoods() {

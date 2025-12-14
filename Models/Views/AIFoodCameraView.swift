@@ -27,28 +27,31 @@ struct AIFoodCameraView: UIViewControllerRepresentable {
     }
     
     private func createCameraOverlay() -> UIView {
-        let overlayView = UIView()
+        let screenBounds = UIScreen.main.bounds
+        let overlayView = UIView(frame: screenBounds)
         overlayView.backgroundColor = .clear
-        
-        // Add food detection guide
+        overlayView.isUserInteractionEnabled = false
+
+        // Add food detection guide with absolute positioning
         let guideLabel = UILabel()
-        guideLabel.text = "Center food in frame"
+        guideLabel.text = "Position food in frame"
         guideLabel.textColor = .white
-        guideLabel.font = .systemFont(ofSize: 16, weight: .medium)
+        guideLabel.font = .systemFont(ofSize: 18, weight: .semibold)
         guideLabel.textAlignment = .center
-        guideLabel.backgroundColor = UIColor.black.withAlphaComponent(0.3)
-        guideLabel.layer.cornerRadius = 8
+        guideLabel.backgroundColor = UIColor.black.withAlphaComponent(0.5)
+        guideLabel.layer.cornerRadius = 12
         guideLabel.clipsToBounds = true
-        
+        guideLabel.numberOfLines = 1
+
+        // Use absolute frame positioning to avoid safe area issues
+        let labelWidth: CGFloat = 240
+        let labelHeight: CGFloat = 44
+        let labelX = (screenBounds.width - labelWidth) / 2
+        let labelY: CGFloat = 60  // Fixed position from top
+
+        guideLabel.frame = CGRect(x: labelX, y: labelY, width: labelWidth, height: labelHeight)
         overlayView.addSubview(guideLabel)
-        guideLabel.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            guideLabel.topAnchor.constraint(equalTo: overlayView.safeAreaLayoutGuide.topAnchor, constant: 20),
-            guideLabel.centerXAnchor.constraint(equalTo: overlayView.centerXAnchor),
-            guideLabel.widthAnchor.constraint(equalToConstant: 200),
-            guideLabel.heightAnchor.constraint(equalToConstant: 40)
-        ])
-        
+
         return overlayView
     }
     
