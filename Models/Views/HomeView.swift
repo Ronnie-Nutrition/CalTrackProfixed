@@ -84,7 +84,11 @@ struct HomeView: View {
 
                             HStack(spacing: 0) {
                                 QuickAddButton(icon: "camera.viewfinder", title: "AI Photo", color: .blue) {
-                                    showingCamera = true
+                                    if subscriptionManager.hasAccessTo(.aiFoodRecognition) {
+                                        showingCamera = true
+                                    } else {
+                                        showingPremiumUpgrade = true
+                                    }
                                 }
                                 .frame(maxWidth: .infinity)
 
@@ -99,7 +103,11 @@ struct HomeView: View {
                                 .frame(maxWidth: .infinity)
 
                                 QuickAddButton(icon: "photo", title: "Gallery", color: .purple) {
-                                    showingImagePicker = true
+                                    if subscriptionManager.hasAccessTo(.aiFoodRecognition) {
+                                        showingImagePicker = true
+                                    } else {
+                                        showingPremiumUpgrade = true
+                                    }
                                 }
                                 .frame(maxWidth: .infinity)
 

@@ -376,6 +376,7 @@ enum SubscriptionPlanType: String, CaseIterable {
 // MARK: - Premium Features
 
 enum PremiumFeature: String, CaseIterable {
+    case aiFoodRecognition = "ai_food_recognition"
     case advancedAnalytics = "advanced_analytics"
     case mealPlanning = "meal_planning"
     case unlimitedRecipes = "unlimited_recipes"
@@ -389,6 +390,8 @@ enum PremiumFeature: String, CaseIterable {
     
     var displayName: String {
         switch self {
+        case .aiFoodRecognition:
+            return "AI Food Recognition"
         case .advancedAnalytics:
             return "Advanced Analytics"
         case .mealPlanning:
@@ -414,6 +417,8 @@ enum PremiumFeature: String, CaseIterable {
     
     var description: String {
         switch self {
+        case .aiFoodRecognition:
+            return "Scan food with your camera for instant nutrition analysis"
         case .advancedAnalytics:
             return "Detailed nutrition trends and comprehensive reports"
         case .mealPlanning:
@@ -439,6 +444,8 @@ enum PremiumFeature: String, CaseIterable {
     
     var icon: String {
         switch self {
+        case .aiFoodRecognition:
+            return "camera.viewfinder"
         case .advancedAnalytics:
             return "chart.line.uptrend.xyaxis"
         case .mealPlanning:
