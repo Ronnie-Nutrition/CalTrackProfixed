@@ -142,8 +142,8 @@ struct SettingsView: View {
                 }
                 
                 Section("Support") {
-                    Link("Privacy Policy", destination: URL(string: "https://example.com/privacy")!)
-                    Link("Terms of Service", destination: URL(string: "https://example.com/terms")!)
+                    Link("Privacy Policy", destination: URL(string: "https://ronnie-nutrition.github.io/CalTrackProfixed/privacy-policy.html")!)
+                    Link("Terms of Service", destination: URL(string: "https://ronnie-nutrition.github.io/CalTrackProfixed/terms-of-service.html")!)
                     Link("Contact Support", destination: URL(string: "mailto:support@caltrackpro.com")!)
                 }
 

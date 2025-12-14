@@ -17,21 +17,21 @@
 	<key>CFBundleShortVersionString</key>
 	<string>1.0</string>
 	<key>CFBundleVersion</key>
-	<string>1</string>
+	<string>2</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
 	<string>CalTrackPro needs camera access to scan food items and barcodes for easy calorie tracking.</string>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>CalTrackPro needs photo library access to analyze food photos for calorie tracking.</string>
 	<key>NSHealthShareUsageDescription</key>
 	<string>CalTrackPro can read your health data to provide better insights and sync with other fitness apps.</string>
 	<key>NSHealthUpdateUsageDescription</key>
 	<string>CalTrackPro can save your nutrition data to Apple Health to keep all your health information in one place.</string>
-	<key>NSSpeechRecognitionUsageDescription</key>
-	<string>CalTrackPro uses speech recognition to log food entries when you say things like "I ate a turkey sandwich".</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>CalTrackPro needs microphone access to recognize your voice when logging food entries.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>CalTrackPro needs photo library access to analyze food photos for calorie tracking.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>CalTrackPro uses speech recognition to log food entries when you say things like "I ate a turkey sandwich".</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

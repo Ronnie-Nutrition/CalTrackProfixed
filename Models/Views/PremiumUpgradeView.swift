@@ -262,7 +262,7 @@ struct PremiumUpgradeView: View {
                 
                 Button("Privacy Policy") {
                     // Open privacy URL
-                    if let url = URL(string: "https://caltrackpro.com/privacy") {
+                    if let url = URL(string: "https://ronnie-nutrition.github.io/CalTrackProfixed/privacy-policy.html") {
                         UIApplication.shared.open(url)
                     }
                 }
