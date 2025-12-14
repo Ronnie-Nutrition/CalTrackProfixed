@@ -29,15 +29,18 @@ class SubscriptionManager: NSObject, ObservableObject {
     
     override init() {
         super.init()
-        
+
+        // TEMPORARY: Disabled for testing until StoreKit is properly configured
+        /*
         // Start listening for transaction updates
         transactionListener = listenForTransactions()
-        
+
         // Load initial subscription status
         Task {
             await loadProducts()
             await checkSubscriptionStatus()
         }
+        */
     }
     
     deinit {
@@ -223,7 +226,9 @@ class SubscriptionManager: NSObject, ObservableObject {
     // MARK: - Premium Feature Access
     
     var isPremiumUser: Bool {
-        return isSubscriptionActive || hasFreeTrial
+        // TEMPORARY: Always return true for testing until StoreKit is configured
+        return true
+        // return isSubscriptionActive || hasFreeTrial
     }
     
     func hasAccessTo(_ feature: PremiumFeature) -> Bool {

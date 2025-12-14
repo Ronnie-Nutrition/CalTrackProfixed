@@ -15,7 +15,8 @@ struct HomeView: View {
     @State private var selectedMealType: FoodEntry.MealType = .breakfast
     @State private var showingPremiumUpgrade = false
     @EnvironmentObject var appState: AppState
-    @StateObject private var subscriptionManager = SubscriptionManager.shared
+    // Temporarily disabled to fix white screen crash
+    // @StateObject private var subscriptionManager = SubscriptionManager.shared
     
     var body: some View {
         NavigationStack {
@@ -30,6 +31,8 @@ struct HomeView: View {
                             .padding(.horizontal)
 
                         // Premium Upgrade Banner - Visible for App Store Reviewers
+                        // Temporarily disabled to fix white screen crash
+                        /*
                         if !subscriptionManager.isPremiumUser {
                             Button(action: {
                                 showingPremiumUpgrade = true
@@ -74,6 +77,7 @@ struct HomeView: View {
                             .buttonStyle(PlainButtonStyle())
                             .padding(.horizontal)
                         }
+                        */
 
                         // Quick Add Section
                         VStack(alignment: .leading, spacing: 16) {
