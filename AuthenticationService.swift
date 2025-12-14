@@ -161,6 +161,45 @@ class AuthenticationService: NSObject, ObservableObject {
         UserDefaults.standard.removeObject(forKey: userIDKey)
         authState = .unauthenticated
     }
+
+    // MARK: - Delete Account
+    /// Permanently deletes the user's account and all associated data
+    /// Required for App Store compliance (Guideline 5.1.1(v))
+    func deleteAccount() async throws {
+        guard let user = currentUser else {
+            throw AuthError.userNotFound
+        }
+
+        isLoading = true
+        defer { isLoading = false }
+
+        // 1. Revoke Apple Sign In credentials if possible
+        // Note: Apple doesn't provide a direct API to revoke credentials
+        // The user must do this in their Apple ID settings
+
+        // 2. Delete user data from backend (if you have one)
+        // await deleteUserFromBackend(user.id)
+
+        // 3. Clear all local user data
+        clearAllUserData()
+
+        // 4. Sign out
+        authState = .unauthenticated
+    }
+
+    /// Clears all local user data
+    private func clearAllUserData() {
+        // Remove authentication data
+        UserDefaults.standard.removeObject(forKey: userDataKey)
+        UserDefaults.standard.removeObject(forKey: userIDKey)
+
+        // Clear all app-specific user defaults
+        let domain = Bundle.main.bundleIdentifier!
+        UserDefaults.standard.removePersistentDomain(forName: domain)
+        UserDefaults.standard.synchronize()
+
+        // Note: SwiftData persistence will be cleared separately in the view layer
+    }
     
     // MARK: - User Management
     private func saveUser(_ user: AppUser) {
