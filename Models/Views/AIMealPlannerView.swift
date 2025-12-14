@@ -386,8 +386,8 @@ struct AIMealPlannerView: View {
     }
     
     private func generateMealPlan() {
-        // Premium-only feature check
-        guard subscriptionManager.isPremiumUser else {
+        // Premium-only feature check (includes free trial)
+        guard subscriptionManager.hasAccessTo(.mealPlanning) else {
             showingPremiumUpgrade = true
             return
         }
