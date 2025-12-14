@@ -17,11 +17,11 @@ class SubscriptionManager: NSObject, ObservableObject {
     @Published var hasFreeTrial = true
     @Published var trialEndDate: Date?
     
-    // Subscription product IDs - configure these in App Store Connect
+    // Subscription product IDs - MUST match App Store Connect configuration
     private let productIDs: [String] = [
-        "com.caltrackpro.premium.monthly",
-        "com.caltrackpro.premium.yearly",
-        "com.caltrackpro.premium.lifetime"
+        "com.easyaiflows.CalTrackProFixed.premium.monthly",
+        "com.easyaiflows.CalTrackProFixed.premium.annual",
+        "com.easyaiflows.CalTrackProFixed.premium.lifetime"
     ]
     
     private var products: [Product] = []
@@ -72,13 +72,13 @@ class SubscriptionManager: NSObject, ObservableObject {
         let priority: Int
         
         switch product.id {
-        case "com.caltrackpro.premium.monthly":
+        case "com.easyaiflows.CalTrackProFixed.premium.monthly":
             planType = .monthly
             priority = 2
-        case "com.caltrackpro.premium.yearly":
+        case "com.easyaiflows.CalTrackProFixed.premium.annual":
             planType = .yearly
             priority = 1
-        case "com.caltrackpro.premium.lifetime":
+        case "com.easyaiflows.CalTrackProFixed.premium.lifetime":
             planType = .lifetime
             priority = 3
         default:

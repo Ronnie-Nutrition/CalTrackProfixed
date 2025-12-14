@@ -13,7 +13,9 @@ struct HomeView: View {
     @State private var selectedImage: UIImage?
     @State private var galleryImage: UIImage?
     @State private var selectedMealType: FoodEntry.MealType = .breakfast
+    @State private var showingPremiumUpgrade = false
     @EnvironmentObject var appState: AppState
+    @StateObject private var subscriptionManager = SubscriptionManager.shared
     
     var body: some View {
         NavigationStack {
@@ -26,6 +28,52 @@ struct HomeView: View {
                         // Daily Summary Card
                         DailySummaryCard()
                             .padding(.horizontal)
+
+                        // Premium Upgrade Banner - Visible for App Store Reviewers
+                        if !subscriptionManager.isPremiumUser {
+                            Button(action: {
+                                showingPremiumUpgrade = true
+                            }) {
+                                LiquidGlassCard(cornerRadius: 16) {
+                                    HStack(spacing: 12) {
+                                        ZStack {
+                                            Circle()
+                                                .fill(
+                                                    LinearGradient(
+                                                        colors: [.yellow, .orange],
+                                                        startPoint: .topLeading,
+                                                        endPoint: .bottomTrailing
+                                                    )
+                                                )
+                                                .frame(width: 50, height: 50)
+
+                                            Image(systemName: "crown.fill")
+                                                .font(.title2)
+                                                .foregroundColor(.white)
+                                        }
+
+                                        VStack(alignment: .leading, spacing: 4) {
+                                            Text("Upgrade to Premium")
+                                                .font(.headline)
+                                                .fontWeight(.semibold)
+                                                .foregroundColor(.primary)
+
+                                            Text("Unlock unlimited features - Starting at $6.99/mo")
+                                                .font(.subheadline)
+                                                .foregroundColor(.secondary)
+                                        }
+
+                                        Spacer()
+
+                                        Image(systemName: "chevron.right")
+                                            .foregroundColor(.secondary)
+                                    }
+                                    .padding()
+                                }
+                            }
+                            .buttonStyle(PlainButtonStyle())
+                            .padding(.horizontal)
+                        }
 
                         // Quick Add Section
                         VStack(alignment: .leading, spacing: 16) {
@@ -148,6 +196,9 @@ struct HomeView: View {
             }
             .sheet(isPresented: $showingVoiceInput) {
                 VoiceInputView()
+            }
+            .sheet(isPresented: $showingPremiumUpgrade) {
+                PremiumUpgradeView()
             }
         }
     }
