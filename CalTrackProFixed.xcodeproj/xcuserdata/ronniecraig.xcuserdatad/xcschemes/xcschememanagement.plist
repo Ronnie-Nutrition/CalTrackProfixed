@@ -6,13 +6,30 @@
 	<dict>
 		<key>CalTrackProFixed.xcscheme_^#shared#^_</key>
 		<dict>
+			<key>isShown</key>
+			<true/>
 			<key>orderHint</key>
 			<integer>0</integer>
 		</dict>
 		<key>CalTrackWidget.xcscheme_^#shared#^_</key>
 		<dict>
+			<key>isShown</key>
+			<false/>
 			<key>orderHint</key>
 			<integer>0</integer>
+		</dict>
+	</dict>
+	<key>SuppressBuildableAutocreation</key>
+	<dict>
+		<key>AF2F2C17F3D040038F729C95</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>FB0B70882EAB9AFC004E511A</key>
+		<dict>
+			<key>primary</key>
+			<true/>
 		</dict>
 	</dict>
 </dict>

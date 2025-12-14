@@ -226,8 +226,8 @@ class SubscriptionManager: NSObject, ObservableObject {
     // MARK: - Premium Feature Access
     
     var isPremiumUser: Bool {
-        // TEMPORARY: Always return true for testing until StoreKit is configured
-        return true
+        // TEMPORARY: Return false so App Store reviewers can see premium upgrade options
+        return false
         // return isSubscriptionActive || hasFreeTrial
     }
     
