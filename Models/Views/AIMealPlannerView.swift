@@ -4,10 +4,12 @@ import SwiftData
 struct AIMealPlannerView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
-    
+
     @StateObject private var mealPlanService = AIMealPlanningService.shared
+    @StateObject private var subscriptionManager = SubscriptionManager.shared
     @State private var userProfile: UserProfile?
-    
+    @State private var showingPremiumUpgrade = false
+
     // Preferences
     @State private var dietType: DietType = .balanced
     @State private var includedMeals: Set<MealType> = [.breakfast, .lunch, .dinner]
@@ -69,6 +71,9 @@ struct AIMealPlannerView: View {
                     generationOverlay
                 }
             }
+            .sheet(isPresented: $showingPremiumUpgrade) {
+                PremiumUpgradeView()
+            }
         }
         .onAppear {
             loadUserProfile()
@@ -78,18 +83,43 @@ struct AIMealPlannerView: View {
     // MARK: - Hero Section
     private var heroSection: some View {
         VStack(spacing: 12) {
-            Image(systemName: "wand.and.stars")
-                .font(.system(size: 50))
-                .foregroundStyle(.linearGradient(
-                    colors: [.purple, .blue],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                ))
-            
+            ZStack(alignment: .topTrailing) {
+                Image(systemName: "wand.and.stars")
+                    .font(.system(size: 50))
+                    .foregroundStyle(.linearGradient(
+                        colors: [.purple, .blue],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ))
+
+                // Premium Badge
+                if !subscriptionManager.isPremiumUser {
+                    HStack(spacing: 4) {
+                        Image(systemName: "crown.fill")
+                            .font(.caption2)
+                        Text("Premium")
+                            .font(.caption2)
+                            .fontWeight(.semibold)
+                    }
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(
+                        LinearGradient(
+                            colors: [.yellow, .orange],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
+                    .foregroundColor(.white)
+                    .cornerRadius(12)
+                    .offset(x: 30, y: -10)
+                }
+            }
+
             Text("Personalized Meal Plans")
                 .font(.title2)
                 .bold()
-            
+
             Text("AI-powered weekly meal planning tailored to your goals")
                 .font(.subheadline)
                 .foregroundColor(.secondary)
@@ -356,12 +386,18 @@ struct AIMealPlannerView: View {
     }
     
     private func generateMealPlan() {
+        // Premium-only feature check
+        guard subscriptionManager.isPremiumUser else {
+            showingPremiumUpgrade = true
+            return
+        }
+
         guard let profile = userProfile else {
             errorMessage = "Please set up your profile first"
             showError = true
             return
         }
-        
+
         let preferences = MealPlanPreferences(
             dietType: dietType,
             includedMeals: includedMeals,
