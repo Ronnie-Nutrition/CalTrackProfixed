@@ -58,7 +58,7 @@ struct HomeView: View {
                                                 .fontWeight(.semibold)
                                                 .foregroundColor(.primary)
 
-                                            Text("Unlock unlimited features - Starting at $6.99/mo")
+                                            Text("Unlock unlimited features - Starting at $4.99/mo")
                                                 .font(.subheadline)
                                                 .foregroundColor(.secondary)
                                         }
