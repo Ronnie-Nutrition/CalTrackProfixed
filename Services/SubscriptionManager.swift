@@ -320,15 +320,45 @@ struct SubscriptionPlan: Identifiable, Hashable {
             return "One-time purchase"
         }
     }
-    
+
     var description: String {
         switch type {
         case .monthly:
-            return "Full access to all premium features"
+            return "Full access to all premium features. Auto-renews monthly."
         case .yearly:
-            return "Save 60% with annual billing"
+            return "Save 44% with annual billing. Auto-renews yearly."
         case .lifetime:
-            return "Pay once, premium forever"
+            return "Pay once, premium forever. No subscription."
+        }
+    }
+
+    // Duration text (Required by Apple Guideline 3.1.2)
+    var durationText: String {
+        switch type {
+        case .monthly:
+            return "1 Month"
+        case .yearly:
+            return "12 Months (1 Year)"
+        case .lifetime:
+            return "Lifetime (One-Time Purchase)"
+        }
+    }
+
+    // Per-unit pricing text (Required by Apple Guideline 3.1.2)
+    var pricePerUnitText: String {
+        switch type {
+        case .monthly:
+            return "\(priceFormatted)/month"
+        case .yearly:
+            // Calculate monthly equivalent
+            let monthlyPrice = (price as NSDecimalNumber).doubleValue / 12.0
+            let formatter = NumberFormatter()
+            formatter.numberStyle = .currency
+            formatter.currencyCode = product.priceFormatStyle.currencyCode
+            let monthlyFormatted = formatter.string(from: NSNumber(value: monthlyPrice)) ?? "$\(String(format: "%.2f", monthlyPrice))"
+            return "\(monthlyFormatted)/month"
+        case .lifetime:
+            return "One-time payment"
         }
     }
     
