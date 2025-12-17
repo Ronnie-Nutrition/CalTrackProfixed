@@ -19,23 +19,29 @@ struct PremiumUpgradeView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                GlassmorphismBackground(colors: [.purple, .blue, .indigo])
-                
-                ScrollView {
-                    VStack(spacing: 24) {
+                // Static gradient background (no animations for smooth scrolling)
+                LinearGradient(
+                    colors: [.purple.opacity(0.3), .blue.opacity(0.2), .indigo.opacity(0.3)],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+                .ignoresSafeArea()
+
+                ScrollView(showsIndicators: false) {
+                    LazyVStack(spacing: 24) {
                         headerSection
-                        
+
                         if subscriptionManager.hasFreeTrial {
                             freeTrialCard
                         }
-                        
+
                         featuresSection
                         subscriptionPlansSection
-                        
+
                         if !subscriptionManager.hasFreeTrial {
                             purchaseSection
                         }
-                        
+
                         bottomSection
                     }
                     .padding()
@@ -82,8 +88,8 @@ struct PremiumUpgradeView: View {
                         )
                     )
                     .frame(width: 100, height: 100)
-                    .liquidPulse(color: .purple, intensity: 0.5)
-                
+                    .shadow(color: .purple.opacity(0.4), radius: 10)
+
                 Image(systemName: "crown.fill")
                     .font(.system(size: 40))
                     .foregroundColor(.white)
@@ -201,41 +207,49 @@ struct PremiumUpgradeView: View {
 
     // MARK: - Fallback Subscription Cards (for App Store Review compliance)
 
+    @State private var selectedFallbackPlan: String? = nil
+
     private var fallbackSubscriptionCards: some View {
         VStack(spacing: 12) {
             // Monthly Plan
             FallbackPlanCard(
-                title: "Monthly Premium",
+                title: "Monthly",
                 duration: "1 Month",
                 price: "$4.99",
                 pricePerUnit: "$4.99/month",
-                description: "Full access to all premium features. Auto-renews monthly.",
+                description: "Auto-renews monthly.",
                 isPopular: false,
-                color: .blue
+                isSelected: selectedFallbackPlan == "monthly",
+                color: .blue,
+                onSelect: { selectedFallbackPlan = "monthly" }
             )
 
             // Yearly Plan
             FallbackPlanCard(
-                title: "Yearly Premium",
+                title: "Yearly",
                 duration: "12 Months",
                 price: "$39.99",
                 pricePerUnit: "$3.33/month",
-                description: "Save 44% with annual billing. Auto-renews yearly.",
+                description: "Save 44%. Auto-renews yearly.",
                 isPopular: true,
-                savings: "Save 44%",
-                color: .green
+                savings: "44% OFF",
+                isSelected: selectedFallbackPlan == "yearly",
+                color: .green,
+                onSelect: { selectedFallbackPlan = "yearly" }
             )
 
             // Lifetime Plan
             FallbackPlanCard(
-                title: "Lifetime Premium",
-                duration: "One-Time Purchase",
+                title: "Lifetime",
+                duration: "One-Time",
                 price: "$99.99",
-                pricePerUnit: "Pay once, own forever",
-                description: "Lifetime access to all premium features. No subscription.",
+                pricePerUnit: "Pay once",
+                description: "Lifetime access. No subscription.",
                 isPopular: false,
-                savings: "Best Value",
-                color: .purple
+                savings: "Best",
+                isSelected: selectedFallbackPlan == "lifetime",
+                color: .purple,
+                onSelect: { selectedFallbackPlan = "lifetime" }
             )
         }
     }
@@ -296,8 +310,7 @@ struct PremiumUpgradeView: View {
                     .cornerRadius(12)
                 }
                 .disabled(isProcessingPurchase || subscriptionManager.isLoading)
-                .liquidPulse(color: plan.color, intensity: 0.3)
-                
+
                 Text("Cancel anytime • No hidden fees")
                     .font(.caption)
                     .foregroundColor(.secondary)
@@ -392,51 +405,42 @@ struct PremiumFeatureCard: View {
     let feature: PremiumFeature
     let isHighlighted: Bool
     let delay: Double
-    
-    @State private var isVisible = false
-    
+
     var body: some View {
-        LiquidGlassCard {
-            VStack(spacing: 12) {
-                ZStack {
-                    Circle()
-                        .fill(isHighlighted ? .orange.opacity(0.2) : .blue.opacity(0.1))
-                        .frame(width: 50, height: 50)
-                    
-                    Image(systemName: feature.icon)
-                        .font(.title2)
-                        .foregroundColor(isHighlighted ? .orange : .blue)
-                }
-                
-                VStack(spacing: 4) {
-                    Text(feature.displayName)
-                        .font(.subheadline)
-                        .fontWeight(.semibold)
-                        .multilineTextAlignment(.center)
-                    
-                    Text(feature.description)
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                        .multilineTextAlignment(.center)
-                        .lineLimit(3)
-                }
+        VStack(spacing: 12) {
+            ZStack {
+                Circle()
+                    .fill(isHighlighted ? .orange.opacity(0.2) : .blue.opacity(0.1))
+                    .frame(width: 50, height: 50)
+
+                Image(systemName: feature.icon)
+                    .font(.title2)
+                    .foregroundColor(isHighlighted ? .orange : .blue)
             }
-            .padding()
-            .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(isHighlighted ? .orange : .clear, lineWidth: 2)
-            )
+
+            VStack(spacing: 4) {
+                Text(feature.displayName)
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.primary)
+                    .multilineTextAlignment(.center)
+
+                Text(feature.description)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+                    .lineLimit(3)
+            }
         }
-        .scaleEffect(isVisible ? 1 : 0.8)
-        .opacity(isVisible ? 1 : 0)
-        .animation(
-            .spring(response: 0.6, dampingFraction: 0.8)
-            .delay(delay),
-            value: isVisible
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color(.systemBackground).opacity(0.8))
         )
-        .onAppear {
-            isVisible = true
-        }
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(isHighlighted ? .orange : Color.gray.opacity(0.3), lineWidth: isHighlighted ? 2 : 1)
+        )
     }
 }
 
@@ -444,95 +448,98 @@ struct SubscriptionPlanCard: View {
     let plan: SubscriptionPlan
     let isSelected: Bool
     let onSelect: () -> Void
-    
+
     var body: some View {
         Button(action: onSelect) {
-            LiquidGlassCard {
-                VStack(spacing: 12) {
-                    HStack {
-                        VStack(alignment: .leading, spacing: 4) {
-                            HStack {
-                                Text(plan.title)
-                                    .font(.headline)
-                                    .fontWeight(.semibold)
-
-                                if plan.isPopular {
-                                    Text("POPULAR")
-                                        .font(.caption2)
-                                        .fontWeight(.bold)
-                                        .foregroundColor(.white)
-                                        .padding(.horizontal, 8)
-                                        .padding(.vertical, 2)
-                                        .background(.green)
-                                        .cornerRadius(8)
-                                }
-
-                                Spacer()
-
-                                if let savings = plan.savings {
-                                    Text(savings)
-                                        .font(.caption)
-                                        .fontWeight(.medium)
-                                        .foregroundColor(.orange)
-                                        .padding(.horizontal, 6)
-                                        .padding(.vertical, 2)
-                                        .background(.orange.opacity(0.1))
-                                        .cornerRadius(6)
-                                }
-                            }
-
-                            // Duration (Required by Apple)
-                            Text("Duration: \(plan.durationText)")
-                                .font(.subheadline)
+            VStack(spacing: 12) {
+                HStack {
+                    VStack(alignment: .leading, spacing: 4) {
+                        HStack {
+                            Text(plan.title)
+                                .font(.headline)
+                                .fontWeight(.semibold)
                                 .foregroundColor(.primary)
 
-                            Text(plan.description)
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                        }
+                            if plan.isPopular {
+                                Text("POPULAR")
+                                    .font(.caption2)
+                                    .fontWeight(.bold)
+                                    .foregroundColor(.white)
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 2)
+                                    .background(.green)
+                                    .cornerRadius(8)
+                            }
 
-                        Spacer()
-
-                        VStack(alignment: .trailing, spacing: 4) {
-                            Text(plan.priceFormatted)
-                                .font(.title2)
-                                .fontWeight(.bold)
-                                .foregroundColor(plan.color)
-
-                            // Per-unit pricing (Required by Apple)
-                            Text(plan.pricePerUnitText)
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                        }
-                    }
-                    
-                    // Introductory offer information
-                    if let intro = plan.introductoryOffer {
-                        HStack {
-                            Image(systemName: "gift.fill")
-                                .foregroundColor(.green)
-                                .font(.caption)
-                            
-                            Text(formatIntroductoryOffer(intro))
-                                .font(.caption)
-                                .foregroundColor(.green)
-                                .fontWeight(.medium)
-                            
                             Spacer()
+
+                            if let savings = plan.savings {
+                                Text(savings)
+                                    .font(.caption)
+                                    .fontWeight(.medium)
+                                    .foregroundColor(.green)
+                                    .padding(.horizontal, 6)
+                                    .padding(.vertical, 2)
+                                    .background(.green.opacity(0.15))
+                                    .cornerRadius(6)
+                            }
                         }
-                        .padding(.top, 4)
+
+                        // Duration (Required by Apple)
+                        Text("Duration: \(plan.durationText)")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+
+                        Text(plan.description)
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+
+                    Spacer()
+
+                    VStack(alignment: .trailing, spacing: 4) {
+                        Text(plan.priceFormatted)
+                            .font(.title2)
+                            .fontWeight(.bold)
+                            .foregroundColor(plan.color)
+
+                        // Per-unit pricing (Required by Apple)
+                        Text(plan.pricePerUnitText)
+                            .font(.caption)
+                            .foregroundColor(.secondary)
                     }
                 }
-                .padding()
-                .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(isSelected ? plan.color : .clear, lineWidth: 2)
-                )
+
+                // Introductory offer information
+                if let intro = plan.introductoryOffer {
+                    HStack {
+                        Image(systemName: "gift.fill")
+                            .foregroundColor(.green)
+                            .font(.caption)
+
+                        Text(formatIntroductoryOffer(intro))
+                            .font(.caption)
+                            .foregroundColor(.green)
+                            .fontWeight(.medium)
+
+                        Spacer()
+                    }
+                    .padding(.top, 4)
+                }
             }
+            .padding()
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color(.systemBackground).opacity(0.8))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(isSelected ? plan.color : Color.gray.opacity(0.3), lineWidth: isSelected ? 2 : 1)
+            )
         }
         .buttonStyle(PlainButtonStyle())
     }
-    
+
     private func formatIntroductoryOffer(_ offer: Product.SubscriptionOffer) -> String {
         let period = offer.period
 
@@ -551,40 +558,41 @@ struct FallbackPlanCard: View {
     let description: String
     let isPopular: Bool
     var savings: String? = nil
+    let isSelected: Bool
     let color: Color
+    let onSelect: () -> Void
 
     var body: some View {
-        VStack(spacing: 12) {
-            HStack {
+        Button(action: onSelect) {
+            HStack(spacing: 12) {
+                // Left side - Plan info
                 VStack(alignment: .leading, spacing: 4) {
-                    HStack {
+                    HStack(spacing: 6) {
                         Text(title)
                             .font(.headline)
                             .fontWeight(.semibold)
                             .foregroundColor(.primary)
 
                         if isPopular {
-                            Text("POPULAR")
+                            Text("TOP")
                                 .font(.caption2)
                                 .fontWeight(.bold)
                                 .foregroundColor(.white)
-                                .padding(.horizontal, 8)
+                                .padding(.horizontal, 6)
                                 .padding(.vertical, 2)
                                 .background(.green)
-                                .cornerRadius(8)
+                                .cornerRadius(4)
                         }
-
-                        Spacer()
 
                         if let savings = savings {
                             Text(savings)
-                                .font(.caption)
+                                .font(.caption2)
                                 .fontWeight(.medium)
                                 .foregroundColor(.green)
-                                .padding(.horizontal, 6)
+                                .padding(.horizontal, 5)
                                 .padding(.vertical, 2)
                                 .background(.green.opacity(0.15))
-                                .cornerRadius(6)
+                                .cornerRadius(4)
                         }
                     }
 
@@ -600,28 +608,29 @@ struct FallbackPlanCard: View {
 
                 Spacer()
 
-                VStack(alignment: .trailing, spacing: 4) {
+                // Right side - Price
+                VStack(alignment: .trailing, spacing: 2) {
                     Text(price)
                         .font(.title2)
                         .fontWeight(.bold)
                         .foregroundColor(color)
 
-                    // Per-unit pricing (Required by Apple)
                     Text(pricePerUnit)
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
             }
+            .padding()
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color(.systemBackground).opacity(0.8))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(isSelected ? color : Color.gray.opacity(0.3), lineWidth: isSelected ? 2 : 1)
+            )
         }
-        .padding()
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(.ultraThinMaterial)
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(Color.white.opacity(0.2), lineWidth: 1)
-        )
+        .buttonStyle(PlainButtonStyle())
     }
 }
 
