@@ -153,11 +153,13 @@ struct CameraPermissionView: View {
                 }
                 
                 VStack(spacing: 16) {
-                    Button("Enable Camera Access") {
+                    Button("Continue") {
                         Task {
                             await permissionManager.requestCameraPermission()
                             if permissionManager.permissionStatus == .authorized {
                                 onPermissionGranted()
+                            } else if permissionManager.permissionStatus == .denied {
+                                // Permission denied - user can go to Settings
                             }
                         }
                     }
@@ -167,27 +169,23 @@ struct CameraPermissionView: View {
                     .foregroundColor(.white)
                     .cornerRadius(16)
                     .shadow(color: .blue.opacity(0.3), radius: 10)
-                    
+
                     if permissionManager.permissionStatus == .denied {
                         VStack(spacing: 8) {
-                            Text("Camera access was denied")
+                            Text("Camera access was denied. You can enable it in Settings.")
                                 .font(.subheadline)
-                                .foregroundColor(.red)
-                            
+                                .foregroundColor(.secondary)
+                                .multilineTextAlignment(.center)
+
                             Button("Open Settings") {
                                 if let settingsURL = URL(string: UIApplication.openSettingsURLString) {
                                     UIApplication.shared.open(settingsURL)
                                 }
                             }
-                            .font(.caption)
+                            .font(.subheadline)
                             .foregroundColor(.blue)
                         }
                     }
-                    
-                    Button("Cancel") {
-                        onDismiss()
-                    }
-                    .foregroundColor(.secondary)
                 }
                 .padding(.horizontal, 24)
             }

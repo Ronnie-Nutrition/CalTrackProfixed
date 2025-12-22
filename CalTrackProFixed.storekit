@@ -150,7 +150,7 @@
               "locale" : "en_US"
             }
           ],
-          "productID" : "com.caltrackpro.premium.lifetime",
+          "productID" : "com.caltrackpro.premium.lifetime.v2",
           "recurringSubscriptionPeriod" : "P0D",
           "referenceName" : "Lifetime Premium",
           "subscriptionGroupID" : "Premium",

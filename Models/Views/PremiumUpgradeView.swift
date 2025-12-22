@@ -28,24 +28,15 @@ struct PremiumUpgradeView: View {
                 .ignoresSafeArea()
 
                 ScrollView(showsIndicators: false) {
-                    LazyVStack(spacing: 24) {
+                    VStack(spacing: 24) {
                         headerSection
-
-                        if subscriptionManager.hasFreeTrial {
-                            freeTrialCard
-                        }
-
                         featuresSection
                         subscriptionPlansSection
-
-                        if !subscriptionManager.hasFreeTrial {
-                            purchaseSection
-                        }
-
                         bottomSection
                     }
                     .padding()
                 }
+                .scrollBounceBehavior(.basedOnSize)
             }
             .navigationTitle("CalTrack Pro Premium")
             .navigationBarTitleDisplayMode(.inline)
@@ -156,17 +147,31 @@ struct PremiumUpgradeView: View {
                 .font(.title2)
                 .fontWeight(.bold)
                 .padding(.horizontal)
-            
-            LazyVGrid(columns: [
-                GridItem(.flexible()),
-                GridItem(.flexible())
-            ], spacing: 16) {
-                ForEach(Array(PremiumFeature.allCases.enumerated()), id: \.element) { index, feature in
-                    PremiumFeatureCard(
-                        feature: feature,
-                        isHighlighted: feature == sourceFeature,
-                        delay: Double(index) * 0.1
-                    )
+
+            // Use regular Grid instead of LazyVGrid for stable scrolling
+            let features = Array(PremiumFeature.allCases)
+            VStack(spacing: 16) {
+                ForEach(0..<(features.count / 2 + features.count % 2), id: \.self) { row in
+                    HStack(spacing: 16) {
+                        let firstIndex = row * 2
+                        let secondIndex = row * 2 + 1
+
+                        PremiumFeatureCard(
+                            feature: features[firstIndex],
+                            isHighlighted: features[firstIndex] == sourceFeature,
+                            delay: 0
+                        )
+
+                        if secondIndex < features.count {
+                            PremiumFeatureCard(
+                                feature: features[secondIndex],
+                                isHighlighted: features[secondIndex] == sourceFeature,
+                                delay: 0
+                            )
+                        } else {
+                            Spacer()
+                        }
+                    }
                 }
             }
             .padding(.horizontal)
@@ -182,26 +187,121 @@ struct PremiumUpgradeView: View {
                 .fontWeight(.bold)
                 .padding(.horizontal)
 
-            VStack(spacing: 12) {
-                if subscriptionManager.availableSubscriptions.isEmpty {
-                    // Show fallback subscription info when StoreKit products aren't loaded
-                    // This ensures Apple reviewers see required subscription details
-                    fallbackSubscriptionCards
-                } else {
-                    ForEach(subscriptionManager.availableSubscriptions) { plan in
-                        SubscriptionPlanCard(
-                            plan: plan,
-                            isSelected: selectedPlan == plan,
-                            onSelect: { selectedPlan = plan }
-                        )
-                    }
-                }
-            }
-            .padding(.horizontal)
-            .animation(nil, value: subscriptionManager.availableSubscriptions.count)
+            // Always show fallback cards - they work even without StoreKit
+            // This provides consistent layout and prevents scroll glitches
+            fallbackSubscriptionCards
+                .padding(.horizontal)
+
+            // Purchase button
+            fallbackPurchaseButton
+                .padding(.horizontal)
 
             // Required subscription terms disclosure
             subscriptionTermsDisclosure
+        }
+    }
+
+    // MARK: - Fallback Purchase Button
+
+    private var fallbackPurchaseButton: some View {
+        VStack(spacing: 12) {
+            if let selected = selectedFallbackPlan {
+                Button(action: {
+                    purchaseFallbackPlan(selected)
+                }) {
+                    HStack {
+                        if isProcessingPurchase {
+                            ProgressView()
+                                .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                                .scaleEffect(0.8)
+                        } else {
+                            Image(systemName: "crown.fill")
+                                .font(.title2)
+                        }
+
+                        Text(isProcessingPurchase ? "Processing..." : "Subscribe Now")
+                            .font(.headline)
+                            .fontWeight(.semibold)
+                    }
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(
+                        LinearGradient(
+                            colors: selected == "yearly" ? [.green, .mint] : [.purple, .pink],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
+                    .cornerRadius(12)
+                }
+                .disabled(isProcessingPurchase || subscriptionManager.isLoading)
+
+                Text("Cancel anytime • Secure payment with Apple")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            } else {
+                Text("Select a plan above to continue")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                    .frame(maxWidth: .infinity)
+                    .padding()
+            }
+        }
+    }
+
+    // MARK: - Purchase Fallback Plan
+
+    private func purchaseFallbackPlan(_ planType: String) {
+        isProcessingPurchase = true
+
+        // Map fallback plan to StoreKit product ID (must match App Store Connect)
+        let productID: String
+        switch planType {
+        case "monthly":
+            productID = "com.caltrackpro.premium.monthly"
+        case "yearly":
+            productID = "com.caltrackpro.premium.yearly"
+        case "lifetime":
+            productID = "com.caltrackpro.premium.lifetime.v2"
+        default:
+            isProcessingPurchase = false
+            return
+        }
+
+        Task {
+            // Try to find the StoreKit product
+            if let plan = subscriptionManager.availableSubscriptions.first(where: { $0.id == productID }) {
+                let success = await subscriptionManager.purchaseSubscription(plan)
+                await MainActor.run {
+                    isProcessingPurchase = false
+                    if success {
+                        dismiss()
+                    } else if subscriptionManager.errorMessage != nil {
+                        showingError = true
+                    }
+                }
+            } else {
+                // Products not loaded yet - try loading them first
+                await subscriptionManager.loadProducts()
+                if let plan = subscriptionManager.availableSubscriptions.first(where: { $0.id == productID }) {
+                    let success = await subscriptionManager.purchaseSubscription(plan)
+                    await MainActor.run {
+                        isProcessingPurchase = false
+                        if success {
+                            dismiss()
+                        } else if subscriptionManager.errorMessage != nil {
+                            showingError = true
+                        }
+                    }
+                } else {
+                    await MainActor.run {
+                        isProcessingPurchase = false
+                        subscriptionManager.errorMessage = "Unable to load subscription. Please check your internet connection and try again."
+                        showingError = true
+                    }
+                }
+            }
         }
     }
 
@@ -252,6 +352,7 @@ struct PremiumUpgradeView: View {
                 onSelect: { selectedFallbackPlan = "lifetime" }
             )
         }
+        .drawingGroup()
     }
 
     // MARK: - Subscription Terms Disclosure (Required by Apple)

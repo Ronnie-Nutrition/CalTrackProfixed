@@ -19,27 +19,27 @@ struct EnhancedBarcodeScannerView: View {
                         Image(systemName: "camera.fill")
                             .font(.system(size: 60))
                             .foregroundColor(.gray)
-                        
-                        Text("Camera Access Required")
+
+                        Text("Camera Access Needed")
                             .font(.title2)
                             .bold()
-                        
+
                         Text(scanner.errorMessage)
                             .multilineTextAlignment(.center)
                             .foregroundColor(.secondary)
                             .padding(.horizontal)
-                        
+
                         Button("Open Settings") {
                             if let settingsUrl = URL(string: UIApplication.openSettingsURLString) {
                                 UIApplication.shared.open(settingsUrl)
                             }
                         }
                         .buttonStyle(.borderedProminent)
-                        
-                        Button("Cancel") {
+
+                        Button("Go Back") {
                             dismiss()
                         }
-                        .buttonStyle(.bordered)
+                        .foregroundColor(.secondary)
                     }
                     .padding()
                 } else {

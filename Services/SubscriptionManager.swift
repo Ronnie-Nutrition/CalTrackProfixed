@@ -19,9 +19,9 @@ class SubscriptionManager: NSObject, ObservableObject {
     
     // Subscription product IDs - MUST match App Store Connect configuration
     private let productIDs: [String] = [
-        "com.easyaiflows.CalTrackProFixed.premium.monthly",
-        "com.easyaiflows.CalTrackProFixed.premium.annual",
-        "com.easyaiflows.CalTrackProFixed.premium.lifetime"
+        "com.caltrackpro.premium.monthly",
+        "com.caltrackpro.premium.yearly",
+        "com.caltrackpro.premium.lifetime.v2"
     ]
     
     private var products: [Product] = []
@@ -72,13 +72,13 @@ class SubscriptionManager: NSObject, ObservableObject {
         let priority: Int
         
         switch product.id {
-        case "com.easyaiflows.CalTrackProFixed.premium.monthly":
+        case "com.caltrackpro.premium.monthly":
             planType = .monthly
             priority = 2
-        case "com.easyaiflows.CalTrackProFixed.premium.annual":
+        case "com.caltrackpro.premium.yearly":
             planType = .yearly
             priority = 1
-        case "com.easyaiflows.CalTrackProFixed.premium.lifetime":
+        case "com.caltrackpro.premium.lifetime.v2":
             planType = .lifetime
             priority = 3
         default:
