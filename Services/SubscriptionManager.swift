@@ -8,7 +8,7 @@ import SwiftUI
 @MainActor
 class SubscriptionManager: NSObject, ObservableObject {
     static let shared = SubscriptionManager()
-    
+
     @Published var isSubscriptionActive = false
     @Published var currentSubscription: SubscriptionPlan?
     @Published var availableSubscriptions: [SubscriptionPlan] = []
@@ -16,17 +16,22 @@ class SubscriptionManager: NSObject, ObservableObject {
     @Published var errorMessage: String?
     @Published var hasFreeTrial = true
     @Published var trialEndDate: Date?
-    
-    // Subscription product IDs - MUST match App Store Connect configuration
+    @Published var productsLoadedSuccessfully = false
+    @Published var lastLoadError: String?
+
+    // Subscription product IDs - MUST match App Store Connect configuration exactly
+    // These must be configured in App Store Connect under "In-App Purchases"
     private let productIDs: [String] = [
         "com.caltrackpro.premium.monthly",
         "com.caltrackpro.premium.yearly",
         "com.caltrackpro.premium.lifetime.v2"
     ]
-    
+
     private var products: [Product] = []
     private var transactionListener: Task<Void, Error>?
-    
+    private var loadAttempts = 0
+    private let maxLoadAttempts = 3
+
     override init() {
         super.init()
 
@@ -35,42 +40,83 @@ class SubscriptionManager: NSObject, ObservableObject {
 
         // Load initial subscription status
         Task {
-            await loadProducts()
+            await loadProductsWithRetry()
             await checkSubscriptionStatus()
         }
     }
-    
+
     deinit {
         transactionListener?.cancel()
     }
-    
-    // MARK: - Product Loading
-    
+
+    // MARK: - Product Loading with Retry
+
+    func loadProductsWithRetry() async {
+        loadAttempts = 0
+        while loadAttempts < maxLoadAttempts && !productsLoadedSuccessfully {
+            loadAttempts += 1
+            await loadProducts()
+
+            if !productsLoadedSuccessfully && loadAttempts < maxLoadAttempts {
+                // Wait before retrying (exponential backoff)
+                try? await Task.sleep(nanoseconds: UInt64(loadAttempts) * 1_000_000_000)
+            }
+        }
+    }
+
     func loadProducts() async {
         isLoading = true
-        
+        errorMessage = nil
+        lastLoadError = nil
+
         do {
+            print("[StoreKit] Loading products for IDs: \(productIDs)")
             products = try await Product.products(for: productIDs)
-            
+            print("[StoreKit] Loaded \(products.count) products")
+
+            for product in products {
+                print("[StoreKit] Product: \(product.id) - \(product.displayName) - \(product.displayPrice)")
+            }
+
             availableSubscriptions = products.compactMap { product in
                 createSubscriptionPlan(from: product)
             }.sorted { $0.priority < $1.priority }
-            
+
+            print("[StoreKit] Created \(availableSubscriptions.count) subscription plans")
+
+            productsLoadedSuccessfully = !availableSubscriptions.isEmpty
+
+            if products.isEmpty {
+                lastLoadError = "No products returned from App Store. Verify product IDs in App Store Connect match: \(productIDs.joined(separator: ", "))"
+                print("[StoreKit] WARNING: \(lastLoadError!)")
+            } else if availableSubscriptions.isEmpty {
+                lastLoadError = "Products loaded but could not create plans. Check product configuration."
+                print("[StoreKit] WARNING: \(lastLoadError!)")
+            }
+
             isLoading = false
         } catch {
+            let errorDesc = error.localizedDescription
+            lastLoadError = "StoreKit error: \(errorDesc)"
+            print("[StoreKit] ERROR loading products: \(errorDesc)")
+
             await MainActor.run {
-                errorMessage = "Failed to load subscription options: \(error.localizedDescription)"
+                // Don't show generic error to user - provide actionable message
+                if errorDesc.contains("network") || errorDesc.contains("connection") {
+                    errorMessage = "Cannot connect to App Store. Please check your internet connection."
+                } else {
+                    errorMessage = "Unable to load subscription options. Please try again."
+                }
                 isLoading = false
             }
         }
     }
-    
+
     private func createSubscriptionPlan(from product: Product) -> SubscriptionPlan? {
-        guard let subscription = product.subscription else { return nil }
-        
         let planType: SubscriptionPlanType
         let priority: Int
-        
+
+        // Determine plan type from product ID - match exact IDs first, then patterns
         switch product.id {
         case "com.caltrackpro.premium.monthly":
             planType = .monthly
@@ -78,13 +124,41 @@ class SubscriptionManager: NSObject, ObservableObject {
         case "com.caltrackpro.premium.yearly":
             planType = .yearly
             priority = 1
-        case "com.caltrackpro.premium.lifetime.v2":
+        case "com.caltrackpro.premium.lifetime.v2", "com.caltrackpro.premium.lifetime":
+            planType = .lifetime
+            priority = 3
+        case let id where id.contains("monthly"):
+            planType = .monthly
+            priority = 2
+        case let id where id.contains("yearly"):
+            planType = .yearly
+            priority = 1
+        case let id where id.contains("lifetime"):
             planType = .lifetime
             priority = 3
         default:
+            print("[StoreKit] Unknown product ID: \(product.id)")
             return nil
         }
-        
+
+        // Handle both subscriptions (including non-renewing) and non-consumables
+        let introOffer: Product.SubscriptionOffer?
+        let promoOffers: [Product.SubscriptionOffer]
+
+        if let subscription = product.subscription {
+            // This is a subscription product (auto-renewable or non-renewing)
+            introOffer = subscription.introductoryOffer
+            promoOffers = subscription.promotionalOffers
+            print("[StoreKit] Product \(product.id) is subscription type")
+        } else {
+            // This is a non-consumable - no subscription offers
+            introOffer = nil
+            promoOffers = []
+            print("[StoreKit] Product \(product.id) is non-consumable type")
+        }
+
+        print("[StoreKit] Created plan: \(planType.rawValue) from product: \(product.id)")
+
         return SubscriptionPlan(
             id: product.id,
             type: planType,
@@ -92,98 +166,164 @@ class SubscriptionManager: NSObject, ObservableObject {
             priority: priority,
             price: product.price,
             priceFormatted: product.displayPrice,
-            introductoryOffer: subscription.introductoryOffer,
-            promotionalOffers: subscription.promotionalOffers
+            introductoryOffer: introOffer,
+            promotionalOffers: promoOffers
         )
     }
     
     // MARK: - Subscription Purchase
-    
+
     func purchaseSubscription(_ plan: SubscriptionPlan) async -> Bool {
         isLoading = true
         errorMessage = nil
-        
+
+        print("[StoreKit] Starting purchase for: \(plan.id)")
+
         do {
             let result = try await plan.product.purchase()
-            
+
             switch result {
             case .success(let verification):
+                print("[StoreKit] Purchase successful, verifying...")
                 let transaction = try checkVerified(verification)
                 await transaction.finish()
+                print("[StoreKit] Transaction finished: \(transaction.productID)")
                 await checkSubscriptionStatus()
                 isLoading = false
                 return true
-                
+
             case .userCancelled:
+                print("[StoreKit] User cancelled purchase")
                 isLoading = false
                 return false
-                
+
             case .pending:
+                print("[StoreKit] Purchase pending (Ask to Buy or other)")
                 isLoading = false
-                errorMessage = "Purchase is pending approval"
+                errorMessage = "Purchase is pending approval. Once approved, your subscription will be activated automatically."
                 return false
-                
+
             @unknown default:
+                print("[StoreKit] Unknown purchase result")
                 isLoading = false
-                errorMessage = "Unknown purchase result"
+                errorMessage = "An unexpected error occurred. Please try again."
                 return false
             }
-            
-        } catch {
+
+        } catch StoreKitError.userCancelled {
+            print("[StoreKit] StoreKit user cancelled")
+            isLoading = false
+            return false
+        } catch StoreKitError.notAvailableInStorefront {
+            print("[StoreKit] Product not available in storefront")
             await MainActor.run {
                 isLoading = false
-                errorMessage = "Purchase failed: \(error.localizedDescription)"
+                errorMessage = "This subscription is not available in your region."
+            }
+            return false
+        } catch StoreKitError.networkError(let underlyingError) {
+            print("[StoreKit] Network error: \(underlyingError)")
+            await MainActor.run {
+                isLoading = false
+                errorMessage = "Network error. Please check your connection and try again."
+            }
+            return false
+        } catch {
+            print("[StoreKit] Purchase error: \(error)")
+            await MainActor.run {
+                isLoading = false
+                // Provide user-friendly error message
+                let errorString = error.localizedDescription.lowercased()
+                if errorString.contains("cancel") {
+                    // User cancelled - don't show error
+                    errorMessage = nil
+                } else if errorString.contains("network") || errorString.contains("connection") {
+                    errorMessage = "Network error. Please check your connection and try again."
+                } else if errorString.contains("not signed") || errorString.contains("sign in") {
+                    errorMessage = "Please sign in to the App Store to complete your purchase."
+                } else {
+                    errorMessage = "Purchase could not be completed. Please try again."
+                }
             }
             return false
         }
     }
     
     // MARK: - Subscription Management
-    
+
     func restorePurchases() async {
         isLoading = true
-        
+        errorMessage = nil
+
+        print("[StoreKit] Restoring purchases...")
+
         do {
             try await AppStore.sync()
             await checkSubscriptionStatus()
+            print("[StoreKit] Restore completed. Active: \(isSubscriptionActive)")
             isLoading = false
         } catch {
+            print("[StoreKit] Restore failed: \(error)")
             await MainActor.run {
-                errorMessage = "Failed to restore purchases: \(error.localizedDescription)"
+                errorMessage = "Could not restore purchases. Please ensure you're signed in to the App Store."
                 isLoading = false
             }
         }
     }
-    
+
     func checkSubscriptionStatus() async {
         var activeSubscription: SubscriptionPlan?
         var hasActiveSubscription = false
-        
+
+        print("[StoreKit] Checking subscription status...")
+
         // Check current entitlements
         for await result in Transaction.currentEntitlements {
             do {
                 let transaction = try checkVerified(result)
-                
+                print("[StoreKit] Found entitlement: \(transaction.productID)")
+
+                // First try to match with loaded subscriptions
                 if let subscription = availableSubscriptions.first(where: { $0.id == transaction.productID }) {
-                    
                     // Check if subscription is still valid
                     if let expirationDate = transaction.expirationDate {
                         if expirationDate > Date() {
+                            print("[StoreKit] Active subscription until: \(expirationDate)")
                             hasActiveSubscription = true
                             activeSubscription = subscription
+                        } else {
+                            print("[StoreKit] Subscription expired: \(expirationDate)")
                         }
                     } else {
-                        // Lifetime subscription
+                        // No expiration = lifetime purchase (non-consumable)
+                        print("[StoreKit] Lifetime purchase detected")
                         hasActiveSubscription = true
                         activeSubscription = subscription
                     }
+                } else {
+                    // Product not in our loaded list - might be a lifetime or different product ID
+                    // Still grant access if it's one of our products
+                    let productId = transaction.productID.lowercased()
+                    if productId.contains("caltrackpro") || productId.contains("premium") {
+                        print("[StoreKit] Recognized product (not loaded): \(transaction.productID)")
+                        if let expirationDate = transaction.expirationDate {
+                            if expirationDate > Date() {
+                                hasActiveSubscription = true
+                            }
+                        } else {
+                            // Lifetime purchase
+                            hasActiveSubscription = true
+                        }
+                    }
                 }
-                
+
             } catch {
-                print("Transaction verification failed: \(error)")
+                print("[StoreKit] Transaction verification failed: \(error)")
             }
         }
-        
+
+        print("[StoreKit] Final status - Active: \(hasActiveSubscription)")
+
         await MainActor.run {
             isSubscriptionActive = hasActiveSubscription
             currentSubscription = activeSubscription

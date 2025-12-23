@@ -49,10 +49,13 @@ struct PremiumUpgradeView: View {
             }
             .onAppear {
                 subscriptionManager.logSubscriptionEvent(.viewUpgrade)
-                
-                if subscriptionManager.availableSubscriptions.isEmpty {
-                    Task {
-                        await subscriptionManager.loadProducts()
+
+                // Always attempt to load products on appear with retry
+                Task {
+                    if subscriptionManager.availableSubscriptions.isEmpty || !subscriptionManager.productsLoadedSuccessfully {
+                        print("[PremiumView] Loading products...")
+                        await subscriptionManager.loadProductsWithRetry()
+                        print("[PremiumView] Products loaded: \(subscriptionManager.availableSubscriptions.count)")
                     }
                 }
             }
@@ -255,7 +258,7 @@ struct PremiumUpgradeView: View {
     private func purchaseFallbackPlan(_ planType: String) {
         isProcessingPurchase = true
 
-        // Map fallback plan to StoreKit product ID (must match App Store Connect)
+        // Map fallback plan to StoreKit product ID (must match App Store Connect exactly)
         let productID: String
         switch planType {
         case "monthly":
@@ -270,8 +273,28 @@ struct PremiumUpgradeView: View {
         }
 
         Task {
+            print("[Purchase] Attempting to purchase: \(productID)")
+
             // Try to find the StoreKit product
-            if let plan = subscriptionManager.availableSubscriptions.first(where: { $0.id == productID }) {
+            var plan = subscriptionManager.availableSubscriptions.first(where: { $0.id == productID })
+
+            // If not found, try loading products first
+            if plan == nil {
+                print("[Purchase] Product not loaded, attempting to load...")
+                await subscriptionManager.loadProductsWithRetry()
+                plan = subscriptionManager.availableSubscriptions.first(where: { $0.id == productID })
+            }
+
+            // Also try matching by type in case IDs don't match exactly
+            if plan == nil {
+                print("[Purchase] Trying to match by type...")
+                plan = subscriptionManager.availableSubscriptions.first(where: {
+                    $0.type.rawValue == planType
+                })
+            }
+
+            if let plan = plan {
+                print("[Purchase] Found plan: \(plan.id), proceeding with purchase")
                 let success = await subscriptionManager.purchaseSubscription(plan)
                 await MainActor.run {
                     isProcessingPurchase = false
@@ -282,24 +305,15 @@ struct PremiumUpgradeView: View {
                     }
                 }
             } else {
-                // Products not loaded yet - try loading them first
-                await subscriptionManager.loadProducts()
-                if let plan = subscriptionManager.availableSubscriptions.first(where: { $0.id == productID }) {
-                    let success = await subscriptionManager.purchaseSubscription(plan)
-                    await MainActor.run {
-                        isProcessingPurchase = false
-                        if success {
-                            dismiss()
-                        } else if subscriptionManager.errorMessage != nil {
-                            showingError = true
-                        }
+                print("[Purchase] Could not find product. Available: \(subscriptionManager.availableSubscriptions.map { $0.id })")
+                await MainActor.run {
+                    isProcessingPurchase = false
+                    if let lastError = subscriptionManager.lastLoadError {
+                        subscriptionManager.errorMessage = "Unable to connect to App Store. Please try again later. (\(lastError))"
+                    } else {
+                        subscriptionManager.errorMessage = "Subscription products are not available. Please ensure you have an active internet connection and try again."
                     }
-                } else {
-                    await MainActor.run {
-                        isProcessingPurchase = false
-                        subscriptionManager.errorMessage = "Unable to load subscription. Please check your internet connection and try again."
-                        showingError = true
-                    }
+                    showingError = true
                 }
             }
         }
