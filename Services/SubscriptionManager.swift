@@ -70,12 +70,34 @@ class SubscriptionManager: NSObject, ObservableObject {
         lastLoadError = nil
 
         do {
-            print("[StoreKit] Loading products for IDs: \(productIDs)")
+            print("[StoreKit] ========== LOADING PRODUCTS ==========")
+            print("[StoreKit] Requesting products for IDs: \(productIDs)")
+            print("[StoreKit] Bundle ID: \(Bundle.main.bundleIdentifier ?? "unknown")")
+
             products = try await Product.products(for: productIDs)
-            print("[StoreKit] Loaded \(products.count) products")
+
+            print("[StoreKit] ========== PRODUCTS LOADED ==========")
+            print("[StoreKit] Total products returned: \(products.count)")
+
+            if products.isEmpty {
+                print("[StoreKit] WARNING: No products returned!")
+                print("[StoreKit] Possible causes:")
+                print("[StoreKit] 1. Product IDs don't match App Store Connect exactly")
+                print("[StoreKit] 2. Products not in 'Ready to Submit' status")
+                print("[StoreKit] 3. Paid Apps Agreement not signed")
+                print("[StoreKit] 4. Products not available in this storefront")
+            }
 
             for product in products {
-                print("[StoreKit] Product: \(product.id) - \(product.displayName) - \(product.displayPrice)")
+                print("[StoreKit] Product found:")
+                print("[StoreKit]   - ID: \(product.id)")
+                print("[StoreKit]   - Name: \(product.displayName)")
+                print("[StoreKit]   - Price: \(product.displayPrice)")
+                print("[StoreKit]   - Type: \(product.type)")
+                if let subscription = product.subscription {
+                    print("[StoreKit]   - Subscription period: \(subscription.subscriptionPeriod)")
+                    print("[StoreKit]   - Is family shareable: \(product.isFamilyShareable)")
+                }
             }
 
             availableSubscriptions = products.compactMap { product in
@@ -83,25 +105,44 @@ class SubscriptionManager: NSObject, ObservableObject {
             }.sorted { $0.priority < $1.priority }
 
             print("[StoreKit] Created \(availableSubscriptions.count) subscription plans")
+            print("[StoreKit] =========================================")
 
             productsLoadedSuccessfully = !availableSubscriptions.isEmpty
 
             if products.isEmpty {
-                lastLoadError = "No products returned from App Store. Verify product IDs in App Store Connect match: \(productIDs.joined(separator: ", "))"
-                print("[StoreKit] WARNING: \(lastLoadError!)")
+                lastLoadError = "No products returned from App Store. Verify product IDs in App Store Connect match exactly: \(productIDs.joined(separator: ", "))"
+                print("[StoreKit] ERROR: \(lastLoadError!)")
             } else if availableSubscriptions.isEmpty {
-                lastLoadError = "Products loaded but could not create plans. Check product configuration."
-                print("[StoreKit] WARNING: \(lastLoadError!)")
+                lastLoadError = "Products loaded but could not create subscription plans. Check product type configuration."
+                print("[StoreKit] ERROR: \(lastLoadError!)")
             }
 
             isLoading = false
-        } catch {
-            let errorDesc = error.localizedDescription
-            lastLoadError = "StoreKit error: \(errorDesc)"
-            print("[StoreKit] ERROR loading products: \(errorDesc)")
+        } catch let error as StoreKitError {
+            print("[StoreKit] StoreKitError loading products: \(error)")
+            lastLoadError = "StoreKit error: \(error)"
 
             await MainActor.run {
-                // Don't show generic error to user - provide actionable message
+                switch error {
+                case .networkError:
+                    errorMessage = "Cannot connect to App Store. Please check your internet connection."
+                case .systemError:
+                    errorMessage = "System error loading subscriptions. Please try again."
+                case .notAvailableInStorefront:
+                    errorMessage = "Subscriptions not available in your region."
+                default:
+                    errorMessage = "Unable to load subscription options. Please try again."
+                }
+                isLoading = false
+            }
+        } catch {
+            let errorDesc = error.localizedDescription
+            lastLoadError = "Error: \(errorDesc)"
+            print("[StoreKit] ERROR loading products: \(error)")
+            print("[StoreKit] Error type: \(type(of: error))")
+            print("[StoreKit] Error description: \(errorDesc)")
+
+            await MainActor.run {
                 if errorDesc.contains("network") || errorDesc.contains("connection") {
                     errorMessage = "Cannot connect to App Store. Please check your internet connection."
                 } else {
@@ -228,8 +269,31 @@ class SubscriptionManager: NSObject, ObservableObject {
                 errorMessage = "Network error. Please check your connection and try again."
             }
             return false
+        } catch StoreKitError.systemError(let underlyingError) {
+            print("[StoreKit] System error: \(underlyingError)")
+            await MainActor.run {
+                isLoading = false
+                errorMessage = "A system error occurred. Please restart the app and try again."
+            }
+            return false
+        } catch StoreKitError.notEntitled {
+            print("[StoreKit] Not entitled error")
+            await MainActor.run {
+                isLoading = false
+                errorMessage = "Unable to complete purchase. Please try again."
+            }
+            return false
+        } catch SubscriptionError.failedVerification {
+            print("[StoreKit] Transaction verification failed")
+            await MainActor.run {
+                isLoading = false
+                errorMessage = "Unable to verify purchase. Please try again or contact support."
+            }
+            return false
         } catch {
             print("[StoreKit] Purchase error: \(error)")
+            print("[StoreKit] Error type: \(type(of: error))")
+            print("[StoreKit] Error description: \(error.localizedDescription)")
             await MainActor.run {
                 isLoading = false
                 // Provide user-friendly error message
@@ -241,6 +305,8 @@ class SubscriptionManager: NSObject, ObservableObject {
                     errorMessage = "Network error. Please check your connection and try again."
                 } else if errorString.contains("not signed") || errorString.contains("sign in") {
                     errorMessage = "Please sign in to the App Store to complete your purchase."
+                } else if errorString.contains("sandbox") {
+                    errorMessage = "Unable to connect to the App Store. Please try again."
                 } else {
                     errorMessage = "Purchase could not be completed. Please try again."
                 }
@@ -390,10 +456,17 @@ class SubscriptionManager: NSObject, ObservableObject {
     }
     
     // MARK: - Transaction Verification
-    
+
     private func checkVerified<T>(_ result: VerificationResult<T>) throws -> T {
         switch result {
-        case .unverified:
+        case .unverified(let unverifiedTransaction, let verificationError):
+            // Log detailed verification failure for debugging
+            print("[StoreKit] Transaction verification failed:")
+            print("[StoreKit] - Transaction: \(unverifiedTransaction)")
+            print("[StoreKit] - Error: \(verificationError)")
+
+            // In sandbox/review environment, Apple sometimes has verification issues
+            // We still throw but with better logging for debugging
             throw SubscriptionError.failedVerification
         case .verified(let safe):
             return safe

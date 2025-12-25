@@ -356,7 +356,7 @@ struct PremiumUpgradeView: View {
             FallbackPlanCard(
                 title: "Lifetime",
                 duration: "One-Time",
-                price: "$99.99",
+                price: "$79.99",
                 pricePerUnit: "Pay once",
                 description: "Lifetime access. No subscription.",
                 isPopular: false,
@@ -381,7 +381,7 @@ struct PremiumUpgradeView: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text("• Monthly: $4.99/month, billed every 1 month")
                 Text("• Yearly: $39.99/year ($3.33/month), billed every 12 months")
-                Text("• Lifetime: $99.99 one-time purchase, no renewal")
+                Text("• Lifetime: $79.99 one-time purchase, no renewal")
             }
             .font(.caption2)
             .foregroundColor(.secondary)
