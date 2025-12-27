@@ -73,6 +73,7 @@
 		FB0B71312EAFB870004E511A /* Utilities/APIConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB0B71322EAFB870004E511A /* Utilities/APIConfig.swift */; };
 		FB0B71332EAFB880004E511A /* EnhancedProductDetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB0B71342EAFB880004E511A /* EnhancedProductDetailsView.swift */; };
 		FB0B71352EAFB890004E511A /* EnhancedBarcodeScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB0B71362EAFB890004E511A /* EnhancedBarcodeScannerView.swift */; };
+		FB26463A2EFCE54900245D81 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FB2646392EFCE54900245D81 /* StoreKit.framework */; };
 		FBDAA1332EBE635300EB31F2 /* VoiceInputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBDAA1322EBE635300EB31F2 /* VoiceInputView.swift */; };
 		FBFASTING001 /* Services/FastingManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBFASTING002 /* Services/FastingManager.swift */; };
 		FBFASTING003 /* Models/Views/FastingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBFASTING004 /* Models/Views/FastingView.swift */; };
@@ -187,6 +188,7 @@
 		FB0B71322EAFB870004E511A /* Utilities/APIConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utilities/APIConfig.swift; sourceTree = "<group>"; };
 		FB0B71342EAFB880004E511A /* EnhancedProductDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnhancedProductDetailsView.swift; sourceTree = "<group>"; };
 		FB0B71362EAFB890004E511A /* EnhancedBarcodeScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnhancedBarcodeScannerView.swift; sourceTree = "<group>"; };
+		FB2646392EFCE54900245D81 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 		FBDAA1322EBE635300EB31F2 /* VoiceInputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceInputView.swift; sourceTree = "<group>"; };
 		FBFASTING002 /* Services/FastingManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Services/FastingManager.swift; sourceTree = "<group>"; };
 		FBFASTING004 /* Models/Views/FastingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models/Views/FastingView.swift; sourceTree = "<group>"; };
@@ -227,6 +229,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				FB0B70B72EAB9C53004E511A /* SwiftData.framework in Frameworks */,
+				FB26463A2EFCE54900245D81 /* StoreKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -285,6 +288,7 @@
 		FB0B70B52EAB9C52004E511A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				FB2646392EFCE54900245D81 /* StoreKit.framework */,
 				FB0B70B62EAB9C53004E511A /* SwiftData.framework */,
 				D3A0456B730E48398289DE51 /* WidgetKit.framework */,
 			);
@@ -682,7 +686,7 @@
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_ENTITLEMENTS = CalTrackWidget/CalTrackWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = D66KWXXM88;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = CalTrackWidget/Info.plist;
@@ -712,7 +716,7 @@
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_ENTITLEMENTS = CalTrackWidget/CalTrackWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = D66KWXXM88;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = CalTrackWidget/Info.plist;
@@ -864,21 +868,22 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = CalTrackPro.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = D66KWXXM88;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = CalTrackPro;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.health-fitness";
 				INFOPLIST_KEY_NSCameraUsageDescription = "CalTrackPro needs camera access to scan barcodes and take photos of your meals for nutrition tracking.";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "CalTrackPro reads your health data to provide better insights and sync with other fitness apps.";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "CalTrackPro saves your nutrition data to Apple Health to keep all your health information in one place.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "CalTrackPro needs microphone access to recognize your voice when logging food entries.";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "CalTrackPro needs photo library access to let you select photos of your meals for nutrition tracking.";
 				INFOPLIST_KEY_NSPrivacyAccessedAPICategoryFileTimestamp = YES;
 				INFOPLIST_KEY_NSPrivacyAccessedAPICategoryUserDefaults = YES;
 				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "CalTrackPro uses speech recognition to log food entries when you say things like 'I ate a turkey sandwich'.";
-				INFOPLIST_KEY_NSHealthShareUsageDescription = "CalTrackPro reads your health data to provide better insights and sync with other fitness apps.";
-				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "CalTrackPro saves your nutrition data to Apple Health to keep all your health information in one place.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -893,6 +898,7 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = easyaiflows.com.CalTrackProFixed;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
@@ -909,21 +915,22 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = CalTrackPro.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = D66KWXXM88;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = CalTrackPro;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.health-fitness";
 				INFOPLIST_KEY_NSCameraUsageDescription = "CalTrackPro needs camera access to scan barcodes and take photos of your meals for nutrition tracking.";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "CalTrackPro reads your health data to provide better insights and sync with other fitness apps.";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "CalTrackPro saves your nutrition data to Apple Health to keep all your health information in one place.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "CalTrackPro needs microphone access to recognize your voice when logging food entries.";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "CalTrackPro needs photo library access to let you select photos of your meals for nutrition tracking.";
 				INFOPLIST_KEY_NSPrivacyAccessedAPICategoryFileTimestamp = YES;
 				INFOPLIST_KEY_NSPrivacyAccessedAPICategoryUserDefaults = YES;
 				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "CalTrackPro uses speech recognition to log food entries when you say things like 'I ate a turkey sandwich'.";
-				INFOPLIST_KEY_NSHealthShareUsageDescription = "CalTrackPro reads your health data to provide better insights and sync with other fitness apps.";
-				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "CalTrackPro saves your nutrition data to Apple Health to keep all your health information in one place.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -938,6 +945,7 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = easyaiflows.com.CalTrackProFixed;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
@@ -953,7 +961,7 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = D66KWXXM88;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
@@ -975,7 +983,7 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = D66KWXXM88;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
@@ -996,7 +1004,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = D66KWXXM88;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
@@ -1016,7 +1024,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = D66KWXXM88;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
