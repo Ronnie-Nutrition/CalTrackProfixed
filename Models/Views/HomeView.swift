@@ -29,6 +29,10 @@ struct HomeView: View {
                         DailySummaryCard()
                             .padding(.horizontal)
 
+                        // Apple Health Integration Card - Required for App Store Guideline 2.5.1
+                        AppleHealthStatusCard()
+                            .padding(.horizontal)
+
                         // Premium Upgrade Banner - Visible for App Store Reviewers
                         if !subscriptionManager.isPremiumUser {
                             Button(action: {
@@ -751,6 +755,119 @@ struct GalleryFoodRecognitionView: View {
                     showingError = true
                 }
             }
+        }
+    }
+}
+
+// MARK: - Apple Health Status Card (Required for App Store Guideline 2.5.1)
+// This card clearly identifies HealthKit functionality in the app's user interface
+
+struct AppleHealthStatusCard: View {
+    @State private var showingHealthIntegration = false
+    @AppStorage("healthKitAuthorized") private var isHealthKitAuthorized = false
+    @AppStorage("healthSyncEnabled") private var syncEnabled = false
+
+    var body: some View {
+        Button(action: { showingHealthIntegration = true }) {
+            LiquidGlassCard(cornerRadius: 16) {
+                VStack(spacing: 12) {
+                    // Header with Apple Health branding
+                    HStack(spacing: 12) {
+                        // Apple Health icon
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 10)
+                                .fill(
+                                    LinearGradient(
+                                        colors: [.red, .pink],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    )
+                                )
+                                .frame(width: 44, height: 44)
+
+                            Image(systemName: "heart.fill")
+                                .font(.title2)
+                                .foregroundColor(.white)
+                        }
+
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Apple Health")
+                                .font(.headline)
+                                .fontWeight(.semibold)
+                                .foregroundColor(.primary)
+
+                            Text(isHealthKitAuthorized ? (syncEnabled ? "Syncing nutrition data" : "Connected") : "Tap to connect")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+
+                        Spacer()
+
+                        // Status indicator
+                        if isHealthKitAuthorized {
+                            Image(systemName: syncEnabled ? "checkmark.circle.fill" : "link.circle.fill")
+                                .font(.title2)
+                                .foregroundColor(syncEnabled ? .green : .blue)
+                        } else {
+                            Image(systemName: "chevron.right")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+
+                    // Data types being synced - clearly identifies HealthKit functionality
+                    if isHealthKitAuthorized {
+                        Divider()
+
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Data synced with Apple Health:")
+                                .font(.caption)
+                                .fontWeight(.medium)
+                                .foregroundColor(.secondary)
+
+                            HStack(spacing: 16) {
+                                HealthDataBadge(icon: "flame.fill", label: "Calories", color: .orange)
+                                HealthDataBadge(icon: "p.circle.fill", label: "Protein", color: .red)
+                                HealthDataBadge(icon: "c.circle.fill", label: "Carbs", color: .yellow)
+                                HealthDataBadge(icon: "f.circle.fill", label: "Fat", color: .blue)
+                            }
+                        }
+                    } else {
+                        // Show what will be synced when connected
+                        HStack(spacing: 8) {
+                            Image(systemName: "info.circle")
+                                .font(.caption)
+                                .foregroundColor(.blue)
+                            Text("Sync calories, protein, carbs & fat with Apple Health")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                }
+                .padding()
+            }
+        }
+        .buttonStyle(PlainButtonStyle())
+        .sheet(isPresented: $showingHealthIntegration) {
+            HealthIntegrationView()
+        }
+    }
+}
+
+// Small badge showing health data type
+struct HealthDataBadge: View {
+    let icon: String
+    let label: String
+    let color: Color
+
+    var body: some View {
+        VStack(spacing: 4) {
+            Image(systemName: icon)
+                .font(.caption)
+                .foregroundColor(color)
+            Text(label)
+                .font(.system(size: 9))
+                .foregroundColor(.secondary)
         }
     }
 }

@@ -57,20 +57,62 @@ struct AIFoodCameraView: UIViewControllerRepresentable {
     
     class Coordinator: NSObject, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
         let parent: AIFoodCameraView
-        
+
         init(_ parent: AIFoodCameraView) {
             self.parent = parent
         }
-        
+
         func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
-            if let image = info[.originalImage] as? UIImage {
-                parent.capturedImage = image
-            }
+            // Dismiss immediately for better UX
             parent.isPresented = false
+
+            // Process image in background to avoid UI freeze
+            DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+                guard let self = self else { return }
+
+                if let originalImage = info[.originalImage] as? UIImage {
+                    // Resize image to max 1200px for faster processing
+                    // This dramatically reduces the 20-30 second delay
+                    let resizedImage = self.resizeImageForRecognition(originalImage, maxDimension: 1200)
+
+                    DispatchQueue.main.async {
+                        self.parent.capturedImage = resizedImage
+                    }
+                }
+            }
         }
-        
+
         func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
             parent.isPresented = false
+        }
+
+        /// Resizes image to a maximum dimension while maintaining aspect ratio
+        /// This prevents the 20-30 second delay caused by processing full-resolution camera images
+        private func resizeImageForRecognition(_ image: UIImage, maxDimension: CGFloat) -> UIImage {
+            let size = image.size
+
+            // If image is already small enough, return as-is
+            if size.width <= maxDimension && size.height <= maxDimension {
+                return image
+            }
+
+            // Calculate new size maintaining aspect ratio
+            let aspectRatio = size.width / size.height
+            var newSize: CGSize
+
+            if size.width > size.height {
+                newSize = CGSize(width: maxDimension, height: maxDimension / aspectRatio)
+            } else {
+                newSize = CGSize(width: maxDimension * aspectRatio, height: maxDimension)
+            }
+
+            // Use UIGraphicsImageRenderer for efficient resizing
+            let renderer = UIGraphicsImageRenderer(size: newSize)
+            let resizedImage = renderer.image { _ in
+                image.draw(in: CGRect(origin: .zero, size: newSize))
+            }
+
+            return resizedImage
         }
     }
 }
@@ -98,20 +140,55 @@ struct PhotoLibraryPicker: UIViewControllerRepresentable {
     
     class Coordinator: NSObject, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
         let parent: PhotoLibraryPicker
-        
+
         init(_ parent: PhotoLibraryPicker) {
             self.parent = parent
         }
-        
+
         func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
-            if let image = info[.originalImage] as? UIImage {
-                parent.selectedImage = image
-            }
+            // Dismiss immediately for better UX
             parent.isPresented = false
+
+            // Process image in background to avoid UI freeze
+            DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+                guard let self = self else { return }
+
+                if let originalImage = info[.originalImage] as? UIImage {
+                    // Resize image to max 1200px for faster processing
+                    let resizedImage = self.resizeImageForRecognition(originalImage, maxDimension: 1200)
+
+                    DispatchQueue.main.async {
+                        self.parent.selectedImage = resizedImage
+                    }
+                }
+            }
         }
-        
+
         func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
             parent.isPresented = false
+        }
+
+        /// Resizes image to a maximum dimension while maintaining aspect ratio
+        private func resizeImageForRecognition(_ image: UIImage, maxDimension: CGFloat) -> UIImage {
+            let size = image.size
+
+            if size.width <= maxDimension && size.height <= maxDimension {
+                return image
+            }
+
+            let aspectRatio = size.width / size.height
+            var newSize: CGSize
+
+            if size.width > size.height {
+                newSize = CGSize(width: maxDimension, height: maxDimension / aspectRatio)
+            } else {
+                newSize = CGSize(width: maxDimension * aspectRatio, height: maxDimension)
+            }
+
+            let renderer = UIGraphicsImageRenderer(size: newSize)
+            return renderer.image { _ in
+                image.draw(in: CGRect(origin: .zero, size: newSize))
+            }
         }
     }
 }
