@@ -8,6 +8,7 @@ struct SettingsView: View {
     @AppStorage("waterReminder") private var waterReminder = true
     @AppStorage("darkMode") private var darkMode = false
     @AppStorage("units") private var units = "metric"
+    @AppStorage("scanDetailMode") private var scanDetailMode = "detailed"
     @State private var showingHealthIntegration = false
     @State private var showingPremiumUpgrade = false
     @State private var showingAPIKeySetup = false
@@ -80,9 +81,27 @@ struct SettingsView: View {
                     .foregroundColor(.primary)
 
                     if hasOpenAIKey {
-                        Text("AI camera uses OpenAI Vision for accurate food recognition")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
+                        Picker("Scan Quality", selection: $scanDetailMode) {
+                            HStack {
+                                Image(systemName: "hare.fill")
+                                Text("Quick Scan")
+                            }.tag("quick")
+                            HStack {
+                                Image(systemName: "sparkles")
+                                Text("Detailed Scan")
+                            }.tag("detailed")
+                        }
+                        .pickerStyle(.menu)
+
+                        if scanDetailMode == "quick" {
+                            Text("Quick Scan: Faster results, lower cost (~$0.003/scan). Best for simple, single-item foods.")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        } else {
+                            Text("Detailed Scan: More accurate for complex meals and multiple items (~$0.01/scan). Recommended for platters and mixed dishes.")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
                     } else {
                         Text("Configure OpenAI API key to enable advanced AI food recognition. Without it, basic recognition is used.")
                             .font(.caption)

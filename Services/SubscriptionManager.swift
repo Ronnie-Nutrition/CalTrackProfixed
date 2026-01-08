@@ -14,8 +14,7 @@ class SubscriptionManager: NSObject, ObservableObject {
     @Published var availableSubscriptions: [SubscriptionPlan] = []
     @Published var isLoading = false
     @Published var errorMessage: String?
-    @Published var hasFreeTrial = true
-    @Published var trialEndDate: Date?
+    @Published var isEligibleForIntroOffer = false  // Tracks App Store introductory offer eligibility
     @Published var productsLoadedSuccessfully = false
     @Published var lastLoadError: String?
 
@@ -393,55 +392,56 @@ class SubscriptionManager: NSObject, ObservableObject {
         await MainActor.run {
             isSubscriptionActive = hasActiveSubscription
             currentSubscription = activeSubscription
-            updateFreeTrial()
         }
+
+        // Check introductory offer eligibility
+        await checkIntroOfferEligibility()
     }
-    
-    private func updateFreeTrial() {
-        let trialKey = "com.caltrackpro.freetrial.used"
-        let trialEndKey = "com.caltrackpro.freetrial.enddate"
-        
-        if !UserDefaults.standard.bool(forKey: trialKey) {
-            // Free trial not used yet
-            hasFreeTrial = true
-            
-            if trialEndDate == nil {
-                // Set 7-day trial period
-                let endDate = Calendar.current.date(byAdding: .day, value: 7, to: Date()) ?? Date()
-                UserDefaults.standard.set(endDate, forKey: trialEndKey)
-                trialEndDate = endDate
-            } else {
-                trialEndDate = UserDefaults.standard.object(forKey: trialEndKey) as? Date
+
+    /// Check if user is eligible for introductory offers (managed by App Store)
+    /// Users are eligible if they haven't previously subscribed to any product in the subscription group
+    private func checkIntroOfferEligibility() async {
+        // If user already has active subscription, they're not eligible for intro offer
+        if isSubscriptionActive {
+            await MainActor.run {
+                isEligibleForIntroOffer = false
             }
-            
-            // Check if trial has expired
-            if let endDate = trialEndDate, endDate < Date() {
-                hasFreeTrial = false
-                UserDefaults.standard.set(true, forKey: trialKey)
+            return
+        }
+
+        // Check if user has ever had a subscription in this group
+        // StoreKit 2 tracks this automatically via Product.SubscriptionInfo.isEligibleForIntroOffer
+        var eligible = true
+
+        for product in products {
+            if let subscription = product.subscription {
+                let isEligible = await subscription.isEligibleForIntroOffer
+                if !isEligible {
+                    eligible = false
+                    break
+                }
             }
-            
-        } else {
-            hasFreeTrial = false
-            trialEndDate = nil
+        }
+
+        await MainActor.run {
+            isEligibleForIntroOffer = eligible
+            print("[StoreKit] Introductory offer eligibility: \(eligible)")
         }
     }
     
     // MARK: - Premium Feature Access
-    
+
     var isPremiumUser: Bool {
-        // Only check subscription status (not free trial) so upgrade options are visible
+        // Check if user has an active subscription (including trial period from App Store)
         return isSubscriptionActive
     }
-    
+
     func hasAccessTo(_ feature: PremiumFeature) -> Bool {
-        // Free trial gives access to all features
-        if hasFreeTrial {
-            return true
-        }
-        
-        // Check subscription status
+        // Access is granted only through active App Store subscription
+        // This includes users in their introductory offer period (free trial)
+        // StoreKit automatically includes trial users in currentEntitlements
         guard isSubscriptionActive else { return false }
-        
+
         // All premium features are available with any active subscription
         return true
     }

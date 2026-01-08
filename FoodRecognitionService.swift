@@ -246,19 +246,29 @@ class FoodRecognitionService: ObservableObject {
         request.setValue("Bearer \(openAIAPIKey)", forHTTPHeaderField: "Authorization")
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
-        // Create the prompt for food analysis
+        // Create the prompt for food analysis - Enhanced for better accuracy
         let prompt = """
-        Analyze this image and identify all food items visible. For each food item, provide:
-        1. The food name (be specific, e.g., "chocolate chip cookie" not just "cookie")
-        2. Your confidence level (0.0 to 1.0)
-        3. Estimated calories per serving
-        4. Estimated protein in grams
-        5. Estimated carbs in grams
-        6. Estimated fat in grams
-        7. Typical serving size
+        You are an expert nutritionist analyzing a food image. Carefully examine this image and identify ALL individual food items visible.
+
+        IMPORTANT GUIDELINES:
+        - Identify each distinct food item separately (e.g., on a tray, identify each item: "grilled chicken breast", "steamed broccoli", "white rice" - NOT "food tray")
+        - Be very specific with food names (e.g., "grilled salmon fillet" not "fish", "Caesar salad with croutons" not "salad")
+        - Estimate the VISIBLE portion size based on what you see in the image, not a typical serving
+        - Use visual cues like plate size, utensils, or hands for scale reference
+        - Consider cooking method when identifying (grilled vs fried, steamed vs roasted)
+        - For mixed dishes, identify the main components
+
+        For each food item provide:
+        1. Specific food name (include preparation method if visible)
+        2. Confidence level (0.0 to 1.0) - be honest if uncertain
+        3. Estimated calories for the VISIBLE portion
+        4. Estimated protein in grams for the VISIBLE portion
+        5. Estimated carbs in grams for the VISIBLE portion
+        6. Estimated fat in grams for the VISIBLE portion
+        7. Estimated serving size based on what's VISIBLE (e.g., "approximately 150g" or "1 cup")
 
         Respond ONLY with valid JSON in this exact format (no markdown, no explanation):
-        {"foods": [{"name": "food name", "confidence": 0.95, "estimatedCalories": 150, "estimatedProtein": 5.0, "estimatedCarbs": 20.0, "estimatedFat": 6.0, "servingSize": "1 cookie (30g)"}]}
+        {"foods": [{"name": "food name", "confidence": 0.95, "estimatedCalories": 150, "estimatedProtein": 5.0, "estimatedCarbs": 20.0, "estimatedFat": 6.0, "servingSize": "approximately 150g"}]}
 
         If no food is detected, respond with: {"foods": []}
         """
@@ -277,13 +287,13 @@ class FoodRecognitionService: ObservableObject {
                             "type": "image_url",
                             "image_url": [
                                 "url": "data:image/jpeg;base64,\(base64Image)",
-                                "detail": "low"  // Use low detail to reduce costs
+                                "detail": "high"  // Use high detail for better food recognition accuracy
                             ]
                         ]
                     ]
                 ]
             ],
-            "max_tokens": 500
+            "max_tokens": 1000  // Increased for multiple food items on trays/plates
         ]
 
         request.httpBody = try JSONSerialization.data(withJSONObject: requestBody)

@@ -105,40 +105,47 @@ struct PremiumUpgradeView: View {
         }
     }
     
-    // MARK: - Free Trial Card
-    
-    private var freeTrialCard: some View {
-        LiquidGlassCard {
-            VStack(spacing: 16) {
-                HStack {
-                    Image(systemName: "gift.fill")
-                        .font(.title2)
-                        .foregroundStyle(
-                            LinearGradient(colors: [.green, .mint], startPoint: .topLeading, endPoint: .bottomTrailing)
-                        )
-                    
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Free Trial Active")
-                            .font(.headline)
-                            .fontWeight(.semibold)
-                        
-                        if let trialEndDate = subscriptionManager.trialEndDate {
-                            let daysLeft = Calendar.current.dateComponents([.day], from: Date(), to: trialEndDate).day ?? 0
-                            Text("\(max(daysLeft, 0)) days remaining")
+    // MARK: - Introductory Offer Card (App Store managed)
+
+    private var introOfferCard: some View {
+        Group {
+            if subscriptionManager.isEligibleForIntroOffer {
+                VStack(spacing: 16) {
+                    HStack {
+                        Image(systemName: "gift.fill")
+                            .font(.title2)
+                            .foregroundStyle(
+                                LinearGradient(colors: [.green, .mint], startPoint: .topLeading, endPoint: .bottomTrailing)
+                            )
+
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Free Trial Available")
+                                .font(.headline)
+                                .fontWeight(.semibold)
+
+                            Text("Start your 7-day free trial")
                                 .font(.subheadline)
                                 .foregroundColor(.secondary)
                         }
+
+                        Spacer()
                     }
-                    
-                    Spacer()
+
+                    Text("Try all premium features free for 7 days. You won't be charged until the trial ends. Cancel anytime in Settings.")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.leading)
                 }
-                
-                Text("You have access to all premium features during your trial. Upgrade anytime to continue enjoying premium benefits.")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                    .multilineTextAlignment(.leading)
+                .padding()
+                .background(
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(Color.green.opacity(0.1))
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(Color.green.opacity(0.3), lineWidth: 1)
+                )
             }
-            .padding()
         }
     }
     
@@ -190,6 +197,10 @@ struct PremiumUpgradeView: View {
                 .fontWeight(.bold)
                 .padding(.horizontal)
 
+            // Show introductory offer card if eligible (App Store managed trial)
+            introOfferCard
+                .padding(.horizontal)
+
             // Always show fallback cards - they work even without StoreKit
             // This provides consistent layout and prevents scroll glitches
             fallbackSubscriptionCards
@@ -218,11 +229,11 @@ struct PremiumUpgradeView: View {
                                 .progressViewStyle(CircularProgressViewStyle(tint: .white))
                                 .scaleEffect(0.8)
                         } else {
-                            Image(systemName: "crown.fill")
+                            Image(systemName: subscriptionManager.isEligibleForIntroOffer ? "gift.fill" : "crown.fill")
                                 .font(.title2)
                         }
 
-                        Text(isProcessingPurchase ? "Processing..." : "Subscribe Now")
+                        Text(buttonText)
                             .font(.headline)
                             .fontWeight(.semibold)
                     }
@@ -240,7 +251,9 @@ struct PremiumUpgradeView: View {
                 }
                 .disabled(isProcessingPurchase || subscriptionManager.isLoading)
 
-                Text("Cancel anytime • Secure payment with Apple")
+                Text(subscriptionManager.isEligibleForIntroOffer ?
+                     "7-day free trial • Cancel anytime in Settings" :
+                     "Cancel anytime • Secure payment with Apple")
                     .font(.caption)
                     .foregroundColor(.secondary)
             } else {
@@ -251,6 +264,16 @@ struct PremiumUpgradeView: View {
                     .padding()
             }
         }
+    }
+
+    private var buttonText: String {
+        if isProcessingPurchase {
+            return "Processing..."
+        }
+        if subscriptionManager.isEligibleForIntroOffer {
+            return "Start Free Trial"
+        }
+        return "Subscribe Now"
     }
 
     // MARK: - Purchase Fallback Plan
@@ -379,6 +402,9 @@ struct PremiumUpgradeView: View {
                 .foregroundColor(.secondary)
 
             VStack(alignment: .leading, spacing: 4) {
+                if subscriptionManager.isEligibleForIntroOffer {
+                    Text("• Free Trial: 7 days free, then subscription price applies")
+                }
                 Text("• Monthly: $4.99/month, billed every 1 month")
                 Text("• Yearly: $39.99/year ($3.33/month), billed every 12 months")
                 Text("• Lifetime: $79.99 one-time purchase, no renewal")
