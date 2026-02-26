@@ -431,6 +431,7 @@
 			);
 			name = CalTrackProFixed;
 			packageProductDependencies = (
+				REVENUECAT002 /* RevenueCat */,
 			);
 			productName = CalTrackProFixed;
 			productReference = FB0B70892EAB9AFC004E511A /* CalTrackProFixed.app */;
@@ -519,6 +520,9 @@
 			minimizedProjectReferenceProxies = 1;
 			preferredProjectObjectVersion = 77;
 			productRefGroup = FB0B708A2EAB9AFC004E511A /* Products */;
+			packageReferences = (
+				REVENUECAT001 /* XCRemoteSwiftPackageReference "purchases-ios-spm" */,
+			);
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -1089,6 +1093,26 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		REVENUECAT001 /* XCRemoteSwiftPackageReference "purchases-ios-spm" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/RevenueCat/purchases-ios-spm.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		REVENUECAT002 /* RevenueCat */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = REVENUECAT001 /* XCRemoteSwiftPackageReference "purchases-ios-spm" */;
+			productName = RevenueCat;
+		};
+/* End XCSwiftPackageProductDependency section */
+
 	};
 	rootObject = FB0B70812EAB9AFB004E511A /* Project object */;
 }

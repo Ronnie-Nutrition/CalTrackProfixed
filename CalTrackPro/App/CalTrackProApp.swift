@@ -2,20 +2,24 @@ import SwiftUI
 import SwiftData
 import FirebaseCore
 import FirebaseCrashlytics
+import RevenueCat
 
 @main
 struct CalTrackProApp: App {
     @StateObject private var appState = AppState()
-    
+
     init() {
         // Configure security first
         configureAppSecurity()
-        
+
         // Configure Firebase before any other initialization
         FirebaseApp.configure()
-        
+
         // Configure Crashlytics settings
         configureCrashlytics()
+
+        // Configure RevenueCat
+        configureRevenueCat()
     }
     
     var body: some Scene {
@@ -53,6 +57,14 @@ struct CalTrackProApp: App {
         #endif
     }
     
+    private func configureRevenueCat() {
+        #if DEBUG
+        Purchases.logLevel = .debug
+        #endif
+        Purchases.configure(withAPIKey: "test_TFvBOGvBiWDfCcKDITvmqSFdYOE")
+        print("[RevenueCat] Configured with test API key")
+    }
+
     private func configureAppSecurity() {
         // Initialize security configuration
         SecurityConfig.configureNetworkSecurity()
