@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		083E32155EE40E59C2FD8C2 /* AdvancedUIComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8083E32155EE40E59C2FD8C2 /* AdvancedUIComponents.swift */; };
 		163DC2841F44F0698BC58FC /* GoalDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0163DC2841F44F0698BC58FC /* GoalDetailView.swift */; };
+		18DD67182F55F0480017DEA1 /* RevenueCat in Frameworks */ = {isa = PBXBuildFile; productRef = REVENUECAT002 /* RevenueCat */; };
 		1F1997AF4EF43DB9B899A05 /* DataExportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71F1997AF4EF43DB9B899A05 /* DataExportView.swift */; };
 		206960557BF4D418D53D5F0 /* HealthIntegrationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4206960557BF4D418D53D5F0 /* HealthIntegrationView.swift */; };
 		33234AAA16E4A298D49D1F6 /* AdvancedAnalyticsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 133234AAA16E4A298D49D1F6 /* AdvancedAnalyticsView.swift */; };
@@ -228,6 +229,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				18DD67182F55F0480017DEA1 /* RevenueCat in Frameworks */,
 				FB0B70B72EAB9C53004E511A /* SwiftData.framework in Frameworks */,
 				FB26463A2EFCE54900245D81 /* StoreKit.framework in Frameworks */,
 			);
@@ -518,11 +520,11 @@
 			);
 			mainGroup = FB0B70802EAB9AFB004E511A;
 			minimizedProjectReferenceProxies = 1;
-			preferredProjectObjectVersion = 77;
-			productRefGroup = FB0B708A2EAB9AFC004E511A /* Products */;
 			packageReferences = (
 				REVENUECAT001 /* XCRemoteSwiftPackageReference "purchases-ios-spm" */,
 			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = FB0B708A2EAB9AFC004E511A /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -690,7 +692,7 @@
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_ENTITLEMENTS = CalTrackWidget/CalTrackWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = D66KWXXM88;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = CalTrackWidget/Info.plist;
@@ -702,7 +704,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.0.1;
+				MARKETING_VERSION = 1.0.8;
 				PRODUCT_BUNDLE_IDENTIFIER = easyaiflows.com.CalTrackProFixed.CalTrackWidget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -720,7 +722,7 @@
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_ENTITLEMENTS = CalTrackWidget/CalTrackWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = D66KWXXM88;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = CalTrackWidget/Info.plist;
@@ -732,7 +734,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.0.1;
+				MARKETING_VERSION = 1.0.8;
 				PRODUCT_BUNDLE_IDENTIFIER = easyaiflows.com.CalTrackProFixed.CalTrackWidget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -874,7 +876,7 @@
 				CODE_SIGN_ENTITLEMENTS = CalTrackPro.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = D66KWXXM88;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -899,7 +901,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.1;
+				MARKETING_VERSION = 1.0.8;
 				PRODUCT_BUNDLE_IDENTIFIER = easyaiflows.com.CalTrackProFixed;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -921,7 +923,7 @@
 				CODE_SIGN_ENTITLEMENTS = CalTrackPro.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = D66KWXXM88;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -946,7 +948,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.1;
+				MARKETING_VERSION = 1.0.8;
 				PRODUCT_BUNDLE_IDENTIFIER = easyaiflows.com.CalTrackProFixed;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -965,11 +967,11 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = D66KWXXM88;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 1.0.1;
+				MARKETING_VERSION = 1.0.8;
 				PRODUCT_BUNDLE_IDENTIFIER = easyaiflows.com.CalTrackProFixedTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
@@ -987,11 +989,11 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = D66KWXXM88;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 1.0.1;
+				MARKETING_VERSION = 1.0.8;
 				PRODUCT_BUNDLE_IDENTIFIER = easyaiflows.com.CalTrackProFixedTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
@@ -1008,10 +1010,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = D66KWXXM88;
 				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.0.1;
+				MARKETING_VERSION = 1.0.8;
 				PRODUCT_BUNDLE_IDENTIFIER = easyaiflows.com.CalTrackProFixedUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
@@ -1028,10 +1030,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = D66KWXXM88;
 				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.0.1;
+				MARKETING_VERSION = 1.0.8;
 				PRODUCT_BUNDLE_IDENTIFIER = easyaiflows.com.CalTrackProFixedUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
@@ -1112,7 +1114,6 @@
 			productName = RevenueCat;
 		};
 /* End XCSwiftPackageProductDependency section */
-
 	};
 	rootObject = FB0B70812EAB9AFB004E511A /* Project object */;
 }
