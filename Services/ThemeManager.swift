@@ -372,6 +372,7 @@ struct AppAnimations {
 
 // MARK: - Haptic Feedback
 
+@MainActor
 struct AppHaptics {
     static let shared = AppHaptics()
     private init() {}

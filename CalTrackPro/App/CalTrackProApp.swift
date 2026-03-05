@@ -61,8 +61,8 @@ struct CalTrackProApp: App {
         #if DEBUG
         Purchases.logLevel = .debug
         #endif
-        Purchases.configure(withAPIKey: "test_TFvBOGvBiWDfCcKDITvmqSFdYOE")
-        print("[RevenueCat] Configured with test API key")
+        Purchases.configure(withAPIKey: "appl_KExajelckHGxUUEYUZbwgcfNnkD")
+        print("[RevenueCat] Configured with production API key")
     }
 
     private func configureAppSecurity() {
