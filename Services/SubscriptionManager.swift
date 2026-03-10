@@ -69,6 +69,12 @@ class SubscriptionManager: NSObject, ObservableObject {
     }
 
     func loadProducts() async {
+        guard Purchases.isConfigured else {
+            print("[RevenueCat] WARNING: Purchases not configured, skipping loadProducts")
+            lastLoadError = "Store not configured yet."
+            return
+        }
+
         isLoading = true
         errorMessage = nil
         lastLoadError = nil
@@ -180,6 +186,12 @@ class SubscriptionManager: NSObject, ObservableObject {
     // MARK: - Subscription Purchase
 
     func purchaseSubscription(_ plan: SubscriptionPlan) async -> Bool {
+        guard Purchases.isConfigured else {
+            print("[RevenueCat] WARNING: Purchases not configured, skipping purchase")
+            errorMessage = "Store not available. Please try again."
+            return false
+        }
+
         guard let package = plan.package else {
             print("[RevenueCat] ERROR: No package for plan \(plan.id)")
             errorMessage = "Purchase could not be completed. Please try again."
@@ -244,6 +256,12 @@ class SubscriptionManager: NSObject, ObservableObject {
     // MARK: - Subscription Management
 
     func restorePurchases() async {
+        guard Purchases.isConfigured else {
+            print("[RevenueCat] WARNING: Purchases not configured, skipping restorePurchases")
+            errorMessage = "Store not available. Please try again."
+            return
+        }
+
         isLoading = true
         errorMessage = nil
 
@@ -262,6 +280,11 @@ class SubscriptionManager: NSObject, ObservableObject {
     }
 
     func checkSubscriptionStatus() async {
+        guard Purchases.isConfigured else {
+            print("[RevenueCat] WARNING: Purchases not configured, skipping checkSubscriptionStatus")
+            return
+        }
+
         print("[RevenueCat] Checking subscription status...")
 
         do {
@@ -340,6 +363,11 @@ class SubscriptionManager: NSObject, ObservableObject {
 
     /// Call this when a user arrives from a TikTok link or deep link
     func setTikTokAttribution(videoId: String? = nil, campaign: String? = nil) {
+        guard Purchases.isConfigured else {
+            print("[RevenueCat] WARNING: Purchases not configured, skipping TikTok attribution")
+            return
+        }
+
         var attributes: [String: String] = [
             "$mediaSource": "TikTok"
         ]
