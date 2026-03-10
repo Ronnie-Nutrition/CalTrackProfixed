@@ -34,11 +34,21 @@ class SubscriptionManager: NSObject, ObservableObject {
     override init() {
         super.init()
 
-        // Set ourselves as the RevenueCat delegate for real-time updates
-        Purchases.shared.delegate = self
+        // Defer RevenueCat setup to ensure Purchases.configure() has completed
+        Task { @MainActor in
+            // Set ourselves as the RevenueCat delegate for real-time updates
+            if Purchases.isConfigured {
+                Purchases.shared.delegate = self
+            } else {
+                print("[RevenueCat] WARNING: Purchases not configured yet, retrying in 1s...")
+                try? await Task.sleep(nanoseconds: 1_000_000_000)
+                if Purchases.isConfigured {
+                    Purchases.shared.delegate = self
+                } else {
+                    print("[RevenueCat] ERROR: Purchases still not configured after retry")
+                }
+            }
 
-        // Load initial data
-        Task {
             await loadProductsWithRetry()
             await checkSubscriptionStatus()
         }
@@ -149,16 +159,21 @@ class SubscriptionManager: NSObject, ObservableObject {
 
         print("[RevenueCat] Created plan: \(planType.rawValue) from package: \(package.identifier)")
 
+        guard let sk2Product = storeProduct.sk2Product else {
+            print("[RevenueCat] WARNING: sk2Product is nil for \(storeProduct.productIdentifier)")
+            return nil
+        }
+
         return SubscriptionPlan(
             id: storeProduct.productIdentifier,
             type: planType,
-            product: storeProduct.sk2Product!,
+            product: sk2Product,
             package: package,
             priority: priority,
             price: storeProduct.price,
             priceFormatted: storeProduct.localizedPriceString,
-            introductoryOffer: storeProduct.sk2Product?.subscription?.introductoryOffer,
-            promotionalOffers: storeProduct.sk2Product?.subscription?.promotionalOffers ?? []
+            introductoryOffer: sk2Product.subscription?.introductoryOffer,
+            promotionalOffers: sk2Product.subscription?.promotionalOffers ?? []
         )
     }
 

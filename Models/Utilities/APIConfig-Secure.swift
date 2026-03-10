@@ -29,9 +29,9 @@ struct SecureAPIConfig {
             return infoPlistValue
         }
         
-        // 4. Fatal error in production
+        // 4. Return empty string to prevent crash — API calls will fail gracefully
         #if DEBUG
-        // For development only - will be removed before App Store submission
+        // For development only
         let devId = "temporary_dev_id"
         KeychainManager.shared.storeAPICredentials(
             appId: devId,
@@ -39,16 +39,17 @@ struct SecureAPIConfig {
         )
         return devId
         #else
-        fatalError("EDAMAM_APP_ID not configured. Please set it in environment variables or Info.plist")
+        CrashlyticsManager.shared.log("EDAMAM_APP_ID not configured — API calls will be unavailable", category: "Security")
+        return ""
         #endif
     }
-    
+
     static var edamamAppKey: String {
         // 1. Try Keychain first (most secure)
         if let keychainValue = KeychainManager.shared.getEdamamAppKey() {
             return keychainValue
         }
-        
+
         // 2. Try environment variable (for CI/CD)
         if let envValue = ProcessInfo.processInfo.environment["EDAMAM_APP_KEY"], !envValue.isEmpty {
             // Store in keychain for next time
@@ -58,7 +59,7 @@ struct SecureAPIConfig {
             )
             return envValue
         }
-        
+
         // 3. Try Info.plist (for build configurations)
         if let infoPlistValue = Bundle.main.object(forInfoDictionaryKey: "EDAMAM_APP_KEY") as? String, !infoPlistValue.isEmpty {
             // Store in keychain for next time
@@ -68,10 +69,10 @@ struct SecureAPIConfig {
             )
             return infoPlistValue
         }
-        
-        // 4. Fatal error in production
+
+        // 4. Return empty string to prevent crash — API calls will fail gracefully
         #if DEBUG
-        // For development only - will be removed before App Store submission
+        // For development only
         let devKey = "temporary_dev_key"
         KeychainManager.shared.storeAPICredentials(
             appId: edamamAppId,
@@ -79,7 +80,8 @@ struct SecureAPIConfig {
         )
         return devKey
         #else
-        fatalError("EDAMAM_APP_KEY not configured. Please set it in environment variables or Info.plist")
+        CrashlyticsManager.shared.log("EDAMAM_APP_KEY not configured — API calls will be unavailable", category: "Security")
+        return ""
         #endif
     }
 }
